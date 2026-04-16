@@ -1,6 +1,6 @@
 project_name: mmore
-docs_path: ../mmore/docs/source
-code_path: ../mmore/src/mmore
+docs_path: ../../mmore/docs/source
+code_path: ../../mmore/src/mmore
 include_extensions:
   - .md
   - .rst

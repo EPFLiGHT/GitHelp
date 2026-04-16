@@ -16,3 +16,13 @@ Project setup and initial prototype in progress.
 - corpus building
 - indexing and retrieval through MMORE
 - Streamlit conversational UI
+
+## Dependencies
+
+This project currently targets `mmore==1.2.1`.
+
+Before using this project, make sure the required system dependencies for MMORE are installed, then install MMORE in the project environment.
+
+## Run 
+At the root of the repo:  
+`PYTHONPATH=src python scripts/build_corpus.py`
