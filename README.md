@@ -25,4 +25,5 @@ Before using this project, make sure the required system dependencies for MMORE 
 
 ## Run 
 At the root of the repo:  
-`PYTHONPATH=src python scripts/build_corpus.py`
+`PYTHONPATH=src python scripts/build_corpus.py`  
+`PYTHONPATH=src python scripts/preview_corpus.py`  

@@ -18,3 +18,10 @@ def save_corpus_jsonl(documents: list[DocumentRecord], output_path: str | Path) 
     with output_path.open("w", encoding="utf-8") as f:
         for doc in documents:
             f.write(json.dumps(doc.model_dump(), ensure_ascii=False) + "\n")
+
+
+def summarize_corpus(documents: list[DocumentRecord]) -> dict[str, int]:
+    summary: dict[str, int] = {}
+    for doc in documents:
+        summary[doc.source_type] = summary.get(doc.source_type, 0) + 1
+    return summary
