@@ -1,0 +1,23 @@
+[project]
+name = "docask"
+version = "0.1.0"
+description = "Conversational interface for querying project documentation with MMORE"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit",
+    "pyyaml",
+    "python-dotenv",
+    "pydantic",
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,4 @@
+app_title: DocAsk
+app_subtitle: Ask questions about a project's documentation
+show_sources: true
+default_top_k: 5

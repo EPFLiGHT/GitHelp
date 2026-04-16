@@ -1,0 +1,8 @@
+include_markdown: true
+include_code_docstrings: false
+include_signatures: false
+include_code_snippets: false
+
+chunk_size: 1200
+chunk_overlap: 150
+top_k: 5
