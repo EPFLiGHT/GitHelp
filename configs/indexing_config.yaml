@@ -6,3 +6,8 @@ include_code_snippets: false
 chunk_size: 1200
 chunk_overlap: 150
 top_k: 5
+
+retrieval_backend: simple
+#retrieval_backend: mmore
+collection_name: mmore_docs
+mmore_index_config_path: configs/mmore_index_config.yaml
