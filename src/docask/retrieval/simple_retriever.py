@@ -52,6 +52,8 @@ def retrieve(
         if "_" in token or "." in token
     }
 
+    user_doc_words = {"how", "install", "run", "use", "start", "setup", "configure", "command"}
+
     results: list[RetrievalResult] = []
 
     for doc in documents:
@@ -78,22 +80,28 @@ def retrieve(
             continue
 
         score = overlap / math.sqrt(len(doc_token_set))
+        exact_symbol_match = False
 
         if doc.symbol_name:
             symbol_lower = doc.symbol_name.lower()
+            is_specific_identifier = "_" in symbol_lower or len(symbol_lower) >= 8
 
-            # Very strong boost for exact symbol name match.
+            # Strong boost only for explicit code-like identifiers.
+            # Examples: get_latest_reports, build_rag_pipeline, PDFProcessor
             if symbol_lower in query_lower:
-                score += 10.0
+                exact_symbol_match = True
+                score += 10.0 if is_specific_identifier else 1.5
 
-            # Useful when the user writes get latest reports instead of get_latest_reports.
+            # Handles "get latest reports" instead of "get_latest_reports".
             symbol_parts = symbol_lower.split("_")
             if len(symbol_parts) > 1 and all(part in query_token_set for part in symbol_parts):
+                exact_symbol_match = True
                 score += 6.0
 
-            # Useful when query contains explicit code identifier tokens.
+            # Handles explicit identifier tokens.
             if symbol_lower in query_identifiers:
-                score += 8.0
+                exact_symbol_match = True
+                score += 8.0 if is_specific_identifier else 1.5
 
         if doc.signature and doc.signature.lower() in query_lower:
             score += 4.0
@@ -106,6 +114,14 @@ def retrieve(
 
         if query_lower in searchable_lower:
             score += 1.0
+
+        # If the user asks for a signature, prefer the exact symbol match.
+        if "signature" in query_token_set and doc.source_type.startswith("python") and not exact_symbol_match:
+            score -= 3.0
+
+        # Prefer user-facing documentation for user-facing questions.
+        if doc.source_type.startswith("markdown") and query_token_set & user_doc_words:
+            score += 2.0
 
         results.append(RetrievalResult(document=doc, score=score))
 
