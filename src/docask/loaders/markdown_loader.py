@@ -127,7 +127,7 @@ def load_markdown_documents(base_path: str | Path) -> list[DocumentRecord]:
 
             documents.append(
                 DocumentRecord(
-                    doc_id=f"markdown::{rel_path}::{doc_id_suffix}",
+                    doc_id=f"markdown::{rel_path}::{idx}-{doc_id_suffix}",
                     content=section_content,
                     source_type="markdown_section",
                     title=full_title,

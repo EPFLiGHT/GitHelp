@@ -4,11 +4,26 @@ import json
 from pathlib import Path
 
 from docask.data_models import DocumentRecord
+from docask.extractors.python_doc_extractor import extract_python_docs
 from docask.loaders.markdown_loader import load_markdown_documents
 
-# takes several sources and produces an unique corpus
-def build_corpus_from_markdown(docs_path: str | Path) -> list[DocumentRecord]:
-    return load_markdown_documents(docs_path)
+
+def build_corpus(
+    docs_path: str | Path,
+    code_path: str | Path | None = None,
+) -> list[DocumentRecord]:
+    documents: list[DocumentRecord] = []
+
+    markdown_docs = load_markdown_documents(docs_path)
+    print(f"Loaded {len(markdown_docs)} markdown documents")
+    documents.extend(markdown_docs)
+
+    if code_path is not None:
+        code_docs = extract_python_docs(code_path)
+        print(f"Loaded {len(code_docs)} code documents")
+        documents.extend(code_docs)
+
+    return documents
 
 
 def save_corpus_jsonl(documents: list[DocumentRecord], output_path: str | Path) -> None:
