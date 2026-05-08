@@ -5,9 +5,18 @@ from docask.corpus.builder import build_corpus, save_corpus_jsonl, summarize_cor
 from docask.utils.paths import PROCESSED_DATA_DIR
 
 
-def main() -> None:
-    configs = load_all_configs()
+"""
+Build the DocAsk corpus from the configured project sources.
 
+This script reads the project configuration, loads documentation sources
+such as Markdown files, Python docstrings, YAML configs, and repository
+structure, then saves the resulting corpus as JSONL.
+"""
+
+
+def main() -> None:
+    """Build and save the configured DocAsk corpus."""
+    configs = load_all_configs()
     project_config = configs["project"]
 
     project_name = project_config.get("project_name", "project")
@@ -22,15 +31,18 @@ def main() -> None:
     include_repo_structure = project_config.get("include_repo_structure", False)
     repo_structure_max_depth = project_config.get("repo_structure_max_depth", 4)
 
-    print("project_name =", project_name)
-    print("package_name =", package_name)
-    print("repo_path =", repo_path)
-    print("docs_path =", docs_path)
-    print("code_path =", code_path)
-    print("include_yaml_configs =", include_yaml_configs)
-    print("yaml_config_paths =", yaml_config_paths)
-    print("include_repo_structure =", include_repo_structure)
-    print("repo_structure_max_depth =", repo_structure_max_depth)
+    print("Building DocAsk corpus")
+    print("-" * 80)
+    print(f"project_name: {project_name}")
+    print(f"package_name: {package_name}")
+    print(f"repo_path: {repo_path}")
+    print(f"docs_path: {docs_path}")
+    print(f"code_path: {code_path}")
+    print(f"include_yaml_configs: {include_yaml_configs}")
+    print(f"yaml_config_paths: {yaml_config_paths}")
+    print(f"include_repo_structure: {include_repo_structure}")
+    print(f"repo_structure_max_depth: {repo_structure_max_depth}")
+    print("-" * 80)
 
     documents = build_corpus(
         docs_path=docs_path,
@@ -49,9 +61,11 @@ def main() -> None:
 
     summary = summarize_corpus(documents)
 
+    print()
     print(f"Built corpus with {len(documents)} documents")
     print(f"Saved to: {output_path}")
     print("Breakdown by source_type:")
+
     for source_type, count in summary.items():
         print(f"  - {source_type}: {count}")
 

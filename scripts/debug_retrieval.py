@@ -5,12 +5,28 @@ import argparse
 from docask.retrieval.simple_retriever import load_corpus, retrieve
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("query")
+"""
+Debug the local simple retriever.
+
+This script retrieves documents from the JSONL corpus and prints detailed
+information about the ranked results.
+"""
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Debug DocAsk simple retrieval."
+    )
+    parser.add_argument("query", help="Query used to retrieve documents.")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--corpus-path", default="data/processed/corpus.jsonl")
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Run simple retrieval and print detailed ranked results."""
+    args = parse_args()
 
     documents = load_corpus(args.corpus_path)
     results = retrieve(args.query, documents, top_k=args.top_k)
@@ -19,11 +35,11 @@ def main() -> None:
     print(f"Results: {len(results)}")
     print()
 
-    for i, result in enumerate(results, start=1):
+    for index, result in enumerate(results, start=1):
         doc = result.document
 
         print("=" * 80)
-        print(f"#{i} score={result.score:.4f}")
+        print(f"#{index} score={result.score:.4f}")
         print(f"doc_id: {doc.doc_id}")
         print(f"title: {doc.title}")
         print(f"source_type: {doc.source_type}")
