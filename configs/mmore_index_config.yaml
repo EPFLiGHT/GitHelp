@@ -1,0 +1,13 @@
+indexer:
+  dense_model:
+    model_name: sentence-transformers/all-MiniLM-L6-v2
+    is_multimodal: false
+  sparse_model:
+    model_name: splade
+    is_multimodal: false
+  db:
+    uri: ./data/indexes/mmore/proc_demo.db
+    name: my_db
+
+collection_name: mmore_docs
+documents_path: data/processed/mmore_corpus.jsonl

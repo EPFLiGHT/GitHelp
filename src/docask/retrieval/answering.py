@@ -5,7 +5,7 @@ from pathlib import Path
 from docask.retrieval.extractive_answerer import answer_from_sources
 from docask.retrieval.prompting import build_user_prompt
 from docask.retrieval.simple_retriever import RetrievalResult, load_corpus, retrieve
-
+from docask.retrieval.retriever_factory import retrieve_documents
 
 def prepare_answer_prompt(
     question: str,
@@ -13,7 +13,14 @@ def prepare_answer_prompt(
     top_k: int = 5,
 ) -> tuple[str, list[RetrievalResult]]:
     documents = load_corpus(corpus_path)
-    results = retrieve(question, documents, top_k=top_k)
+    #results = retrieve(question, documents, top_k=top_k)
+    results = retrieve_documents(
+        query=question,
+        top_k=top_k,
+        backend="simple",
+        #backend="mmore",
+        corpus_path=corpus_path,
+    )
     prompt = build_user_prompt(question, results)
 
     return prompt, results

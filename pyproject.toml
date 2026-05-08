@@ -10,7 +10,7 @@ dependencies = [
     "python-dotenv",
     "pydantic",
     "pytest",
-    "mmore==1.2.1",
+    "mmore[index,rag]==1.2.2",
 ]
 
 [build-system]
