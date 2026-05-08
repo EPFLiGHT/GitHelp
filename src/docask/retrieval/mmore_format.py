@@ -23,9 +23,26 @@ def document_to_mmore_sample(doc: DocumentRecord) -> dict:
     }
 
     metadata = {key: value for key, value in metadata.items() if value is not None}
+    
+    source_header = "\n".join(
+        part
+        for part in [
+            f"DocAsk ID: {doc.doc_id}",
+            f"Source type: {doc.source_type}",
+            f"Title: {doc.title}" if doc.title else None,
+            f"Relative path: {doc.metadata.get('relative_path')}" if doc.metadata.get("relative_path") else None,
+            f"Section: {doc.section_title}" if doc.section_title else None,
+            f"Module: {doc.module_name}" if doc.module_name else None,
+            f"Symbol: {doc.symbol_name}" if doc.symbol_name else None,
+            f"Signature: {doc.signature}" if doc.signature else None,
+        ]
+        if part
+    )
+
+    text = f"{source_header}\n\nContent:\n{doc.content}"
 
     return {
-        "text": doc.content,
+        "text": text,
         "modalities": [],
         "metadata": metadata,
     }
