@@ -47,3 +47,6 @@ data/indexes/
 # Python packaging
 *.egg-info/
 src/*.egg-info/
+
+# Documentation
+docs/_build/
