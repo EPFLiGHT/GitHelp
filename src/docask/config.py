@@ -1,3 +1,11 @@
+"""
+Configuration loading utilities for DocAsk.
+
+This module loads the YAML configuration files used by the project.
+DocAsk currently uses separate configuration files for project settings,
+indexing settings, and application settings.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,12 +15,33 @@ import yaml
 
 
 def load_yaml(path: str | Path) -> dict[str, Any]:
+    """
+    Load a YAML file and validate that it contains a dictionary.
+
+    Parameters
+    ----------
+    path:
+        Path to the YAML file.
+
+    Returns
+    -------
+    dict[str, Any]
+        Parsed YAML content.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the YAML file does not exist.
+    ValueError
+        If the YAML file does not contain a dictionary at the top level.
+    """
     path = Path(path)
+
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
 
-    with path.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    with path.open("r", encoding="utf-8") as file:
+        data = yaml.safe_load(file) or {}
 
     if not isinstance(data, dict):
         raise ValueError(f"YAML config must be a dictionary: {path}")
@@ -21,6 +50,19 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
 
 
 def load_all_configs(config_dir: str | Path = "configs") -> dict[str, dict[str, Any]]:
+    """
+    Load all configuration files used by DocAsk.
+
+    Parameters
+    ----------
+    config_dir:
+        Directory containing the YAML configuration files.
+
+    Returns
+    -------
+    dict[str, dict[str, Any]]
+        Dictionary containing project, indexing, and app configuration.
+    """
     config_dir = Path(config_dir)
 
     return {

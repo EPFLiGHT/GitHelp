@@ -9,8 +9,12 @@ dependencies = [
     "pyyaml",
     "python-dotenv",
     "pydantic",
-    "pytest",
     "mmore[index,rag]==1.2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
 ]
 
 [build-system]

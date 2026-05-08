@@ -1,4 +1,10 @@
+# Streamlit application settings.
+
 app_title: DocAsk
 app_subtitle: Ask questions about a project's documentation
+
+# Whether retrieved sources should be displayed in the UI.
 show_sources: true
+
+# Default number of retrieved documents shown to the answerer.
 default_top_k: 5

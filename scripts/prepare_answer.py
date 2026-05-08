@@ -2,16 +2,32 @@ from __future__ import annotations
 
 import argparse
 
-from docask.retrieval.answering import prepare_answer_prompt
+from docask.rag.answering import prepare_answer_prompt
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("question")
+"""
+Prepare a source-grounded prompt for a question.
+
+This script retrieves relevant documents and formats them into the prompt that
+would be sent to an LLM. It does not call an LLM.
+"""
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Prepare an LLM prompt from retrieved DocAsk sources."
+    )
+    parser.add_argument("question", help="Question to ask about the indexed project.")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--corpus-path", default="data/processed/corpus.jsonl")
     parser.add_argument("--backend", default="simple", choices=["simple", "mmore"])
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main() -> None:
+    """Retrieve sources and print the generated LLM prompt."""
+    args = parse_args()
 
     prompt, results = prepare_answer_prompt(
         question=args.question,
@@ -24,9 +40,14 @@ def main() -> None:
     print()
     print("=" * 80)
     print("Retrieved sources:")
-    for i, result in enumerate(results, start=1):
+
+    for index, result in enumerate(results, start=1):
         doc = result.document
-        print(f"{i}. {doc.source_type} | {doc.metadata.get('relative_path')} | {doc.title}")
+        print(
+            f"{index}. {doc.source_type} | "
+            f"{doc.metadata.get('relative_path')} | "
+            f"{doc.title}"
+        )
 
 
 if __name__ == "__main__":

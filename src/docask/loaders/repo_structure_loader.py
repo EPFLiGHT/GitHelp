@@ -5,6 +5,16 @@ from pathlib import Path
 from docask.data_models import DocumentRecord
 
 
+"""
+Loader for repository structure information.
+
+This module creates a synthetic DocumentRecord containing a readable tree view
+of a repository. It helps DocAsk answer navigation-oriented questions about
+where files, modules, configs, examples, tests, or documentation pages are
+located.
+"""
+
+
 DEFAULT_EXCLUDED_DIRS = {
     ".git",
     "__pycache__",
@@ -37,6 +47,9 @@ DEFAULT_INCLUDED_SUFFIXES = {
 
 
 def _should_skip(path: Path, repo_root: Path) -> bool:
+    """
+    Return whether a path should be excluded from the repository tree.
+    """
     try:
         relative_parts = path.relative_to(repo_root).parts
     except ValueError:
@@ -46,6 +59,9 @@ def _should_skip(path: Path, repo_root: Path) -> bool:
 
 
 def _is_visible_file(path: Path) -> bool:
+    """
+    Return whether a file should be included in the repository tree.
+    """
     return path.suffix.lower() in DEFAULT_INCLUDED_SUFFIXES
 
 
@@ -55,6 +71,23 @@ def build_repo_tree(
     max_depth: int = 4,
     max_entries_per_dir: int = 80,
 ) -> str:
+    """
+    Build a readable tree representation of a repository.
+
+    Parameters
+    ----------
+    repo_path:
+        Path to the repository root.
+    max_depth:
+        Maximum directory depth to include.
+    max_entries_per_dir:
+        Maximum number of visible entries per directory.
+
+    Returns
+    -------
+    str
+        Text representation of the repository tree.
+    """
     repo_root = Path(repo_path)
 
     if not repo_root.exists():
@@ -83,11 +116,9 @@ def build_repo_tree(
             key=lambda p: (p.is_file(), p.name.lower()),
         )
 
-        if len(visible_children) > max_entries_per_dir:
+        truncated = len(visible_children) > max_entries_per_dir
+        if truncated:
             visible_children = visible_children[:max_entries_per_dir]
-            truncated = True
-        else:
-            truncated = False
 
         for index, child in enumerate(visible_children):
             is_last = index == len(visible_children) - 1 and not truncated
@@ -114,6 +145,24 @@ def load_repo_structure_document(
     project_name: str = "project",
     max_depth: int = 4,
 ) -> list[DocumentRecord]:
+    """
+    Create a DocumentRecord describing the repository structure.
+
+    Parameters
+    ----------
+    repo_path:
+        Path to the repository root.
+    project_name:
+        Name of the project. Stored in the title and metadata.
+    max_depth:
+        Maximum depth of the repository tree.
+
+    Returns
+    -------
+    list[DocumentRecord]
+        A one-element list containing the repository structure document,
+        or an empty list if the repository path is invalid.
+    """
     repo_path = Path(repo_path)
 
     if not repo_path.exists():
@@ -128,7 +177,11 @@ def load_repo_structure_document(
         [
             f"Repository structure for project: {project_name}",
             "",
-            "This document summarizes the repository layout. It is useful for answering navigation questions such as where modules, examples, configs, tests, or documentation files are located.",
+            (
+                "This document summarizes the repository layout. It is useful "
+                "for answering navigation questions such as where modules, "
+                "examples, configs, tests, or documentation files are located."
+            ),
             "",
             "Repository tree:",
             "```text",

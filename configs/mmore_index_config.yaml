@@ -1,13 +1,20 @@
+# MMORE indexing configuration used to build the DocAsk retrieval index.
+
 indexer:
   dense_model:
     model_name: sentence-transformers/all-MiniLM-L6-v2
     is_multimodal: false
+
   sparse_model:
     model_name: splade
     is_multimodal: false
+
   db:
-    uri: ./data/indexes/mmore/proc_demo.db
+    uri: ./data/indexes/mmore/docask.db
     name: my_db
 
+# Collection used to store the indexed DocAsk corpus.
 collection_name: mmore_docs
+
+# MMORE-compatible JSONL file produced from the DocAsk corpus.
 documents_path: data/processed/mmore_corpus.jsonl
