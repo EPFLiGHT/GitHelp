@@ -36,3 +36,12 @@ data/extracted_code_docs/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/extracted_code_docs/.gitkeep
+
+# Generated data / indexes
+data/processed/*.jsonl
+data/indexes/
+*.db
+
+# Python packaging
+*.egg-info/
+src/*.egg-info/
