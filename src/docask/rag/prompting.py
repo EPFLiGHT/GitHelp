@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from docask.retrieval.simple_retriever import RetrievalResult
+from docask.retrieval.base import RetrievalResult
+
+
+"""
+Prompt construction utilities for DocAsk.
+
+This module formats retrieved documents into a source-grounded prompt that can
+be sent to an LLM. The prompt instructs the model to answer only from the
+retrieved sources and to cite them.
+"""
 
 
 SYSTEM_PROMPT = """You are DocAsk, an assistant that answers questions about a software project's documentation and code documentation.
@@ -13,6 +22,12 @@ Be concise, technical, and precise.
 
 
 def format_source_label(result: RetrievalResult, index: int) -> str:
+    """
+    Build a readable label for one retrieved source.
+
+    The label is shown before each source in the LLM context and is also used
+    for inline citations such as [Source 1].
+    """
     doc = result.document
 
     source_type = doc.source_type
@@ -29,6 +44,9 @@ def format_source_label(result: RetrievalResult, index: int) -> str:
 
 
 def format_context(results: list[RetrievalResult]) -> str:
+    """
+    Format retrieved documents as context blocks for the LLM.
+    """
     blocks: list[str] = []
 
     for index, result in enumerate(results, start=1):
@@ -50,6 +68,11 @@ def format_context(results: list[RetrievalResult]) -> str:
 
 
 def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
+    """
+    Build the user prompt sent to the LLM.
+
+    The prompt includes the original question and the retrieved sources.
+    """
     context = format_context(results)
 
     return f"""Question:

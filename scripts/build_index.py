@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from docask.config import load_all_configs
-from docask.retrieval.mmore_indexer import build_mmore_index
+from docask.indexing.mmore_indexer import build_mmore_index
 from docask.utils.paths import PROCESSED_DATA_DIR
 
 

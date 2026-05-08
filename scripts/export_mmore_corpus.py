@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from docask.retrieval.mmore_format import export_corpus_to_mmore_jsonl
+from docask.indexing.mmore_format import export_corpus_to_mmore_jsonl
 from docask.utils.paths import PROCESSED_DATA_DIR
 
 

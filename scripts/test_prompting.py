@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from docask.retrieval.prompting import build_user_prompt
+from docask.rag.prompting import build_user_prompt
 from docask.retrieval.simple_retriever import load_corpus, retrieve
 
 

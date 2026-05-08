@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from docask.retrieval.answering import answer_question
+from docask.rag.answering import answer_question
 
 
 def main() -> None:
