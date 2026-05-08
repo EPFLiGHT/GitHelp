@@ -10,12 +10,14 @@ def main() -> None:
     parser.add_argument("question")
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--corpus-path", default="data/processed/corpus.jsonl")
+    parser.add_argument("--backend", default="simple", choices=["simple", "mmore"])
     args = parser.parse_args()
 
     prompt, results = prepare_answer_prompt(
         question=args.question,
         corpus_path=args.corpus_path,
         top_k=args.top_k,
+        backend=args.backend,
     )
 
     print(prompt)
