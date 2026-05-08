@@ -99,6 +99,41 @@ def _mmore_result_to_retrieval_result(result: dict[str, Any]) -> RetrievalResult
     return RetrievalResult(document=doc, score=score)
 
 
+def _rerank_for_docask_intent(
+    query: str,
+    results: list[RetrievalResult],
+) -> list[RetrievalResult]:
+    query_lower = query.lower()
+
+    wants_config_example = (
+        "config" in query_lower
+        and any(word in query_lower for word in ["look like", "example", "yaml", "write", "structure"])
+    )
+
+    if not wants_config_example:
+        return results
+
+    reranked: list[RetrievalResult] = []
+
+    for result in results:
+        doc = result.document
+        score = result.score
+
+        if doc.source_type in {"example_config", "production_config", "yaml_config"}:
+            score += 0.5
+
+        if doc.source_type == "example_config":
+            score += 0.2
+
+        if doc.metadata.get("relative_path") and "index" in doc.metadata["relative_path"].lower():
+            score += 0.2
+
+        reranked.append(RetrievalResult(document=doc, score=score))
+
+    reranked.sort(key=lambda result: result.score, reverse=True)
+    return reranked
+
+
 def retrieve_with_mmore(
     query: str,
     top_k: int = 5,
@@ -126,4 +161,5 @@ def retrieve_with_mmore(
         search_type=search_type,
     )
 
-    return [_mmore_result_to_retrieval_result(result) for result in raw_results]
+    results = [_mmore_result_to_retrieval_result(result) for result in raw_results]
+    return _rerank_for_docask_intent(query, results)

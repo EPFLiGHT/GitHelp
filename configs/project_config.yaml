@@ -1,11 +1,29 @@
 project_name: mmore
+repo_path: ../../mmore
 docs_path: ../../mmore/docs/source
 code_path: ../../mmore/src/mmore
+
+include_yaml_configs: true
+yaml_config_paths:
+  - ../../mmore/examples
+  - ../../mmore/production-config
+
+include_repo_structure: true
+repo_structure_max_depth: 4
+
 include_extensions:
   - .md
   - .rst
   - .py
+  - .yaml
+  - .yml
+
 exclude_patterns:
   - "__pycache__"
   - ".ipynb_checkpoints"
   - ".DS_Store"
+  - ".git"
+  - "build"
+  - "dist"
+  - ".venv"
+  - "venv"

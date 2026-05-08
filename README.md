@@ -1,59 +1,219 @@
 # DocAsk
 
-DocAsk is a conversational interface for querying project documentation in natural language.
+DocAsk is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
 
-The initial use case is the MMORE documentation. The longer-term goal is to support other software projects by combining written documentation with documentation extracted from code, such as docstrings, function signatures, class descriptions, and selected code snippets.
+The initial use case is the [MMORE](https://github.com/swiss-ai/mmore) repository. DocAsk uses MMORE internally for indexing and retrieval, while exposing a simpler project-level interface to the user.
 
-## Project goal
+The user does not need to call MMORE directly.
 
-DocAsk aims to provide a documentation assistant that can:
+---
 
-- ingest project documentation;
-- extract structured documentation from Python code;
-- build a unified corpus;
-- retrieve relevant sources for a user question;
-- generate an answer grounded in the retrieved sources;
-- display the answer together with traceable citations.
+## Goal
 
-The final target architecture is:
+DocAsk aims to help users ask questions about a project such as:
+
+- How do I install or run the project?
+- How do I configure indexing or retrieval?
+- Where is a specific module implemented?
+- What is the signature of a function?
+- What does a class or method do?
+- What does an example configuration file look like?
+
+The long-term goal is to support other repositories by combining several source types:
+
+- written documentation;
+- Python docstrings and signatures;
+- YAML configuration examples;
+- repository structure summaries;
+- later, selected code snippets and tests.
+
+---
+
+## Current architecture
 
 ```text
-project docs + code
+project repository
         ↓
-structured corpus
+DocAsk loaders and extractors
         ↓
-MMORE indexing / retrieval
+unified corpus.jsonl
+        ↓
+MMORE-compatible export
+        ↓
+MMORE indexing
+        ↓
+MMORE retrieval
+        ↓
+prompt construction
         ↓
 LLM answer generation
         ↓
-Streamlit conversational UI
+Streamlit UI
 ```
+
+At the moment, the project supports corpus building, MMORE indexing, MMORE retrieval, prompt preparation, and a temporary extractive answerer.
+
+LLM generation and the Streamlit interface are the next steps.
+
+---
 
 ## Current status
 
-The current version is an early prototype.
-
-Implemented so far:
+Implemented:
 
 - Markdown documentation loading;
-- Python code documentation extraction with `ast`;
+- Python documentation extraction using `ast`;
+- extraction of module, class, function and method docstrings;
+- extraction of Python signatures;
+- YAML configuration loading;
+- repository structure summary generation;
 - unified `DocumentRecord` format;
-- JSONL corpus building;
-- corpus preview utilities;
-- temporary local retriever;
-- prompt formatting for future LLM use;
-- simple extractive answerer for terminal testing.
+- JSONL corpus generation;
+- export to MMORE-compatible JSONL format;
+- internal MMORE indexing through the PyPI package;
+- internal MMORE retrieval backend;
+- temporary local retriever for debugging;
+- prompt construction with source citations;
+- temporary extractive answerer for terminal testing.
 
 Not implemented yet:
 
-- MMORE indexing / retrieval integration;
-- LLM generation;
-- Streamlit chat interface;
-- multi-project configuration;
-- advanced chunking;
-- dependency graph or code navigation features.
+- LLM-based answer generation;
+- Streamlit conversational interface;
+- deployment;
+- selected code snippets;
+- test file extraction;
+- advanced source-aware reranking.
 
-The current local retriever is temporary. It is used to validate the corpus format, metadata, source display, and question-to-source flow before replacing the retrieval layer with MMORE.
+---
+
+## Sources used to build the corpus
+
+DocAsk currently builds its corpus from the following source types.
+
+### 1. Markdown / reStructuredText documentation
+
+Configured with:
+
+```yaml
+docs_path: ../../mmore/docs/source
+```
+
+The Markdown loader reads `.md` and `.rst` files, splits them into sections, and creates one `DocumentRecord` per section.
+
+Source type:
+
+```text
+markdown_section
+```
+
+Used for questions such as:
+
+```text
+How do I install MMORE?
+How do I run the indexing pipeline?
+What is the RAG module?
+How does processing work?
+```
+
+---
+
+### 2. Python code documentation
+
+Configured with:
+
+```yaml
+code_path: ../../mmore/src/mmore
+```
+
+The Python extractor uses the built-in `ast` module to extract:
+
+- module docstrings;
+- class docstrings;
+- function signatures and docstrings;
+- method signatures and docstrings.
+
+Source types:
+
+```text
+python_module
+python_class
+python_function
+python_method
+```
+
+Used for questions such as:
+
+```text
+What is the signature of get_latest_reports?
+What does Retriever.retrieve do?
+Which arguments does the index command take?
+```
+
+---
+
+### 3. YAML configuration files
+
+Configured with:
+
+```yaml
+include_yaml_configs: true
+yaml_config_paths:
+  - ../../mmore/examples
+  - ../../mmore/production-config
+```
+
+DocAsk loads `.yaml` and `.yml` files from the configured paths.
+
+If a repository does not have YAML files or does not have an `examples/` folder, DocAsk simply skips this source type without failing.
+
+Source types:
+
+```text
+example_config
+production_config
+yaml_config
+```
+
+Used for questions such as:
+
+```text
+What should the indexing config look like?
+Show me an example RAG config.
+How do I configure the retriever?
+What fields are required in an indexing config?
+```
+
+---
+
+### 4. Repository structure summary
+
+Configured with:
+
+```yaml
+include_repo_structure: true
+repo_path: ../../mmore
+repo_structure_max_depth: 4
+```
+
+DocAsk generates a synthetic tree view of the repository.
+
+Source type:
+
+```text
+repo_structure
+```
+
+Used for questions such as:
+
+```text
+Where is the retriever implemented?
+Where are the example configs?
+Where is the documentation stored?
+What is the structure of the repository?
+```
+
+---
 
 ## Repository structure
 
@@ -66,13 +226,18 @@ docask/
 ├── configs/
 │   ├── project_config.yaml
 │   ├── indexing_config.yaml
-│   └── app_config.yaml
+│   ├── app_config.yaml
+│   ├── mmore_index_config.yaml
+│   └── mmore_retriever_config.yaml
 ├── data/
 │   ├── raw/
 │   ├── processed/
-│   └── extracted_code_docs/
+│   ├── extracted_code_docs/
+│   └── indexes/
 ├── scripts/
 │   ├── build_corpus.py
+│   ├── export_mmore_corpus.py
+│   ├── build_index.py
 │   ├── extract_code_docs.py
 │   ├── preview_corpus.py
 │   ├── test_retrieval.py
@@ -85,13 +250,19 @@ docask/
 │       ├── config.py
 │       ├── data_models.py
 │       ├── loaders/
-│       │   └── markdown_loader.py
+│       │   ├── markdown_loader.py
+│       │   ├── yaml_loader.py
+│       │   └── repo_structure_loader.py
 │       ├── extractors/
 │       │   └── python_doc_extractor.py
 │       ├── corpus/
 │       │   └── builder.py
 │       ├── retrieval/
 │       │   ├── simple_retriever.py
+│       │   ├── mmore_format.py
+│       │   ├── mmore_indexer.py
+│       │   ├── mmore_retriever.py
+│       │   ├── retriever_factory.py
 │       │   ├── prompting.py
 │       │   ├── answering.py
 │       │   └── extractive_answerer.py
@@ -100,13 +271,17 @@ docask/
 └── tests/
 ```
 
+---
+
 ## Main modules
 
 ### `src/docask/data_models.py`
 
 Defines the internal document format used by DocAsk.
 
-The main model is `DocumentRecord`, which represents one indexable unit. It contains:
+The main model is `DocumentRecord`, which represents one indexable unit.
+
+It includes:
 
 - `doc_id`;
 - `content`;
@@ -121,185 +296,338 @@ The main model is `DocumentRecord`, which represents one indexable unit. It cont
 - `tags`;
 - `metadata`.
 
-This format is shared by Markdown documentation and Python code documentation.
+All source types are converted into this common format.
+
+---
 
 ### `src/docask/loaders/markdown_loader.py`
 
-Loads Markdown documentation files and splits them into structured sections.
+Loads Markdown and reStructuredText documentation.
 
-For each section, it creates a `DocumentRecord` with metadata such as:
+It creates structured section-level records with metadata such as:
 
-- relative file path;
+- relative path;
 - page title;
 - section title;
 - heading level;
 - documentation domain.
 
-Example source type:
-
-```text
-markdown_section
-```
+---
 
 ### `src/docask/extractors/python_doc_extractor.py`
 
-Extracts documentation from Python source files using the built-in `ast` module.
+Extracts Python documentation using `ast`.
 
 It extracts:
 
-- module docstrings;
-- class docstrings;
-- function signatures and docstrings;
-- method signatures and docstrings.
+- modules;
+- classes;
+- functions;
+- methods;
+- signatures;
+- docstrings.
 
-It creates `DocumentRecord` objects with source types such as:
+It does not index full raw code at this stage.
+
+---
+
+### `src/docask/loaders/yaml_loader.py`
+
+Loads YAML configuration files from configured paths.
+
+It is generic and tolerant:
+
+- missing paths are skipped;
+- repositories without YAML files are supported;
+- source types are inferred from the path when possible.
+
+For example:
 
 ```text
-python_module
-python_class
-python_function
-python_method
+examples/index/config.yaml          → example_config
+production-config/rag/config.yaml   → production_config
+other/config.yaml                    → yaml_config
 ```
 
-For functions and methods, the indexed content includes the symbol name, type, signature, and docstring. This makes code-related questions easier to retrieve.
+---
 
-Example indexed content:
+### `src/docask/loaders/repo_structure_loader.py`
 
-```text
-Symbol: mmore.run_dashboard_backend.get_latest_reports
-Type: function
-Signature: get_latest_reports(page_size: int = Query(100, ge=1), page_idx: int = Query(0, ge=0)) -> BatchedReports
+Generates a synthetic repository tree document.
 
-Docstring:
-Get the latest reports in a paginated way.
-```
+It excludes noisy directories such as:
+
+- `.git`;
+- `__pycache__`;
+- `.venv`;
+- `dist`;
+- `build`;
+- `.pytest_cache`;
+- `node_modules`.
+
+It keeps useful files such as:
+
+- `.py`;
+- `.md`;
+- `.rst`;
+- `.yaml`;
+- `.yml`;
+- `.toml`;
+- `.json`;
+- `.txt`.
+
+---
 
 ### `src/docask/corpus/builder.py`
 
-Builds the final corpus by merging several sources:
+Builds the final DocAsk corpus by combining:
 
 - Markdown documentation;
-- Python code documentation.
+- Python code documentation;
+- YAML configuration files;
+- repository structure summary.
 
-It can save the corpus as JSONL in:
+The output is:
 
 ```text
 data/processed/corpus.jsonl
 ```
 
-Each line contains one serialized `DocumentRecord`.
+Each line is a serialized `DocumentRecord`.
+
+---
+
+### `src/docask/retrieval/mmore_format.py`
+
+Converts the internal DocAsk corpus into a MMORE-compatible JSONL format.
+
+MMORE expects records shaped like:
+
+```json
+{
+  "text": "...",
+  "modalities": [],
+  "metadata": {}
+}
+```
+
+The output is:
+
+```text
+data/processed/mmore_corpus.jsonl
+```
+
+DocAsk adds a short source header to each text field before indexing so that source information can be reconstructed after MMORE retrieval.
+
+---
+
+### `src/docask/retrieval/mmore_indexer.py`
+
+Internal wrapper around MMORE indexing.
+
+It calls MMORE through Python internally:
+
+```bash
+python -m mmore index ...
+```
+
+The user does not call this command directly.
+
+---
+
+### `src/docask/retrieval/mmore_retriever.py`
+
+Internal wrapper around MMORE retrieval.
+
+It uses:
+
+```python
+Retriever.from_config(...)
+retriever.retrieve(...)
+```
+
+and converts raw MMORE results back into DocAsk `RetrievalResult` objects with source metadata.
+
+---
 
 ### `src/docask/retrieval/simple_retriever.py`
 
-Temporary local retriever used for prototyping.
+Temporary local retriever used for debugging and comparison.
 
-It loads the JSONL corpus and retrieves relevant documents for a question using token overlap and simple scoring rules.
+It does not use MMORE. It is useful to quickly test the corpus without rebuilding the MMORE index.
 
-The retriever includes basic heuristics to:
+---
 
-- favor Markdown documentation for user-facing questions such as “how do I install…”;
-- favor code documentation for symbol-related questions such as “what is the signature of…”;
-- boost exact matches on function, class, or method names.
+### `src/docask/retrieval/retriever_factory.py`
 
-This retriever is not the final retrieval system. It will later be replaced by MMORE indexing and retrieval.
+Selects the retrieval backend.
+
+Available backends:
+
+```text
+simple
+mmore
+```
+
+This allows DocAsk to switch retrieval backends without changing the rest of the answering pipeline.
+
+---
 
 ### `src/docask/retrieval/prompting.py`
 
-Formats retrieved sources into a prompt that can be sent to an LLM.
+Formats retrieved sources into a source-grounded prompt for a future LLM.
 
-It builds a source-grounded prompt with explicit source labels:
+The prompt asks the model to:
 
-```text
-[Source 1] markdown_section — getting_started/indexing.md — 2. Run the indexing command
-```
+- answer only from the provided sources;
+- cite sources inline;
+- say when the sources are insufficient.
 
-The prompt instructs the model to answer only from the provided sources and cite them inline.
+---
 
 ### `src/docask/retrieval/extractive_answerer.py`
 
 Temporary answer generator.
 
-It does not call an LLM. It simply builds a minimal answer from the top retrieved source.
+It does not call an LLM. It produces a simple answer from the top retrieved source.
 
-This is useful to validate the full flow before adding LLM generation.
+This is only used until the LLM generation layer is added.
+
+---
 
 ### `src/docask/retrieval/answering.py`
 
-High-level retrieval and answering functions.
+High-level answering functions.
 
-It currently exposes:
+Current functions:
 
-- `prepare_answer_prompt(...)`;
-- `answer_question(...)`.
+```python
+prepare_answer_prompt(...)
+answer_question(...)
+```
 
 This module centralizes the flow:
 
 ```text
-question → retrieve sources → build prompt or answer
+question → retrieval → prompt or answer
 ```
 
-Later, this is where the LLM-based answer generation can be integrated.
-
-### `src/docask/config.py`
-
-Loads YAML configuration files from the `configs/` directory.
-
-### `src/docask/utils/paths.py`
-
-Defines project paths such as:
-
-- project root;
-- config directory;
-- data directory;
-- processed data directory;
-- extracted code documentation directory.
+---
 
 ## Configuration files
 
 ### `configs/project_config.yaml`
 
-Defines the project to index.
+Defines which project to index.
 
-Example:
+Example for MMORE:
 
 ```yaml
 project_name: mmore
+repo_path: ../../mmore
 docs_path: ../../mmore/docs/source
 code_path: ../../mmore/src/mmore
+
+include_yaml_configs: true
+yaml_config_paths:
+  - ../../mmore/examples
+  - ../../mmore/production-config
+
+include_repo_structure: true
+repo_structure_max_depth: 4
+
 include_extensions:
   - .md
   - .rst
   - .py
+  - .yaml
+  - .yml
+
 exclude_patterns:
   - "__pycache__"
   - ".ipynb_checkpoints"
   - ".DS_Store"
+  - ".git"
+  - "build"
+  - "dist"
+  - ".venv"
+  - "venv"
 ```
+
+---
 
 ### `configs/indexing_config.yaml`
 
-Contains indexing-related settings.
+Contains DocAsk indexing and retrieval settings.
 
-Current example:
+Example:
 
 ```yaml
-include_markdown: true
-include_code_docstrings: false
-include_signatures: false
-include_code_snippets: false
+retrieval_backend: mmore
+collection_name: mmore_docs
+mmore_index_config_path: configs/mmore_index_config.yaml
+mmore_retriever_config_path: configs/mmore_retriever_config.yaml
 
 chunk_size: 1200
 chunk_overlap: 150
 top_k: 5
 ```
 
-Some options are planned for later stages and are not fully used yet.
+Some fields are planned for later chunking improvements and are not fully used yet.
+
+---
+
+### `configs/mmore_index_config.yaml`
+
+MMORE indexing configuration.
+
+Example:
+
+```yaml
+indexer:
+  dense_model:
+    model_name: sentence-transformers/all-MiniLM-L6-v2
+    is_multimodal: false
+  sparse_model:
+    model_name: splade
+    is_multimodal: false
+  db:
+    uri: ./data/indexes/mmore/proc_demo.db
+    name: my_db
+
+collection_name: mmore_docs
+documents_path: data/processed/mmore_corpus.jsonl
+```
+
+DocAsk calls this internally when building the MMORE index.
+
+---
+
+### `configs/mmore_retriever_config.yaml`
+
+MMORE retrieval configuration.
+
+Example:
+
+```yaml
+db:
+  uri: ./data/indexes/mmore/proc_demo.db
+  name: my_db
+
+hybrid_search_weight: 0.5
+k: 5
+collection_name: mmore_docs
+use_web: false
+reranker_model_name: null
+```
+
+---
 
 ### `configs/app_config.yaml`
 
-Contains application-related settings.
+Application settings.
 
-Current example:
+Example:
 
 ```yaml
 app_title: DocAsk
@@ -308,167 +636,211 @@ show_sources: true
 default_top_k: 5
 ```
 
+---
+
 ## Dependencies
 
-This project currently targets:
+DocAsk uses MMORE from PyPI.
 
-```text
-mmore==1.2.1
+The current recommended dependency is:
+
+```toml
+"mmore[index,rag]==1.2.2"
 ```
 
-Before using DocAsk, make sure the required system dependencies for MMORE are installed.
+The project also pins Transformers below version 5 because the MMORE SPLADE sparse retrieval path currently requires a Transformers 4.x-compatible tokenizer API.
 
-For local development, MMORE can either be installed from PyPI or installed as an editable package from a local clone.
+```toml
+"transformers>=4.44,<5"
+```
 
-Example with a local MMORE clone:
+Install DocAsk in editable mode:
 
 ```bash
-pip install -e ../mmore
+python -m pip install -e .
 ```
+
+---
 
 ## Usage
 
 Run all commands from the root of the repository.
 
-### Build the corpus
+### 1. Build the DocAsk corpus
 
 ```bash
 PYTHONPATH=src python scripts/build_corpus.py
 ```
 
-This reads the paths defined in `configs/project_config.yaml`, loads Markdown documentation, extracts Python code documentation, and writes:
+This creates:
 
 ```text
 data/processed/corpus.jsonl
 ```
 
-### Preview the corpus
+The corpus contains Markdown documentation, Python docstrings and signatures, YAML configs, and repository structure.
 
-Preview the first corpus entries:
+---
+
+### 2. Preview the corpus
+
+Preview the first entries:
 
 ```bash
 PYTHONPATH=src python scripts/preview_corpus.py
 ```
 
-Preview specific source types:
+Preview Markdown sections:
 
 ```bash
 PYTHONPATH=src python scripts/preview_corpus.py --source-type markdown_section --limit 3
 ```
 
+Preview Python functions:
+
 ```bash
 PYTHONPATH=src python scripts/preview_corpus.py --source-type python_function --limit 3
 ```
 
-```bash
-PYTHONPATH=src python scripts/preview_corpus.py --source-type python_method --limit 3
-```
-
-### Test retrieval
+Preview YAML example configs:
 
 ```bash
-PYTHONPATH=src python scripts/test_retrieval.py "How do I run the indexing pipeline?"
+PYTHONPATH=src python scripts/preview_corpus.py --source-type example_config --limit 3
 ```
+
+Preview production configs:
 
 ```bash
-PYTHONPATH=src python scripts/test_retrieval.py "What is the signature of get_latest_reports?"
+PYTHONPATH=src python scripts/preview_corpus.py --source-type production_config --limit 3
 ```
 
-### Test prompt construction
+Preview repository structure:
 
 ```bash
-PYTHONPATH=src python scripts/test_prompting.py "How do I run the indexing pipeline?"
+PYTHONPATH=src python scripts/preview_corpus.py --source-type repo_structure --limit 1
 ```
 
-This prints the prompt that would be sent to a future LLM.
+---
 
-### Prepare answer prompt
+### 3. Export the corpus for MMORE
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py "How do I run the indexing pipeline?"
+PYTHONPATH=src python scripts/export_mmore_corpus.py
 ```
 
-This retrieves sources and prints the full source-grounded prompt.
-
-### Generate a temporary extractive answer
-
-```bash
-PYTHONPATH=src python scripts/answer_question.py "How do I run the indexing pipeline?"
-```
-
-Example output:
+This creates:
 
 ```text
-Answer:
-Based on the most relevant source, here is the answer:
-
-Once the configuration file is ready, launch the indexing pipeline with:
-python3 -m mmore index --config_file /path/to/config.yaml
-
-Source: [Source 1]
+data/processed/mmore_corpus.jsonl
 ```
 
-## Current example queries
+---
 
-User-facing documentation question:
+### 4. Build the MMORE index
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py "How do I run the indexing pipeline?"
+PYTHONPATH=src python scripts/build_index.py
 ```
 
-Code documentation question:
+This internally calls MMORE and builds the vector index in:
+
+```text
+data/indexes/mmore/
+```
+
+The user does not call MMORE directly.
+
+---
+
+### 5. Test prompt preparation with the MMORE backend
+
+Documentation question:
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py "What is the signature of get_latest_reports?"
+PYTHONPATH=src python scripts/prepare_answer.py "How do I run the indexing pipeline?" --backend mmore
 ```
+
+Code question:
+
+```bash
+PYTHONPATH=src python scripts/prepare_answer.py "What is the signature of get_latest_reports?" --backend mmore
+```
+
+Configuration question:
+
+```bash
+PYTHONPATH=src python scripts/prepare_answer.py "What should the indexing config look like?" --backend mmore
+```
+
+Repository navigation question:
+
+```bash
+PYTHONPATH=src python scripts/prepare_answer.py "Where is the retriever implemented in the repo?" --backend mmore
+```
+
+---
+
+### 6. Use the temporary simple backend
+
+The simple backend does not use MMORE. It is useful for debugging corpus quality.
+
+```bash
+PYTHONPATH=src python scripts/prepare_answer.py "How do I run the indexing pipeline?" --backend simple
+```
+
+---
+
+### 7. Generate a temporary extractive answer
+
+```bash
+PYTHONPATH=src python scripts/answer_question.py "How do I run the indexing pipeline?" --backend mmore
+```
+
+This does not call an LLM yet. It only answers from the top retrieved source.
+
+---
+
+## Full rebuild workflow
+
+When the corpus changes, rebuild everything:
+
+```bash
+rm -rf data/indexes/mmore
+rm -f proc_demo.db
+mkdir -p data/indexes/mmore
+
+PYTHONPATH=src python scripts/build_corpus.py
+PYTHONPATH=src python scripts/export_mmore_corpus.py
+PYTHONPATH=src python scripts/build_index.py
+```
+
+---
 
 ## Development notes
 
-The current retrieval system is intentionally simple. It exists to validate the corpus and source formatting before integrating MMORE.
-
 Important design choices:
 
-- Markdown sections and Python code documentation are stored in the same internal format.
-- Code documents include signatures directly in the indexed content.
-- Metadata is kept rich enough to support source display and later filtering.
-- User-facing questions should generally prefer written documentation.
-- Symbol-level questions should generally prefer extracted code documentation.
+- DocAsk keeps its own internal `DocumentRecord` format.
+- MMORE is used internally for indexing and retrieval.
+- The simple retriever remains available for debugging.
+- Markdown and code documentation are stored in the same corpus.
+- YAML examples are indexed because they are important for configuration questions.
+- Repository structure is indexed to support navigation questions.
+- MMORE retrieval results are converted back into DocAsk source objects for citations.
+
+---
 
 ## Next steps
 
 Planned next steps:
 
-1. Integrate an LLM in terminal mode.
-2. Replace the temporary retriever with MMORE indexing and retrieval.
+1. Add LLM generation with a local model such as `qwen3:8b` through Ollama.
+2. Replace the extractive answerer with source-grounded LLM generation.
 3. Build a minimal Streamlit chat interface.
 4. Display retrieved sources under each answer.
-5. Add configuration options for source types and top-k retrieval.
-6. Improve chunking and source balancing.
-7. Extend support to other projects.
+5. Improve source-aware reranking, especially for configuration questions.
+6. Add selected code snippets when docstrings are insufficient.
+7. Add test extraction for examples of expected behavior.
+8. Deploy the application.
 
-## Roadmap
-
-### Level 1 — MVP
-
-- Markdown documentation ingestion.
-- Corpus building.
-- Retrieval.
-- Answer generation.
-- Source display.
-- Minimal conversational UI.
-
-### Level 2 — Strong prototype
-
-- Markdown documentation plus Python docstrings and signatures.
-- Better metadata handling.
-- LLM answer generation with citations.
-- Streamlit interface.
-- MMORE retrieval integration.
-
-### Level 3 — Advanced version
-
-- Selected code snippets.
-- Multi-project support.
-- Dependency graph or symbol graph.
-- More advanced source ranking.
-- Navigation between documentation and code.
+---
