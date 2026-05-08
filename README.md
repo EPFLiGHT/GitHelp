@@ -77,16 +77,12 @@ Start with:
 docs/index.md
 ```
 
-Main pages:
-
-- `docs/getting_started/quickstart.md`
-- `docs/getting_started/configuration.md`
-- `docs/getting_started/commands.md`
-- `docs/architecture/overview.md`
-- `docs/architecture/repository_structure.md`
-- `docs/components/corpus_building.md`
-- `docs/components/retrieval.md`
-- `docs/components/rag_and_llm.md`
+You can have access to it directly using, from root's repository:
+```
+python -m pip install -r docs/requirements.txt
+sphinx-build -b html docs docs/_build/html
+open docs/_build/html/index.html
+```
 
 ---
 
