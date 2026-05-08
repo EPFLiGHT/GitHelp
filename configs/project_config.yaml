@@ -1,16 +1,24 @@
+# Project indexed by DocAsk.
+
 project_name: mmore
+package_name: mmore
+
+# Paths are relative to the DocAsk repository root.
 repo_path: ../../mmore
 docs_path: ../../mmore/docs/source
 code_path: ../../mmore/src/mmore
 
+# Include YAML configuration files from the target project.
 include_yaml_configs: true
 yaml_config_paths:
   - ../../mmore/examples
   - ../../mmore/production-config
 
+# Add a synthetic document describing the repository tree.
 include_repo_structure: true
 repo_structure_max_depth: 4
 
+# File extensions that are relevant for corpus construction.
 include_extensions:
   - .md
   - .rst
@@ -18,6 +26,7 @@ include_extensions:
   - .yaml
   - .yml
 
+# Paths or patterns excluded from corpus construction.
 exclude_patterns:
   - "__pycache__"
   - ".ipynb_checkpoints"

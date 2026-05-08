@@ -1,13 +1,27 @@
+# Corpus and retrieval settings.
+
+# Documentation sources to include in the corpus.
 include_markdown: true
-include_code_docstrings: false
-include_signatures: false
+include_code_docstrings: true
+include_signatures: true
 include_code_snippets: false
 
+# Reserved for future chunking logic.
+# The current prototype mostly relies on Markdown sections and extracted
+# code documentation records rather than generic text chunking.
 chunk_size: 1200
 chunk_overlap: 150
+
+# Default retrieval settings.
 top_k: 5
 
+# Retrieval backend.
+# "simple" is the local prototype retriever.
+# "mmore" uses the MMORE retrieval backend.
 retrieval_backend: simple
-#retrieval_backend: mmore
+# retrieval_backend: mmore
+
 collection_name: mmore_docs
+
+# MMORE indexing configuration.
 mmore_index_config_path: configs/mmore_index_config.yaml

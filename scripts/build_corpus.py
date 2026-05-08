@@ -11,6 +11,7 @@ def main() -> None:
     project_config = configs["project"]
 
     project_name = project_config.get("project_name", "project")
+    package_name = project_config.get("package_name")
     repo_path = project_config.get("repo_path")
     docs_path = project_config["docs_path"]
     code_path = project_config.get("code_path")
@@ -22,6 +23,7 @@ def main() -> None:
     repo_structure_max_depth = project_config.get("repo_structure_max_depth", 4)
 
     print("project_name =", project_name)
+    print("package_name =", package_name)
     print("repo_path =", repo_path)
     print("docs_path =", docs_path)
     print("code_path =", code_path)
@@ -34,6 +36,7 @@ def main() -> None:
         docs_path=docs_path,
         code_path=code_path,
         project_name=project_name,
+        package_name=package_name,
         repo_path=repo_path,
         include_yaml_configs=include_yaml_configs,
         yaml_config_paths=yaml_config_paths,

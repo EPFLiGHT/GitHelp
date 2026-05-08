@@ -1,9 +1,20 @@
+# MMORE retrieval configuration used by the DocAsk MMORE backend.
+
 db:
   uri: ./data/indexes/mmore/proc_demo.db
   name: my_db
 
+# Weight between dense and sparse retrieval in hybrid search.
 hybrid_search_weight: 0.5
+
+# Default number of retrieved results.
 k: 5
+
+# Collection containing the indexed DocAsk corpus.
 collection_name: mmore_docs
+
+# Web search is disabled because DocAsk should answer from the indexed project corpus.
 use_web: false
+
+# Optional reranker model. Null means no reranker is used.
 reranker_model_name: null
