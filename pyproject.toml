@@ -5,10 +5,14 @@ description = "Conversational interface for querying project documentation with 
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "streamlit",
     "pyyaml",
-    "python-dotenv",
     "pydantic",
+    "pytest",
+    "streamlit",
+    "python-dotenv",
+    "transformers>=4.51.0",
+    "accelerate",
+    "torch",
     "mmore[index,rag]==1.2.2",
 ]
 

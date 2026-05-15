@@ -8,3 +8,10 @@ show_sources: true
 
 # Default number of retrieved documents shown to the answerer.
 default_top_k: 5
+
+llm:
+  provider: qwen
+  model_name: Qwen/Qwen3-0.6B
+  max_new_tokens: 128
+  temperature: 0.0
+  enable_thinking: false
