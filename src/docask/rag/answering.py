@@ -19,6 +19,32 @@ simple extractive answer from the top retrieved source, or generate an LLM-based
 answer from the retrieved sources.
 """
 
+def filter_low_value_results(
+    results: list[RetrievalResult],
+) -> list[RetrievalResult]:
+    """
+    Remove low-value sections that are usually not useful for answer generation.
+
+    Examples include small navigation sections such as "See also".
+    """
+    filtered: list[RetrievalResult] = []
+
+    for result in results:
+        doc = result.document
+
+        title = (doc.title or "").lower()
+        section_title = (doc.section_title or "").lower()
+        content = (doc.content or "").strip()
+
+        is_see_also = "see also" in title or "see also" in section_title
+        is_too_short = len(content) < 40
+
+        if is_see_also or is_too_short:
+            continue
+
+        filtered.append(result)
+
+    return filtered
 
 def prepare_answer_prompt(
     question: str,
@@ -34,10 +60,12 @@ def prepare_answer_prompt(
     """
     results = retrieve_documents(
         query=question,
-        top_k=top_k,
+        top_k=top_k * 2,
         backend=backend,
         corpus_path=corpus_path,
     )
+
+    results = filter_low_value_results(results)[:top_k]
 
     prompt = build_user_prompt(question, results)
 
@@ -82,10 +110,12 @@ def answer_question_with_llm(
     """
     results = retrieve_documents(
         query=question,
-        top_k=top_k,
+        top_k=top_k * 2,
         backend=backend,
         corpus_path=corpus_path,
     )
+
+    results = filter_low_value_results(results)[:top_k]
 
     if not results:
         return "I could not find relevant sources in the corpus.", results

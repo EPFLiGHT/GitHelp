@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from docask.rag.llm_provider import LLMProvider
 
 
 class QwenLLMProvider(LLMProvider):
-    """LLM provider using Qwen3 through Hugging Face Transformers."""
+    """LLM provider using Qwen through Hugging Face Transformers."""
 
     def __init__(
         self,
-        model_name: str = "Qwen/Qwen3-8B",
-        max_new_tokens: int = 512,
+        model_name: str = "Qwen/Qwen3-0.6B",
+        max_new_tokens: int = 128,
         temperature: float = 0.0,
-        enable_thinking: bool = False, #to be changed ?
+        enable_thinking: bool = False,
     ) -> None:
         self.model_name = model_name
         self.max_new_tokens = max_new_tokens

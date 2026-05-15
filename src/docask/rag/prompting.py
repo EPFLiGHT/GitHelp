@@ -15,9 +15,15 @@ retrieved sources and to cite them.
 SYSTEM_PROMPT = """You are DocAsk, an assistant that answers questions about a software project's documentation and code documentation.
 
 Use only the provided sources to answer.
-If the sources are insufficient, say that you do not know from the available sources.
-Always cite the sources you used.
-Be concise, technical, and precise.
+
+Important rules:
+- Do not infer missing setup steps.
+- Do not invent commands, configuration keys, file paths, APIs, modules, or workflows.
+- If the retrieved sources only mention a topic indirectly, say that the available sources are insufficient.
+- If the sources do not explain the requested procedure, say so clearly.
+- Cite every factual statement with [Source 1], [Source 2], etc.
+- Do not quote or paraphrase a source as if it contained information that is not actually present.
+- Be concise, technical, and precise.
 """
 
 
@@ -71,16 +77,18 @@ def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
     """
     Build the user prompt sent to the LLM.
 
-    The prompt includes the original question and the retrieved sources.
+    The prompt includes instructions, the original question, and the retrieved
+    sources.
     """
     context = format_context(results)
 
-    return f"""Question:
+    return f"""{SYSTEM_PROMPT}
+
+Question:
 {question}
 
 Sources:
 {context}
 
-Answer the question using only the sources above.
-Cite sources inline using [Source 1], [Source 2], etc.
+Answer:
 """
