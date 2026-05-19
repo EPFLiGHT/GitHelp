@@ -167,10 +167,10 @@ def retrieve_with_mmore(
     This function is the MMORE backend adapter for DocAsk. It hides MMORE's
     internal result format and returns standard RetrievalResult objects.
 
-    Petit doute à garder en tête : si MMORE renvoie une distance où plus 
-    petit = meilleur, alors reranking avec score += peut être faux. 
-    Si dans ton test les meilleurs résultats ont les scores les plus hauts, OK. 
-    Sinon il faudra inverser.
+    TODO:
+        Verify whether MMORE returns higher-is-better scores or lower-is-better
+        distances. If lower scores are better, the reranking logic should be
+        adjusted accordingly.
     """
     from mmore.rag.retriever import Retriever
 

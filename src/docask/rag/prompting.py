@@ -84,11 +84,20 @@ def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
 
     return f"""{SYSTEM_PROMPT}
 
-Question:
-{question}
+    Question:
+    {question}
 
-Sources:
-{context}
+    Sources:
+    {context}
 
-Answer:
-"""
+    Answer:
+    Write the answer in 2 to 8 concise bullet points.
+    Every bullet point must include at least one inline citation such as [Source 1].
+    If a source contains an explicit command relevant to the question, include that command exactly.
+    If the question asks for parameters, fields, or keys, list only the parameters, fields, or keys that directly answer the question.
+    If the question asks about Milvus parameters, only include fields that belong to a Milvus configuration block or are explicitly described as Milvus parameters.
+    Do not include unrelated configuration fields from other sources.
+    If you mention a command, cite the source that contains the command.
+    If you mention a configuration file, cite the source that contains the file path.
+    If the sources are insufficient, say so clearly and cite the relevant sources.
+    """

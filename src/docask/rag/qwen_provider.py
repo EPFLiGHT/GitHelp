@@ -1,8 +1,20 @@
 from __future__ import annotations
+import re
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from docask.rag.llm_provider import LLMProvider
+
+def remove_thinking_trace(text: str) -> str:
+    """Remove Qwen thinking traces from generated text."""
+    cleaned = re.sub(
+        r"<think>.*?</think>",
+        "",
+        text,
+        flags=re.DOTALL,
+    )
+
+    return cleaned.strip()
 
 
 class QwenLLMProvider(LLMProvider):
@@ -27,6 +39,10 @@ class QwenLLMProvider(LLMProvider):
             dtype="auto",
             device_map="auto",
         )
+        self.model.generation_config.temperature = None
+        self.model.generation_config.top_p = None
+        self.model.generation_config.top_k = None
+        self.model.generation_config.do_sample = False
 
     def generate(self, prompt: str) -> str:
         messages = [
@@ -68,4 +84,4 @@ class QwenLLMProvider(LLMProvider):
             skip_special_tokens=True,
         )
 
-        return answer.strip()
+        return remove_thinking_trace(answer)
