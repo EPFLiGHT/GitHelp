@@ -22,6 +22,51 @@ project profiles, not in this module.
 """
 
 
+def _is_code_or_symbol_question(question: str) -> bool:
+    question_lower = question.lower()
+
+    code_terms = [
+        "function",
+        "class",
+        "method",
+        "signature",
+        "symbol",
+        "cli",
+        "command",
+        "implemented",
+        "implementation",
+        "where is",
+        "where are",
+        "what does",
+        "what do",
+    ]
+
+    return any(term in question_lower for term in code_terms)
+
+
+def _merge_results_by_doc_id(
+    results: list[RetrievalResult],
+) -> list[RetrievalResult]:
+    """
+    Merge retrieval results while keeping the best score for duplicate records.
+    """
+    merged: dict[str, RetrievalResult] = {}
+    order: list[str] = []
+
+    for result in results:
+        doc_id = result.document.doc_id
+
+        if doc_id not in merged:
+            merged[doc_id] = result
+            order.append(doc_id)
+            continue
+
+        if result.score > merged[doc_id].score:
+            merged[doc_id] = result
+
+    return [merged[doc_id] for doc_id in order]
+
+
 def is_subjective_recommendation_question(question: str) -> bool:
     """
     Detect recommendation questions that cannot be answered from retrieved
@@ -105,27 +150,45 @@ def _retrieve_and_prepare_results(
     2. create the selected project profile;
     3. expand the query using the profile;
     4. retrieve more candidates than needed;
-    5. apply generic exact-symbol filtering;
-    6. apply project-specific filtering and reranking;
-    7. keep the final top_k results.
+    5. for MMORE code-oriented questions, add simple-retriever candidates;
+    6. apply generic exact-symbol filtering;
+    7. apply project-specific filtering and reranking;
+    8. keep the final top_k results.
     """
     config = load_yaml(config_path)
     project_profile = create_project_profile(config)
 
     expanded_question = project_profile.expand_query(question)
 
+    retrieval_top_k = max(top_k * 8, 40)
+
     results = retrieve_documents(
         query=expanded_question,
-        top_k=top_k * 4,
+        top_k=retrieval_top_k,
         backend=backend,
         corpus_path=corpus_path,
     )
 
+    if backend == "mmore" and _is_code_or_symbol_question(question):
+        simple_results = retrieve_documents(
+            query=question,
+            top_k=max(top_k * 4, 20),
+            backend="simple",
+            corpus_path=corpus_path,
+        )
+
+        results = _merge_results_by_doc_id(
+            [
+                *results,
+                *simple_results,
+            ]
+        )
+
     results = filter_exact_symbol_results(results, question)
     results = project_profile.filter_results(results, question)
-    results = project_profile.rerank_results(results, question)[:top_k]
+    results = project_profile.rerank_results(results, question)
 
-    return results, config
+    return results[:top_k], config
 
 
 def prepare_answer_prompt(

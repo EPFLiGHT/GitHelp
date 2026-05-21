@@ -84,13 +84,38 @@ The generated corpus can include:
 
 After the corpus is built, use the **Ask questions** section.
 
-For a newly built project corpus, start with:
+### Choose an indexing mode
+
+DocAsk supports two indexing modes.
+
+#### Simple index
+
+The simple index builds a DocAsk JSONL corpus and uses the local simple retriever.
+
+Use it when:
+
+- you want a quick setup;
+- you are debugging corpus extraction;
+- MMORE is not installed or not configured.
+
+#### MMORE index
+
+The MMORE index is the recommended mode for better retrieval quality.
+
+It builds the DocAsk corpus, exports it to MMORE format, and builds the MMORE index.
+
+Use it when:
+
+- MMORE is installed;
+- you want to use the main retrieval backend;
+- the project is ready to be indexed.
+
+After building the MMORE index, select:
 
 ```text
-Retrieval backend: simple
-```
+Retrieval backend: mmore
 
-The simple backend reads the selected `corpus.jsonl` directly and does not require MMORE indexing.
+The simple backend remains available for debugging or quick corpus checks.
 
 Example questions:
 

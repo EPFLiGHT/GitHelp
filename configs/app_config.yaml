@@ -13,7 +13,7 @@ project_profile: mmore  # change to generic for another repository
 
 llm:
   provider: qwen
-  model_name: Qwen/Qwen3-1.7B
-  max_new_tokens: 512
+  model_name: Qwen/Qwen3-4B
+  max_new_tokens: 768
   temperature: 0.0
   enable_thinking: false

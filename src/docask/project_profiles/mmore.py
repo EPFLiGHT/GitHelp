@@ -27,6 +27,13 @@ class MMoreProjectProfile(GenericProjectProfile):
             )
 
         if "index" in normalized_question or "indexing" in normalized_question:
+            if self._is_code_or_symbol_question(question):
+                return (
+                    question
+                    + " cli.py python function method class signature "
+                    + "mmore.cli index command run indexer"
+                )
+
             return (
                 question
                 + " indexing index configuration config config file indexer "
@@ -89,6 +96,12 @@ class MMoreProjectProfile(GenericProjectProfile):
         results: list[RetrievalResult],
         question: str,
     ) -> list[RetrievalResult]:
+        """
+        Apply generic code-aware reranking, then add MMORE-specific config
+        boosts for Milvus, ColPali, and indexing configuration questions.
+        """
+        results = super().rerank_results(results, question)
+
         normalized_question = question.lower()
 
         asks_about_config_parameters = any(
@@ -122,8 +135,14 @@ class MMoreProjectProfile(GenericProjectProfile):
             if "config" in relative_path or "config" in title:
                 score += 4
 
-            if source_type in {"example_config", "production_config"}:
+            if source_type in {"example_config", "production_config", "yaml_config"}:
                 score += 4
+
+            if "colpali" in normalized_question and "colpali" in relative_path:
+                score += 6
+
+            if "milvus" in normalized_question and "milvus" in content:
+                score += 6
 
             for key in [
                 "db_path",
@@ -143,7 +162,7 @@ class MMoreProjectProfile(GenericProjectProfile):
             key=lambda result: (bonus(result), result.score),
             reverse=True,
         )
-    
+
     def answer_directly(
         self,
         question: str,
@@ -159,7 +178,6 @@ class MMoreProjectProfile(GenericProjectProfile):
             return self._answer_milvus_parameter_question(results)
 
         return None
-
 
     def _is_milvus_parameter_question(self, question: str) -> bool:
         """Detect questions asking for Milvus configuration parameters."""
@@ -180,7 +198,6 @@ class MMoreProjectProfile(GenericProjectProfile):
         )
 
         return mentions_milvus and asks_for_parameters
-
 
     def _answer_milvus_parameter_question(
         self,
