@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import re
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -287,4 +287,173 @@ def build_corpus_for_project(
         "corpus_path": str(corpus_path),
         "stdout": completed_process.stdout,
         "stderr": completed_process.stderr,
+    }
+
+
+def export_mmore_corpus_for_project(
+    docask_root: str | Path,
+    corpus_path: str | Path,
+    output_path: str | Path,
+) -> dict[str, str]:
+    """
+    Export a project-specific DocAsk corpus to MMORE-compatible JSONL format.
+    """
+    docask_root = Path(docask_root).resolve()
+    corpus_path = Path(corpus_path).resolve()
+    output_path = Path(output_path).resolve()
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = str(docask_root / "src")
+
+    command = [
+        sys.executable,
+        str(docask_root / "scripts" / "export_mmore_corpus.py"),
+        "--corpus-path",
+        str(corpus_path),
+        "--output-path",
+        str(output_path),
+    ]
+
+    completed_process = subprocess.run(
+        command,
+        cwd=str(docask_root),
+        text=True,
+        capture_output=True,
+        env=environment,
+    )
+
+    if completed_process.returncode != 0:
+        raise RuntimeError(
+            "MMORE corpus export failed.\n\n"
+            f"Command:\n{' '.join(command)}\n\n"
+            f"stdout:\n{completed_process.stdout}\n\n"
+            f"stderr:\n{completed_process.stderr}"
+        )
+
+    return {
+        "mmore_corpus_path": str(output_path),
+        "stdout": completed_process.stdout,
+        "stderr": completed_process.stderr,
+    }
+
+
+def build_mmore_index_for_project(
+    docask_root: str | Path,
+    documents_path: str | Path,
+    collection_name: str = "mmore_docs",
+) -> dict[str, str]:
+    """
+    Build the MMORE index for a project-specific MMORE corpus.
+    """
+    docask_root = Path(docask_root).resolve()
+    documents_path = Path(documents_path).resolve()
+
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = str(docask_root / "src")
+
+    command = [
+        sys.executable,
+        str(docask_root / "scripts" / "build_index.py"),
+        "--documents-path",
+        str(documents_path),
+        "--collection-name",
+        collection_name,
+    ]
+
+    completed_process = subprocess.run(
+        command,
+        cwd=str(docask_root),
+        text=True,
+        capture_output=True,
+        env=environment,
+    )
+
+    if completed_process.returncode != 0:
+        raise RuntimeError(
+            "MMORE index build failed.\n\n"
+            f"Command:\n{' '.join(command)}\n\n"
+            f"stdout:\n{completed_process.stdout}\n\n"
+            f"stderr:\n{completed_process.stderr}"
+        )
+
+    return {
+        "collection_name": collection_name,
+        "stdout": completed_process.stdout,
+        "stderr": completed_process.stderr,
+    }
+
+
+def prepare_project_with_simple_index(
+    docask_root: str | Path,
+    project_path: str | Path,
+    project_name: str | None = None,
+) -> dict[str, str]:
+    """
+    Prepare a project for the simple backend.
+
+    This builds only the DocAsk JSONL corpus.
+    """
+    result = build_corpus_for_project(
+        docask_root=docask_root,
+        project_path=project_path,
+        project_name=project_name,
+    )
+
+    result["indexing_mode"] = "simple"
+    result["backend"] = "simple"
+
+    return result
+
+
+def prepare_project_with_mmore_index(
+    docask_root: str | Path,
+    project_path: str | Path,
+    project_name: str | None = None,
+    collection_name: str = "mmore_docs",
+) -> dict[str, str]:
+    """
+    Prepare a project for the MMORE backend.
+
+    This builds the DocAsk corpus, exports it to MMORE format, and builds the
+    MMORE index.
+    """
+    corpus_result = build_corpus_for_project(
+        docask_root=docask_root,
+        project_path=project_path,
+        project_name=project_name,
+    )
+
+    project_dir = Path(corpus_result["project_dir"])
+    corpus_path = Path(corpus_result["corpus_path"])
+    mmore_corpus_path = project_dir / "mmore_corpus.jsonl"
+
+    export_result = export_mmore_corpus_for_project(
+        docask_root=docask_root,
+        corpus_path=corpus_path,
+        output_path=mmore_corpus_path,
+    )
+
+    index_result = build_mmore_index_for_project(
+        docask_root=docask_root,
+        documents_path=mmore_corpus_path,
+        collection_name=collection_name,
+    )
+
+    return {
+        "project_name": corpus_result["project_name"],
+        "project_dir": corpus_result["project_dir"],
+        "project_config_path": corpus_result["project_config_path"],
+        "corpus_path": corpus_result["corpus_path"],
+        "mmore_corpus_path": export_result["mmore_corpus_path"],
+        "collection_name": index_result["collection_name"],
+        "indexing_mode": "mmore",
+        "backend": "mmore",
+        "build_corpus_stdout": corpus_result.get("stdout", ""),
+        "build_corpus_stderr": corpus_result.get("stderr", ""),
+        "export_mmore_stdout": export_result.get("stdout", ""),
+        "export_mmore_stderr": export_result.get("stderr", ""),
+        "build_index_stdout": index_result.get("stdout", ""),
+        "build_index_stderr": index_result.get("stderr", ""),
     }

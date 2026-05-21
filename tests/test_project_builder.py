@@ -12,6 +12,7 @@ from docask.projects.project_builder import (
     prepare_project_paths,
     slugify_project_name,
     write_project_config,
+    prepare_project_with_simple_index,
 )
 
 
@@ -122,3 +123,39 @@ def test_prepare_project_paths(tmp_path: Path):
     assert prepared["corpus_path"] == (
         docask_root / "data" / "projects" / "target-project" / "corpus.jsonl"
     )
+
+
+def test_prepare_project_with_simple_index_uses_corpus_builder(monkeypatch, tmp_path):
+    docask_root = tmp_path / "docask"
+    project_path = tmp_path / "target_project"
+
+    docask_root.mkdir()
+    project_path.mkdir()
+
+    def fake_build_corpus_for_project(
+        docask_root,
+        project_path,
+        project_name=None,
+    ):
+        return {
+            "project_name": "target-project",
+            "project_dir": str(tmp_path / "docask" / "data" / "projects" / "target-project"),
+            "project_config_path": str(tmp_path / "project_config.yaml"),
+            "corpus_path": str(tmp_path / "corpus.jsonl"),
+            "stdout": "built",
+            "stderr": "",
+        }
+
+    monkeypatch.setattr(
+        "docask.projects.project_builder.build_corpus_for_project",
+        fake_build_corpus_for_project,
+    )
+
+    result = prepare_project_with_simple_index(
+        docask_root=docask_root,
+        project_path=project_path,
+    )
+
+    assert result["indexing_mode"] == "simple"
+    assert result["backend"] == "simple"
+    assert result["project_name"] == "target-project"
