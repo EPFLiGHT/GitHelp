@@ -205,8 +205,154 @@ def display_debug_information(
         st.json(config)
 
 
-def render_project_setup() -> None:
-    """Render project selection and indexing controls."""
+def _build_mmore_index(project_path: str, project_name: str) -> None:
+    """Build the DocAsk corpus and MMORE index for the selected project."""
+    if not project_path.strip():
+        st.warning("Please provide a local project path.")
+        return
+
+    with st.status("Building MMORE index...", expanded=True) as status:
+        try:
+            st.write("Building DocAsk corpus...")
+            st.write("Exporting corpus to MMORE format...")
+            st.write("Building MMORE index...")
+
+            build_result = prepare_project_with_mmore_index(
+                docask_root=PROJECT_ROOT,
+                project_path=project_path,
+                project_name=project_name or None,
+                collection_name="mmore_docs",
+            )
+
+            st.session_state["project_name"] = build_result["project_name"]
+            st.session_state["project_path"] = str(Path(project_path).resolve())
+            st.session_state["project_config_path"] = build_result[
+                "project_config_path"
+            ]
+            st.session_state["corpus_path"] = build_result["corpus_path"]
+            st.session_state["mmore_corpus_path"] = build_result[
+                "mmore_corpus_path"
+            ]
+            st.session_state["collection_name"] = build_result["collection_name"]
+            st.session_state["indexing_mode"] = "mmore"
+            st.session_state["pending_backend"] = "mmore"
+
+            persist_current_state()
+
+            status.update(
+                label="MMORE index built successfully.",
+                state="complete",
+                expanded=False,
+            )
+
+            st.success(
+                f"Project `{build_result['project_name']}` is ready with backend `mmore`."
+            )
+
+            with st.expander("Build output"):
+                st.markdown("#### Corpus build")
+                st.code(build_result.get("build_corpus_stdout", ""))
+
+                if build_result.get("build_corpus_stderr"):
+                    st.code(build_result["build_corpus_stderr"])
+
+                st.markdown("#### MMORE export")
+                st.code(build_result.get("export_mmore_stdout", ""))
+
+                if build_result.get("export_mmore_stderr"):
+                    st.code(build_result["export_mmore_stderr"])
+
+                st.markdown("#### MMORE index")
+                st.code(build_result.get("build_index_stdout", ""))
+
+                if build_result.get("build_index_stderr"):
+                    st.code(build_result["build_index_stderr"])
+
+            st.rerun()
+
+        except Exception as error:
+            status.update(
+                label="MMORE index build failed.",
+                state="error",
+                expanded=True,
+            )
+
+            error_message = str(error)
+
+            if "langchain_milvus" in error_message:
+                st.error(
+                    "MMORE indexing failed because `langchain-milvus` is not installed. "
+                    "Install it with: `pip install langchain-milvus`."
+                )
+            else:
+                st.error("Could not build the MMORE index.")
+
+            st.exception(error)
+
+
+def _build_simple_index(project_path: str, project_name: str) -> None:
+    """Build only the DocAsk corpus for the selected project."""
+    if not project_path.strip():
+        st.warning("Please provide a local project path.")
+        return
+
+    with st.status("Building simple index...", expanded=True) as status:
+        try:
+            st.write("Building DocAsk corpus...")
+
+            build_result = prepare_project_with_simple_index(
+                docask_root=PROJECT_ROOT,
+                project_path=project_path,
+                project_name=project_name or None,
+            )
+
+            st.session_state["project_name"] = build_result["project_name"]
+            st.session_state["project_path"] = str(Path(project_path).resolve())
+            st.session_state["project_config_path"] = build_result[
+                "project_config_path"
+            ]
+            st.session_state["corpus_path"] = build_result["corpus_path"]
+            st.session_state["mmore_corpus_path"] = ""
+            st.session_state["collection_name"] = ""
+            st.session_state["indexing_mode"] = "simple"
+            st.session_state["pending_backend"] = "simple"
+
+            persist_current_state()
+
+            status.update(
+                label="Simple index built successfully.",
+                state="complete",
+                expanded=False,
+            )
+
+            st.success(
+                f"Project `{build_result['project_name']}` is ready with backend `simple`."
+            )
+
+            with st.expander("Build output"):
+                st.code(build_result.get("stdout", ""))
+
+                if build_result.get("stderr"):
+                    st.code(build_result["stderr"])
+
+            st.rerun()
+
+        except Exception as error:
+            status.update(
+                label="Simple index build failed.",
+                state="error",
+                expanded=True,
+            )
+
+            st.error("Could not build the simple index.")
+            st.exception(error)
+
+            
+def _render_project_setup_form(
+    default_project_path: str = "",
+    default_project_name: str = "",
+) -> None:
+    """Render the project setup form and indexing buttons."""
     st.header("Project setup")
 
     project_source = st.radio(
@@ -235,17 +381,25 @@ def render_project_setup() -> None:
 
     project_path = st.text_input(
         "Local project path",
-        value=st.session_state.get("project_path", ""),
+        value=default_project_path,
         placeholder="/path/to/software/project",
     )
 
     project_name = st.text_input(
         "Project name",
-        value=st.session_state.get("project_name", ""),
+        value=default_project_name,
         placeholder="Leave empty to infer from folder name",
     )
 
-    st.markdown("### Index project")
+    save_button = st.button("Save project settings")
+
+    if save_button:
+        st.session_state["project_path"] = project_path
+        st.session_state["project_name"] = project_name
+        persist_current_state()
+        st.success("Project settings saved.")
+
+    st.markdown("### Build index")
 
     col_mmore, col_simple = st.columns(2)
 
@@ -274,178 +428,60 @@ def render_project_setup() -> None:
             use_container_width=True,
         )
 
-    save_button = st.button("Save project settings")
-
-    if save_button:
-        st.session_state["project_path"] = project_path
-        st.session_state["project_name"] = project_name
-        persist_current_state()
-        st.success("Project settings saved.")
-
     if build_mmore_button:
-        if not project_path.strip():
-            st.warning("Please provide a local project path.")
-            return
-
-        with st.status("Building MMORE index...", expanded=True) as status:
-            try:
-                st.write("Building DocAsk corpus...")
-                st.write("Exporting corpus to MMORE format...")
-                st.write("Building MMORE index...")
-
-                build_result = prepare_project_with_mmore_index(
-                    docask_root=PROJECT_ROOT,
-                    project_path=project_path,
-                    project_name=project_name or None,
-                    collection_name="mmore_docs",
-                )
-
-                st.session_state["project_name"] = build_result["project_name"]
-                st.session_state["project_path"] = str(Path(project_path).resolve())
-                st.session_state["project_config_path"] = build_result[
-                    "project_config_path"
-                ]
-                st.session_state["corpus_path"] = build_result["corpus_path"]
-                st.session_state["mmore_corpus_path"] = build_result[
-                    "mmore_corpus_path"
-                ]
-                st.session_state["collection_name"] = build_result["collection_name"]
-                st.session_state["indexing_mode"] = "mmore"
-                st.session_state["pending_backend"] = "mmore"
-
-                persist_current_state()
-
-                status.update(
-                    label="MMORE index built successfully.",
-                    state="complete",
-                    expanded=False,
-                )
-
-                st.success(
-                    f"Project `{build_result['project_name']}` is ready with backend `mmore`."
-                )
-
-                with st.expander("Build output"):
-                    st.markdown("#### Corpus build")
-                    st.code(build_result.get("build_corpus_stdout", ""))
-
-                    if build_result.get("build_corpus_stderr"):
-                        st.code(build_result["build_corpus_stderr"])
-
-                    st.markdown("#### MMORE export")
-                    st.code(build_result.get("export_mmore_stdout", ""))
-
-                    if build_result.get("export_mmore_stderr"):
-                        st.code(build_result["export_mmore_stderr"])
-
-                    st.markdown("#### MMORE index")
-                    st.code(build_result.get("build_index_stdout", ""))
-
-                    if build_result.get("build_index_stderr"):
-                        st.code(build_result["build_index_stderr"])
-
-                st.rerun()
-
-            except Exception as error:
-                status.update(
-                    label="MMORE index build failed.",
-                    state="error",
-                    expanded=True,
-                )
-
-                error_message = str(error)
-
-                if "langchain_milvus" in error_message:
-                    st.error(
-                        "MMORE indexing failed because `langchain-milvus` is not installed. "
-                        "Install it with: `pip install langchain-milvus`."
-                    )
-                else:
-                    st.error("Could not build the MMORE index.")
-
-                st.exception(error)
+        _build_mmore_index(project_path, project_name)
 
     if build_simple_button:
-        if not project_path.strip():
-            st.warning("Please provide a local project path.")
-            return
+        _build_simple_index(project_path, project_name)
 
-        with st.status("Building simple index...", expanded=True) as status:
-            try:
-                st.write("Building DocAsk corpus...")
 
-                build_result = prepare_project_with_simple_index(
-                    docask_root=PROJECT_ROOT,
-                    project_path=project_path,
-                    project_name=project_name or None,
-                )
-
-                st.session_state["project_name"] = build_result["project_name"]
-                st.session_state["project_path"] = str(Path(project_path).resolve())
-                st.session_state["project_config_path"] = build_result[
-                    "project_config_path"
-                ]
-                st.session_state["corpus_path"] = build_result["corpus_path"]
-                st.session_state["mmore_corpus_path"] = ""
-                st.session_state["collection_name"] = ""
-                st.session_state["indexing_mode"] = "simple"
-                st.session_state["pending_backend"] = "simple"
-
-                persist_current_state()
-
-                status.update(
-                    label="Simple index built successfully.",
-                    state="complete",
-                    expanded=False,
-                )
-
-                st.success(
-                    f"Project `{build_result['project_name']}` is ready with backend `simple`."
-                )
-
-                with st.expander("Build output"):
-                    st.code(build_result.get("stdout", ""))
-
-                    if build_result.get("stderr"):
-                        st.code(build_result["stderr"])
-
-                st.rerun()
-
-            except Exception as error:
-                status.update(
-                    label="Simple index build failed.",
-                    state="error",
-                    expanded=True,
-                )
-
-                st.error("Could not build the simple index.")
-                st.exception(error)
-
+def render_project_setup() -> None:
+    """Render project setup only when needed, then keep it compact."""
     current_corpus_path = st.session_state.get("corpus_path", "")
+    corpus_exists = bool(current_corpus_path and Path(current_corpus_path).exists())
 
-    if current_corpus_path:
-        st.markdown("### Current project")
+    project_name = st.session_state.get("project_name", "")
+    project_path = st.session_state.get("project_path", "")
+    indexing_mode = st.session_state.get("indexing_mode", "mmore")
+    backend = st.session_state.get("backend", "mmore")
 
-        st.markdown(f"**Project:** `{st.session_state.get('project_name', '')}`")
-        st.markdown(f"**Project path:** `{st.session_state.get('project_path', '')}`")
-        st.markdown(f"**Indexing mode:** `{st.session_state.get('indexing_mode', 'mmore')}`")
-        st.markdown(f"**Retrieval backend:** `{st.session_state.get('backend', 'mmore')}`")
-        st.markdown(f"**Corpus path:** `{current_corpus_path}`")
+    if corpus_exists:
+        st.success(
+            f"Project `{project_name or 'unknown'}` is ready "
+            f"with `{indexing_mode}` indexing and `{backend}` retrieval."
+        )
 
-        mmore_corpus_path = st.session_state.get("mmore_corpus_path", "")
-        collection_name = st.session_state.get("collection_name", "")
+        with st.expander("Project settings / rebuild index", expanded=False):
+            _render_project_setup_form(
+                default_project_path=project_path,
+                default_project_name=project_name,
+            )
 
-        if mmore_corpus_path:
-            st.markdown(f"**MMORE corpus path:** `{mmore_corpus_path}`")
+            st.markdown("### Current project")
 
-        if collection_name:
-            st.markdown(f"**MMORE collection:** `{collection_name}`")
+            st.markdown(f"**Project:** `{project_name}`")
+            st.markdown(f"**Project path:** `{project_path}`")
+            st.markdown(f"**Indexing mode:** `{indexing_mode}`")
+            st.markdown(f"**Retrieval backend:** `{backend}`")
+            st.markdown(f"**Corpus path:** `{current_corpus_path}`")
 
-        if Path(current_corpus_path).exists():
-            st.success("Corpus file found.")
-        else:
-            st.warning("Corpus path is saved, but the file does not exist.")
+            mmore_corpus_path = st.session_state.get("mmore_corpus_path", "")
+            collection_name = st.session_state.get("collection_name", "")
 
+            if mmore_corpus_path:
+                st.markdown(f"**MMORE corpus path:** `{mmore_corpus_path}`")
+
+            if collection_name:
+                st.markdown(f"**MMORE collection:** `{collection_name}`")
+
+        return
+
+    st.warning("No project corpus found. Configure a project and build an index first.")
+
+    _render_project_setup_form(
+        default_project_path=project_path,
+        default_project_name=project_name,
+    )
 
 def render_sidebar() -> dict:
     """Render sidebar settings and return current options."""
