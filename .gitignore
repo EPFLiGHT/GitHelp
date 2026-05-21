@@ -33,6 +33,8 @@ htmlcov/
 data/raw/*
 data/processed/*
 data/extracted_code_docs/*
+data/app_state.json
+data/projects/
 
 # Keep folder structure
 !data/raw/.gitkeep

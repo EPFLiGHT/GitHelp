@@ -88,7 +88,16 @@ Role:
 
 - creates a synthetic tree view of the repository;
 - excludes noisy folders such as `.git`, `__pycache__`, `.venv`, `dist`, and `build`;
+- includes useful files such as `.py`, `.md`, `.rst`, `.yaml`, `.yml`, `.toml`, `.json`, and `.txt`;
 - helps answer navigation questions.
+
+The maximum tree depth is controlled by:
+
+```yaml
+repo_structure_max_depth: 6
+```
+
+in the project configuration.
 
 Source type:
 

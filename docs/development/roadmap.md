@@ -1,6 +1,6 @@
 # Roadmap
 
-DocAsk is currently an early prototype.
+DocAsk is currently an early but functional prototype.
 
 ## Implemented
 
@@ -11,29 +11,53 @@ DocAsk is currently an early prototype.
 - repository structure summary;
 - unified `DocumentRecord` format;
 - JSONL corpus generation;
+- project-specific corpus generation under `data/projects/`;
+- persisted Streamlit app state under `data/app_state.json`;
 - MMORE-compatible export;
 - MMORE indexing wrapper;
 - MMORE retrieval adapter;
-- local simple retriever for debugging;
+- local simple retriever for debugging and dynamic project corpora;
 - source-grounded prompt construction;
-- temporary extractive answerer.
+- local Qwen LLM provider through Hugging Face Transformers;
+- LLM-based answer generation;
+- cached LLM provider in Streamlit;
+- optional extractive answering path;
+- project profiles for project-specific query expansion, filtering, reranking, and direct answers;
+- MMORE project profile with deterministic Milvus parameter answers;
+- Streamlit interface for project setup, corpus building, question answering, and source inspection;
+- tests for corpus building, retrieval, prompting, project state, project builder, and project profiles;
+- GitHub Actions workflow for running tests.
+
+## Current limitations
+
+- Public GitHub repository loading is planned but not fully integrated.
+- Streamlit currently supports local project paths as the main project setup mode.
+- Building a corpus does not automatically rebuild the MMORE index.
+- The `simple` backend is useful for newly built corpora, but it is not a semantic retriever.
+- The MMORE backend depends on an existing MMORE index and configuration.
+- LLM quality depends on the selected local model.
+- Project profiles are currently lightweight heuristics, not a general evaluation-based reranking system.
 
 ## Next steps
 
-1. Add LLM generation.
-2. Replace the temporary extractive answerer.
-3. Build a minimal Streamlit chat interface.
-4. Display sources under each answer.
-5. Improve reranking for configuration and code questions.
-6. Add selected code snippets when docstrings are insufficient.
-7. Add tests for corpus building and retrieval behavior.
-8. Add Sphinx documentation deployment through GitHub Pages.
+1. Add public GitHub repository loading.
+2. Add an optional Streamlit action to export a project corpus to MMORE format.
+3. Add an optional Streamlit action to build or rebuild the MMORE index.
+4. Make backend selection clearer when the selected corpus and MMORE index may not match.
+5. Improve retrieval evaluation with a small benchmark set.
+6. Add richer support for code-aware questions.
+7. Add better source browsing in the Streamlit interface.
+8. Add documentation for adding a new project profile.
+9. Add deployment instructions for local lab machines or servers.
 
 ## Future ideas
 
 - dependency graph between modules and symbols;
 - test and example extraction;
 - richer code-aware retrieval;
-- multiple project support;
+- multiple saved projects in the UI;
+- project selector for previously built corpora;
 - evaluation set for retrieval quality;
-- better UI for browsing sources.
+- better UI for browsing sources;
+- support for private GitHub repositories with authentication;
+- Sphinx documentation deployment through GitHub Pages.

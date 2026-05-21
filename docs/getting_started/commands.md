@@ -4,7 +4,22 @@ This page lists the main commands used during development.
 
 Run all commands from the root of the `docask` repository.
 
-## Build the corpus
+## Run the Streamlit app
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+The app lets a user:
+
+- select a local target project;
+- build a project-specific corpus;
+- ask questions;
+- inspect retrieved sources;
+- switch retrieval backend;
+- enable or disable LLM generation.
+
+## Build the default corpus
 
 ```bash
 PYTHONPATH=src python scripts/build_corpus.py
@@ -19,51 +34,31 @@ What it does:
 - generates a repository structure document if enabled;
 - writes `data/processed/corpus.jsonl`.
 
-What you should see:
+## Build a project-specific corpus
 
-```text
-Building DocAsk corpus
---------------------------------------------------------------------------------
-project_name: mmore
-package_name: mmore
-repo_path: ../../mmore
-docs_path: ../../mmore/docs/source
-code_path: ../../mmore/src/mmore
-include_yaml_configs: True
-yaml_config_paths: ['../../mmore/examples', '../../mmore/production-config']
-include_repo_structure: True
-repo_structure_max_depth: 4
---------------------------------------------------------------------------------
-Loaded 246 markdown documents
-Loaded 246 code documents
-Loaded 52 YAML config documents
-Loaded 1 repo structure documents
-
-Built corpus with 545 documents
-Saved to: .../data/processed/corpus.jsonl
-Breakdown by source_type:
-  - markdown_section: 246
-  - python_function: 58
-  - python_module: 10
-  - python_class: 49
-  - python_method: 129
-  - example_config: 46
-  - production_config: 6
-  - repo_structure: 1
+```bash
+PYTHONPATH=src python scripts/build_corpus.py \
+  --config data/projects/mmore/project_config.yaml \
+  --output-path data/projects/mmore/corpus.jsonl
 ```
 
-The exact numbers may change when the indexed repository changes.
+This is the command used internally by the Streamlit project setup flow.
 
-## Preview the corpus
+## Preview a corpus
+
+Default corpus:
 
 ```bash
 PYTHONPATH=src python scripts/preview_corpus.py --limit 2
 ```
 
-What it does:
+Project-specific corpus:
 
-- reads `data/processed/corpus.jsonl`;
-- prints a readable preview of extracted records.
+```bash
+PYTHONPATH=src python scripts/preview_corpus.py \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --limit 2
+```
 
 Useful filters:
 
@@ -83,55 +78,79 @@ PYTHONPATH=src python scripts/preview_corpus.py --source-type repo_structure --l
 PYTHONPATH=src python scripts/debug_retrieval.py "How do I configure indexing?"
 ```
 
-What it does:
+This directly tests the simple local retriever.
 
-- loads the local JSONL corpus;
-- runs the simple token-based retriever;
-- prints ranked sources with scores.
+For a project-specific corpus:
 
-This does not require MMORE.
+```bash
+PYTHONPATH=src python scripts/debug_retrieval.py \
+  "How do I configure indexing?" \
+  --corpus-path data/projects/mmore/corpus.jsonl
+```
 
 ## Debug prompt construction
 
 ```bash
-PYTHONPATH=src python scripts/debug_prompting.py "How do I configure indexing?"
+PYTHONPATH=src python scripts/debug_prompting.py \
+  "How do I configure indexing?" \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --config-path configs/app_config.yaml
 ```
 
 What it does:
 
-- retrieves sources with the simple backend;
+- retrieves sources;
+- applies the configured project profile;
 - builds the source-grounded prompt;
-- prints the prompt that would be sent to an LLM.
+- prints the prompt without calling an LLM.
 
 ## Prepare an answer prompt
 
 Simple backend:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py "How do I configure indexing?" --backend simple
+PYTHONPATH=src python scripts/prepare_answer.py \
+  "How do I configure indexing?" \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --config-path configs/app_config.yaml
 ```
 
 MMORE backend:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py "How do I configure indexing?" --backend mmore
+PYTHONPATH=src python scripts/prepare_answer.py \
+  "How do I configure indexing?" \
+  --backend mmore \
+  --config-path configs/app_config.yaml
 ```
 
-The MMORE backend requires the MMORE corpus to be exported and indexed first.
+The MMORE backend requires an MMORE index to be built first.
 
-## Generate a temporary extractive answer
+## Generate an answer
+
+Simple backend with LLM:
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py "How do I configure indexing?" --backend simple
+PYTHONPATH=src python scripts/answer_question.py \
+  "How do I configure indexing?" \
+  --llm \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --config-path configs/app_config.yaml
 ```
 
-What it does:
+Simple backend without LLM:
 
-- retrieves sources;
-- returns a simple answer from the top retrieved document;
-- prints the source list.
+```bash
+PYTHONPATH=src python scripts/answer_question.py \
+  "How do I configure indexing?" \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl
+```
 
-This does not call an LLM yet.
+Some project profiles can answer structured questions directly without loading the LLM.
 
 ## Extract Python documentation only
 
@@ -139,49 +158,50 @@ This does not call an LLM yet.
 PYTHONPATH=src python scripts/extract_code_docs.py
 ```
 
-What it does:
+If the script is run dynamically:
 
-- reads the configured `code_path`;
-- extracts Python module, class, function, and method documentation;
-- writes `data/extracted_code_docs/code_docs.jsonl`.
+```bash
+PYTHONPATH=src python scripts/extract_code_docs.py \
+  --config data/projects/mmore/project_config.yaml \
+  --output-path data/projects/mmore/code_docs.jsonl
+```
 
-This is useful for debugging the Python extractor independently.
+## Export a corpus for MMORE
 
-## Export the corpus for MMORE
+Default corpus:
 
 ```bash
 PYTHONPATH=src python scripts/export_mmore_corpus.py
 ```
 
-What it does:
+Project-specific corpus:
 
-- reads `data/processed/corpus.jsonl`;
-- converts each `DocumentRecord` into MMORE-compatible format;
-- writes `data/processed/mmore_corpus.jsonl`.
+```bash
+PYTHONPATH=src python scripts/export_mmore_corpus.py \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --output-path data/projects/mmore/mmore_corpus.jsonl
+```
 
 ## Build the MMORE index
+
+Default MMORE corpus:
 
 ```bash
 PYTHONPATH=src python scripts/build_index.py
 ```
 
-What it does:
-
-- reads `configs/indexing_config.yaml`;
-- uses `configs/mmore_index_config.yaml`;
-- indexes `data/processed/mmore_corpus.jsonl` with MMORE;
-- stores the index under `data/indexes/mmore/`.
-
-## Run the Streamlit app
+Project-specific MMORE corpus:
 
 ```bash
-scripts/run_app.sh
+PYTHONPATH=src python scripts/build_index.py \
+  --documents-path data/projects/mmore/mmore_corpus.jsonl \
+  --collection-name mmore_docs
 ```
 
-Equivalent command:
+## Run tests
 
 ```bash
-PYTHONPATH=src streamlit run src/docask/app/streamlit_app.py
+PYTHONPATH=src pytest -q
 ```
 
-The Streamlit interface is still under development.
+The GitHub Actions workflow also runs these tests on push and pull request.

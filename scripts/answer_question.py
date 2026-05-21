@@ -40,7 +40,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--backend",
-        default="simple",
+        default="mmore",
         choices=["simple", "mmore"],
         help="Retrieval backend to use.",
     )

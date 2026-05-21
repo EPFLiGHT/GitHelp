@@ -2,6 +2,8 @@
 
 This page explains the shortest path to run DocAsk locally.
 
+The recommended way to use DocAsk is the Streamlit interface. The command-line scripts remain available for debugging and development.
+
 ## 1. Install the project
 
 From the root of the `docask` repository:
@@ -10,99 +12,157 @@ From the root of the `docask` repository:
 python -m pip install -e .
 ```
 
-## 2. Configure the target project
-
-The main file to edit is:
-
-```text
-configs/project_config.yaml
-```
-
-For the MMORE use case, it should contain paths similar to:
-
-```yaml
-project_name: mmore
-package_name: mmore
-
-repo_path: ../../mmore
-docs_path: ../../mmore/docs/source
-code_path: ../../mmore/src/mmore
-
-include_yaml_configs: true
-yaml_config_paths:
-  - ../../mmore/examples
-  - ../../mmore/production-config
-
-include_repo_structure: true
-repo_structure_max_depth: 4
-```
-
-The important paths are:
-
-- `repo_path`: root of the project being indexed;
-- `docs_path`: documentation folder of the target project;
-- `code_path`: Python package folder used for docstring extraction;
-- `yaml_config_paths`: folders where YAML examples or production configs are stored.
-
-## 3. Build the corpus
+If you use the local Qwen provider, make sure the LLM dependencies are installed:
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py
+python -m pip install transformers torch accelerate
 ```
 
-This creates:
+If Streamlit is not already installed:
+
+```bash
+python -m pip install streamlit
+```
+
+## 2. Launch the Streamlit app
+
+From the root of the `docask` repository:
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+The interface opens locally, usually at:
 
 ```text
-data/processed/corpus.jsonl
+http://localhost:8501/
 ```
 
-The corpus can include:
+## 3. Select a project
+
+In the Streamlit interface, use the **Project setup** section.
+
+For the MMORE use case, enter the local path to the MMORE repository, for example:
+
+```text
+/Users/<user>/path/to/mmore
+```
+
+DocAsk can currently build a corpus from a local project path.
+
+Public GitHub repository support is planned, but the main supported workflow for now is local project selection.
+
+## 4. Build the corpus
+
+Click:
+
+```text
+Build corpus
+```
+
+DocAsk generates a dedicated project folder:
+
+```text
+data/projects/<project_name>/
+```
+
+For MMORE, this creates for example:
+
+```text
+data/projects/mmore/project_config.yaml
+data/projects/mmore/corpus.jsonl
+```
+
+The generated corpus can include:
 
 - Markdown and reStructuredText documentation;
 - Python docstrings and signatures extracted with `ast`;
 - YAML configuration files;
 - a synthetic repository structure document.
 
-## 4. Preview the corpus
+## 5. Ask questions
 
-```bash
-PYTHONPATH=src python scripts/preview_corpus.py --limit 2
+After the corpus is built, use the **Ask questions** section.
+
+For a newly built project corpus, start with:
+
+```text
+Retrieval backend: simple
 ```
 
-This prints the first extracted documents. It is the fastest way to check that the paths are correct.
+The simple backend reads the selected `corpus.jsonl` directly and does not require MMORE indexing.
 
-## 5. Test the simple retriever
+Example questions:
 
-```bash
-PYTHONPATH=src python scripts/debug_retrieval.py "How do I configure indexing?"
+```text
+How do I configure indexing?
+Which Milvus parameters are used in the ColPali config?
+Where are the example configs located?
 ```
 
-This uses the local prototype retriever. It does not require MMORE indexing.
+## 6. Inspect sources
 
-## 6. Prepare a prompt
+By default, DocAsk displays retrieved sources under the answer.
 
-```bash
-PYTHONPATH=src python scripts/prepare_answer.py "How do I configure indexing?" --backend simple
+The sidebar options let you:
+
+- show or hide retrieved sources;
+- show full source content;
+- show debug information;
+- switch between `simple` and `mmore` retrieval;
+- enable or disable LLM generation.
+
+## 7. Persistent app state
+
+DocAsk stores the last selected project and UI settings in:
+
+```text
+data/app_state.json
 ```
 
-This retrieves sources and formats the prompt that would be sent to an LLM.
+This allows the interface to restore the previous project, corpus path, backend, and display options after closing and reopening Streamlit.
 
-## 7. Optional: use MMORE indexing and retrieval
+This file is local state and should normally not be committed.
 
-Export the corpus to MMORE format:
+## 8. Optional: command-line corpus build
 
-```bash
-PYTHONPATH=src python scripts/export_mmore_corpus.py
-```
-
-Build the MMORE index:
+The default command still works:
 
 ```bash
-PYTHONPATH=src python scripts/build_index.py
+PYTHONPATH=src python scripts/build_corpus.py
 ```
 
-Then prepare an answer with the MMORE backend:
+It reads:
+
+```text
+configs/project_config.yaml
+```
+
+and writes:
+
+```text
+data/processed/corpus.jsonl
+```
+
+You can also build a project-specific corpus manually:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py "How do I configure indexing?" --backend mmore
+PYTHONPATH=src python scripts/build_corpus.py \
+  --config data/projects/mmore/project_config.yaml \
+  --output-path data/projects/mmore/corpus.jsonl
 ```
+
+## 9. Optional: MMORE indexing
+
+The `mmore` backend retrieves from an MMORE index. Building a corpus alone is not enough to update that index.
+
+For a full MMORE-backed workflow, the steps are:
+
+```text
+build_corpus.py
+→ export_mmore_corpus.py
+→ build_index.py
+→ ask with backend mmore
+```
+
+For local development and newly built corpora, use the `simple` backend first.

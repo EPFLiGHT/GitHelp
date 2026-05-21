@@ -1,40 +1,123 @@
 # Streamlit app
 
-The Streamlit app is the future user-facing interface for DocAsk.
+The Streamlit app is the main user-facing interface for DocAsk.
 
 Current file:
 
 ```text
-src/docask/app/streamlit_app.py
+app/streamlit_app.py
 ```
 
 ## Goal
 
-The app should let a user:
+The app lets a user:
 
-- type a question about the indexed project;
-- choose or configure retrieval settings;
-- receive an answer;
-- inspect retrieved sources.
+- select a local software project;
+- build a DocAsk corpus for that project;
+- ask questions about the selected project;
+- choose the retrieval backend;
+- enable or disable LLM generation;
+- inspect retrieved sources;
+- keep the last selected project and settings after reopening the app.
 
 ## Run command
 
 ```bash
-scripts/run_app.sh
+streamlit run app/streamlit_app.py
 ```
 
-Equivalent command:
-
-```bash
-PYTHONPATH=src streamlit run src/docask/app/streamlit_app.py
-```
-
-## Current status
-
-The interface is still under development.
-
-The backend pipeline is being prepared first:
+The app usually opens at:
 
 ```text
-corpus -> retrieval -> prompt -> answer
+http://localhost:8501/
 ```
+
+## Project setup
+
+The app contains a **Project setup** section.
+
+Current supported mode:
+
+```text
+Local project path
+```
+
+Planned mode:
+
+```text
+Public GitHub repository URL
+```
+
+When a local project path is provided, DocAsk can build a project-specific corpus.
+
+For example:
+
+```text
+/path/to/mmore
+```
+
+generates:
+
+```text
+data/projects/mmore/project_config.yaml
+data/projects/mmore/corpus.jsonl
+```
+
+## Persistent state
+
+The app stores local UI state in:
+
+```text
+data/app_state.json
+```
+
+This can include:
+
+- last project name;
+- last project path;
+- last corpus path;
+- last project config path;
+- selected retrieval backend;
+- number of sources;
+- whether LLM is enabled;
+- source display options;
+- debug display options.
+
+This file is local and should normally not be committed.
+
+## Retrieval backend
+
+The app supports:
+
+```text
+simple
+mmore
+```
+
+For a corpus built from the interface, the safest first option is:
+
+```text
+simple
+```
+
+The `simple` backend reads the generated `corpus.jsonl` directly.
+
+The `mmore` backend should be used when the MMORE index has been built for the relevant corpus.
+
+## LLM caching
+
+The app uses Streamlit resource caching to avoid reloading the local LLM provider for every question.
+
+The first LLM query may take longer because the model is loaded. Later queries reuse the cached provider unless the config cache is cleared.
+
+## Sources
+
+Retrieved sources are displayed by default.
+
+The sidebar can:
+
+- hide retrieved sources;
+- show full source content;
+- show debug information.
+
+This makes the interface useful both for users and for development debugging.

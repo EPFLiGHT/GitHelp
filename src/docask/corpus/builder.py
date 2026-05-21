@@ -30,7 +30,7 @@ def build_corpus(
     include_yaml_configs: bool = False,
     yaml_config_paths: list[str | Path] | None = None,
     include_repo_structure: bool = False,
-    repo_structure_max_depth: int = 4,
+    repo_structure_max_depth: int = 6,
 ) -> list[DocumentRecord]:
     """
     Build a unified DocAsk corpus from several documentation sources.

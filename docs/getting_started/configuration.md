@@ -1,34 +1,94 @@
 # Configuration
 
-DocAsk uses YAML configuration files stored in `configs/`.
+DocAsk uses YAML configuration files stored in `configs/`, plus project-specific configuration files generated under `data/projects/`.
 
-## `project_config.yaml`
+There are two levels of configuration:
 
-This is the main file to edit when changing the project indexed by DocAsk.
+```text
+configs/
+→ global DocAsk settings
 
-For example:
+data/projects/<project_name>/
+→ generated configuration and corpus for a selected target project
+```
+
+## `app_config.yaml`
+
+This file stores application-level settings.
+
+Example:
+
 ```yaml
-project_name: mmore
-package_name: mmore
+app_title: DocAsk
+app_subtitle: Ask questions about a project's documentation
+show_sources: true
+default_top_k: 5
 
-repo_path: ../../mmore
-docs_path: ../../mmore/docs/source
-code_path: ../../mmore/src/mmore
+project_profile: mmore
 
-include_yaml_configs: true
-yaml_config_paths:
-  - ../../mmore/examples
-  - ../../mmore/production-config
-
-include_repo_structure: true
-repo_structure_max_depth: 4
+llm:
+  provider: qwen
+  model_name: Qwen/Qwen3-1.7B
+  max_new_tokens: 512
+  temperature: 0.0
+  enable_thinking: false
 ```
 
 ### Main fields
 
 | Field | Meaning |
 |---|---|
-| `project_name` | Human-readable project name stored in metadata. |
+| `app_title` | Title used by the app. |
+| `app_subtitle` | Subtitle used by the app. |
+| `show_sources` | Whether sources should be shown by default. |
+| `default_top_k` | Default number of retrieved sources. |
+| `project_profile` | Project-specific behavior profile, for example `generic` or `mmore`. |
+| `llm.provider` | LLM provider used by DocAsk. |
+| `llm.model_name` | Model name used by the provider. |
+| `llm.max_new_tokens` | Maximum number of generated tokens. |
+| `llm.temperature` | Generation temperature. |
+| `llm.enable_thinking` | Whether to enable Qwen thinking mode. |
+
+## `project_config.yaml`
+
+This file describes the target project being indexed.
+
+The default configuration is:
+
+```text
+configs/project_config.yaml
+```
+
+When using the Streamlit interface, DocAsk also generates a project-specific config:
+
+```text
+data/projects/<project_name>/project_config.yaml
+```
+
+Example for MMORE:
+
+```yaml
+project_name: mmore
+package_name: mmore
+
+repo_path: /absolute/path/to/mmore
+docs_path: /absolute/path/to/mmore/docs/source
+code_path: /absolute/path/to/mmore/src/mmore
+
+include_yaml_configs: true
+yaml_config_paths:
+  - /absolute/path/to/mmore/examples
+  - /absolute/path/to/mmore/production-config
+
+include_repo_structure: true
+repo_structure_max_depth: 6
+```
+
+### Main fields
+
+| Field | Meaning |
+|---|---|
+| `project_name` | Project name stored in metadata and used for project folders. |
 | `package_name` | Python package prefix used to build full module names. |
 | `repo_path` | Root folder of the target repository. |
 | `docs_path` | Folder containing Markdown or reStructuredText docs. |
@@ -40,7 +100,7 @@ repo_structure_max_depth: 4
 
 ## `indexing_config.yaml`
 
-This file controls general corpus and retrieval settings.
+This file controls MMORE indexing defaults.
 
 ```yaml
 include_markdown: true
@@ -95,13 +155,29 @@ use_web: false
 reranker_model_name: null
 ```
 
-## `app_config.yaml`
+## `data/app_state.json`
 
-This file stores UI-level settings.
+The Streamlit app persists the latest local UI state in:
 
-```yaml
-app_title: DocAsk
-app_subtitle: Ask questions about a project's documentation
-show_sources: true
-default_top_k: 5
+```text
+data/app_state.json
 ```
+
+It can contain:
+
+```json
+{
+  "project_name": "mmore",
+  "project_path": "/path/to/mmore",
+  "corpus_path": "/path/to/docask/data/projects/mmore/corpus.jsonl",
+  "project_config_path": "/path/to/docask/data/projects/mmore/project_config.yaml",
+  "backend": "simple",
+  "top_k": 5,
+  "use_llm": true,
+  "show_sources": true,
+  "show_full_sources": false,
+  "show_debug": false
+}
+```
+
+This file is machine-specific and should normally be ignored by Git.

@@ -18,10 +18,38 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Prepare an LLM prompt from retrieved DocAsk sources."
     )
-    parser.add_argument("question", help="Question to ask about the indexed project.")
-    parser.add_argument("--top-k", type=int, default=5)
-    parser.add_argument("--corpus-path", default="data/processed/corpus.jsonl")
-    parser.add_argument("--backend", default="simple", choices=["simple", "mmore"])
+
+    parser.add_argument(
+        "question",
+        help="Question to ask about the indexed project.",
+    )
+
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=5,
+        help="Number of retrieved sources.",
+    )
+
+    parser.add_argument(
+        "--corpus-path",
+        default="data/processed/corpus.jsonl",
+        help="Path to the DocAsk corpus.",
+    )
+
+    parser.add_argument(
+        "--backend",
+        default="simple",
+        choices=["simple", "mmore"],
+        help="Retrieval backend to use.",
+    )
+
+    parser.add_argument(
+        "--config-path",
+        default="configs/app_config.yaml",
+        help="Path to the app config file.",
+    )
+
     return parser.parse_args()
 
 
@@ -34,6 +62,7 @@ def main() -> None:
         corpus_path=args.corpus_path,
         top_k=args.top_k,
         backend=args.backend,
+        config_path=args.config_path,
     )
 
     print(prompt)

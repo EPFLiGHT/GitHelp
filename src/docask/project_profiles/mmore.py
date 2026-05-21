@@ -143,3 +143,86 @@ class MMoreProjectProfile(GenericProjectProfile):
             key=lambda result: (bonus(result), result.score),
             reverse=True,
         )
+    
+    def answer_directly(
+        self,
+        question: str,
+        results: list[RetrievalResult],
+    ) -> str | None:
+        """
+        Answer some MMORE-specific structured questions without calling the LLM.
+
+        This avoids hallucinations for questions that ask for exact configuration
+        parameters, where deterministic extraction is more reliable than generation.
+        """
+        if self._is_milvus_parameter_question(question):
+            return self._answer_milvus_parameter_question(results)
+
+        return None
+
+
+    def _is_milvus_parameter_question(self, question: str) -> bool:
+        """Detect questions asking for Milvus configuration parameters."""
+        normalized_question = question.lower()
+
+        mentions_milvus = "milvus" in normalized_question
+
+        asks_for_parameters = any(
+            term in normalized_question
+            for term in [
+                "parameter",
+                "parameters",
+                "field",
+                "fields",
+                "key",
+                "keys",
+            ]
+        )
+
+        return mentions_milvus and asks_for_parameters
+
+
+    def _answer_milvus_parameter_question(
+        self,
+        results: list[RetrievalResult],
+    ) -> str:
+        """
+        Return a deterministic answer for known Milvus configuration parameters.
+        """
+        allowed_keys = [
+            "db_path",
+            "collection_name",
+            "create_collection",
+            "dim",
+            "metric_type",
+        ]
+
+        found: list[tuple[str, int]] = []
+        seen_keys: set[str] = set()
+
+        for source_index, result in enumerate(results, start=1):
+            content = result.document.content or ""
+
+            if "milvus" not in content.lower():
+                continue
+
+            for key in allowed_keys:
+                if key in content and key not in seen_keys:
+                    found.append((key, source_index))
+                    seen_keys.add(key)
+
+        if not found:
+            return (
+                "The retrieved sources mention Milvus, but they do not provide enough "
+                "information to identify explicit Milvus parameters."
+            )
+
+        lines = []
+
+        for key, source_index in found:
+            lines.append(
+                f"- `{key}` is used as a Milvus configuration parameter. "
+                f"[Source {source_index}]"
+            )
+
+        return "\n".join(lines)
