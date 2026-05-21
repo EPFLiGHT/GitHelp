@@ -10,6 +10,9 @@ Its job is to turn retrieved sources into a grounded answer.
 src/docask/rag/prompting.py
 src/docask/rag/extractive_answerer.py
 src/docask/rag/answering.py
+src/docask/rag/llm_provider.py
+src/docask/rag/llm_factory.py
+src/docask/rag/qwen_provider.py
 ```
 
 ## Prompting
@@ -22,39 +25,50 @@ src/docask/rag/prompting.py
 
 This module formats retrieved sources into a prompt.
 
-The prompt instructs the future LLM to:
+The prompt instructs the LLM to:
 
 - answer only from the provided sources;
 - cite sources inline with `[Source 1]`, `[Source 2]`, etc.;
+- avoid inventing commands, paths, APIs, modules, or configuration keys;
+- avoid interpreting configuration values unless the sources explain them;
 - say when the sources are insufficient.
 
 Debug command:
 
 ```bash
-PYTHONPATH=src python scripts/debug_prompting.py "How do I configure indexing?"
+PYTHONPATH=src python scripts/debug_prompting.py \
+  "How do I configure indexing?" \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --config-path configs/app_config.yaml
 ```
 
-## Temporary extractive answerer
+## LLM providers
 
-File:
+DocAsk uses a provider interface:
 
 ```text
-src/docask/rag/extractive_answerer.py
+src/docask/rag/llm_provider.py
 ```
 
-This is not a real LLM answerer.
+The active provider is selected from:
 
-It currently:
-
-- takes the top retrieved source;
-- returns its content;
-- has a small special case for signature questions.
-
-Command:
-
-```bash
-PYTHONPATH=src python scripts/answer_question.py "How do I configure indexing?" --backend simple
+```text
+configs/app_config.yaml
 ```
+
+Example:
+
+```yaml
+llm:
+  provider: qwen
+  model_name: Qwen/Qwen3-1.7B
+  max_new_tokens: 512
+  temperature: 0.0
+  enable_thinking: false
+```
+
+The Qwen provider uses Hugging Face Transformers.
 
 ## High-level answering helpers
 
@@ -69,26 +83,63 @@ This module exposes:
 ```python
 prepare_answer_prompt(...)
 answer_question(...)
+answer_question_with_llm(...)
+answer_question_with_provider(...)
 ```
 
 Current flow:
 
 ```text
-question -> retrieval -> prompt or extractive answer
+question
+→ project profile query expansion
+→ retrieval
+→ project profile filtering/reranking
+→ optional project profile direct answer
+→ prompt construction
+→ LLM generation
 ```
 
-## Next step: LLM generation
+## Direct answers from project profiles
 
-The next planned step is to replace the temporary extractive answerer with a source-grounded LLM call.
+Some structured questions are better answered deterministically than by an LLM.
 
-Possible local model path:
+For example, the MMORE profile can answer Milvus parameter questions directly. This avoids returning unrelated fields such as `model_name`, `top_k`, or `max_workers` when the user asks specifically for Milvus parameters.
+
+## Temporary extractive answerer
+
+File:
 
 ```text
-Ollama + qwen3:8b
+src/docask/rag/extractive_answerer.py
 ```
 
-The expected final flow is:
+This remains available when LLM generation is disabled.
 
-```text
-question -> retrieval -> prompt -> LLM answer -> cited sources
+It:
+
+- takes the top retrieved source;
+- returns its content;
+- has a small special case for signature questions.
+
+Command:
+
+```bash
+PYTHONPATH=src python scripts/answer_question.py \
+  "How do I configure indexing?" \
+  --backend simple
 ```
+
+## LLM answer generation
+
+LLM generation can be enabled with:
+
+```bash
+PYTHONPATH=src python scripts/answer_question.py \
+  "How do I configure indexing?" \
+  --llm \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --config-path configs/app_config.yaml
+```
+
+The expected answer includes inline source citations.

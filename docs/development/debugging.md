@@ -2,18 +2,89 @@
 
 This page lists useful checks during development.
 
+## Run all tests
+
+```bash
+PYTHONPATH=src pytest -q
+```
+
+This is the main check before committing changes.
+
 ## Compile all Python files
 
 ```bash
-python -m compileall src scripts
+python -m compileall src scripts app
 ```
 
 This catches syntax errors and some import issues.
 
+## Test default corpus build
+
+```bash
+PYTHONPATH=src python scripts/build_corpus.py
+```
+
+This should write:
+
+```text
+data/processed/corpus.jsonl
+```
+
+## Test dynamic corpus build
+
+```bash
+PYTHONPATH=src python scripts/build_corpus.py \
+  --config configs/project_config.yaml \
+  --output-path data/projects/mmore/corpus.jsonl
+```
+
+This should write:
+
+```text
+data/projects/mmore/corpus.jsonl
+```
+
+## Test answering on a project-specific corpus
+
+```bash
+PYTHONPATH=src python scripts/answer_question.py \
+  "Which Milvus parameters are used in the ColPali config?" \
+  --llm \
+  --backend simple \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --config-path configs/app_config.yaml
+```
+
+For MMORE, some structured questions may be answered directly by the project profile without loading the LLM.
+
+## Debug Streamlit state
+
+The app stores local state in:
+
+```text
+data/app_state.json
+```
+
+If the interface restores an old project or wrong corpus path, remove this file:
+
+```bash
+rm -f data/app_state.json
+```
+
+Then restart Streamlit.
+
+## Clear generated project corpora
+
+```bash
+rm -rf data/projects/
+```
+
+Then rebuild the project corpus from the Streamlit interface or from the command line.
+
 ## Check for old imports after refactoring
 
 ```bash
-grep -R "docask.retrieval.answering\|docask.retrieval.prompting\|docask.retrieval.extractive_answerer\|docask.retrieval.mmore_format\|docask.retrieval.mmore_indexer" -n src scripts
+grep -R "docask.retrieval.answering\|docask.retrieval.prompting\|docask.retrieval.extractive_answerer\|docask.retrieval.mmore_format\|docask.retrieval.mmore_indexer" -n src scripts app docs
 ```
 
 This should return nothing after moving files into `rag/` and `indexing/`.
@@ -32,7 +103,7 @@ If the virtual environment is inside the repo, grep can return unrelated files f
 Prefer:
 
 ```bash
-grep -R "test_prompting\|test_retrieval" -n README.md scripts src docs
+grep -R "test_prompting\|test_retrieval" -n README.md scripts src docs tests
 ```
 
 instead of:
@@ -68,5 +139,24 @@ If results are poor, check:
 - whether the expected source exists in the corpus;
 - whether the source type is correct;
 - whether titles and metadata are informative;
+- whether the selected backend reads the expected corpus or index;
 - whether the query is too vague;
-- whether reranking rules are needed for that intent.
+- whether a project profile should expand, filter, or rerank that intent.
+
+## Backend mismatch
+
+A common issue is using:
+
+```text
+backend mmore
+```
+
+after building a new corpus with Streamlit.
+
+Building a corpus does not update the MMORE index. For a newly built project corpus, use:
+
+```text
+backend simple
+```
+
+unless the MMORE export and index have also been rebuilt.

@@ -36,11 +36,11 @@ File:
 src/docask/retrieval/simple_retriever.py
 ```
 
-The simple retriever is a local debugging backend.
+The simple retriever is a local debugging and dynamic-project backend.
 
 It:
 
-- reads `data/processed/corpus.jsonl`;
+- reads a selected `corpus.jsonl`;
 - tokenizes the query and documents;
 - ranks documents with overlap-based heuristics;
 - adds boosts for exact symbols, signatures, modules, titles, and user-facing documentation.
@@ -50,7 +50,9 @@ It does not use embeddings or MMORE.
 Command:
 
 ```bash
-PYTHONPATH=src python scripts/debug_retrieval.py "How do I configure indexing?"
+PYTHONPATH=src python scripts/debug_retrieval.py \
+  "How do I configure indexing?" \
+  --corpus-path data/projects/mmore/corpus.jsonl
 ```
 
 ## MMORE retriever
@@ -71,7 +73,9 @@ The MMORE retriever:
 Command example:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py "How do I configure indexing?" --backend mmore
+PYTHONPATH=src python scripts/prepare_answer.py \
+  "How do I configure indexing?" \
+  --backend mmore
 ```
 
 ## Retriever factory
@@ -94,3 +98,34 @@ It chooses the backend based on:
 simple
 mmore
 ```
+
+## Project profiles
+
+Retrieval results can be refined by a project profile.
+
+Project profiles live in:
+
+```text
+src/docask/project_profiles/
+```
+
+They can:
+
+- expand queries;
+- filter irrelevant sources;
+- rerank retrieved results;
+- answer some structured questions directly.
+
+This keeps the core DocAsk retrieval pipeline generic while allowing MMORE-specific improvements to remain isolated.
+
+## Backend choice
+
+For a project corpus built from the Streamlit interface, use:
+
+```text
+backend simple
+```
+
+unless the corresponding MMORE index has also been rebuilt.
+
+The `mmore` backend retrieves from the configured MMORE index, not directly from the selected JSONL corpus.

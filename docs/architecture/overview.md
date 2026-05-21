@@ -2,6 +2,8 @@
 
 DocAsk is organized around a simple idea: all sources are converted into the same internal document format before retrieval.
 
+The initial use case is MMORE, but the core pipeline is designed to remain project-agnostic. Project-specific behavior is isolated in optional project profiles.
+
 ## High-level flow
 
 ```text
@@ -23,15 +25,22 @@ retrieval backend
         |                               |
         v                               v
 simple retriever                MMORE retriever
-(local debugging)               (target backend)
+(local / dynamic corpus)        (MMORE index)
         |                               |
         |-------------------------------|
         v
 retrieved sources
         v
+project profile
+        |
+        |  optional direct answer
+        |  optional query expansion / filtering / reranking
+        v
 RAG prompt construction
         v
-answer generation
+LLM or extractive answer
+        v
+answer with cited sources
 ```
 
 ## Main design choices
@@ -45,8 +54,10 @@ DocAsk separates the pipeline into clear blocks:
 | `corpus/` | Combine all sources into one corpus. |
 | `indexing/` | Export and index the corpus with MMORE. |
 | `retrieval/` | Retrieve relevant documents. |
+| `project_profiles/` | Hold optional project-specific query expansion, filtering, reranking, and direct answers. |
 | `rag/` | Build prompts and generate answers. |
-| `app/` | User interface. |
+| `projects/` | Manage selected projects, generated project configs, and persisted app state. |
+| `app/` | Streamlit user interface. |
 
 ## Why keep a DocAsk format?
 
@@ -57,4 +68,28 @@ This keeps the project modular:
 - the corpus can be inspected before indexing;
 - the simple retriever can run without MMORE;
 - MMORE can be replaced or updated without rewriting loaders;
-- retrieved sources keep consistent metadata for citations.
+- retrieved sources keep consistent metadata for citations;
+- Streamlit can work with project-specific corpora before MMORE indexing is available.
+
+## Simple backend vs MMORE backend
+
+The `simple` backend reads a selected `corpus.jsonl` directly. It is useful for:
+
+- local development;
+- newly built project corpora;
+- debugging retrieval quality;
+- avoiding MMORE indexing.
+
+The `mmore` backend retrieves from an MMORE index. It is the target backend, but the index must be built separately.
+
+For a newly selected project, the safe first workflow is:
+
+```text
+Build corpus → use backend simple
+```
+
+The full MMORE workflow is:
+
+```text
+Build corpus → export MMORE corpus → build MMORE index → use backend mmore
+```

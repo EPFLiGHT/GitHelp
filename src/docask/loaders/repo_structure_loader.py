@@ -68,7 +68,7 @@ def _is_visible_file(path: Path) -> bool:
 def build_repo_tree(
     repo_path: str | Path,
     *,
-    max_depth: int = 4,
+    max_depth: int = 6,
     max_entries_per_dir: int = 80,
 ) -> str:
     """

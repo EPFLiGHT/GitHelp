@@ -15,22 +15,30 @@ scripts/build_index.py
 
 ## Step 1: export to MMORE format
 
-Command:
+Default command:
 
 ```bash
 PYTHONPATH=src python scripts/export_mmore_corpus.py
 ```
 
-Input:
+Default input:
 
 ```text
 data/processed/corpus.jsonl
 ```
 
-Output:
+Default output:
 
 ```text
 data/processed/mmore_corpus.jsonl
+```
+
+Project-specific command:
+
+```bash
+PYTHONPATH=src python scripts/export_mmore_corpus.py \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --output-path data/projects/mmore/mmore_corpus.jsonl
 ```
 
 MMORE-compatible records look like:
@@ -47,10 +55,18 @@ DocAsk adds a short source header inside the text field before indexing. This ma
 
 ## Step 2: build the MMORE index
 
-Command:
+Default command:
 
 ```bash
 PYTHONPATH=src python scripts/build_index.py
+```
+
+Project-specific command:
+
+```bash
+PYTHONPATH=src python scripts/build_index.py \
+  --documents-path data/projects/mmore/mmore_corpus.jsonl \
+  --collection-name mmore_docs
 ```
 
 This uses:
@@ -75,3 +91,19 @@ This makes debugging easier:
 2. preview the records;
 3. test simple retrieval;
 4. only then export and index with MMORE.
+
+## Important distinction
+
+Building a corpus does not automatically rebuild the MMORE index.
+
+For a newly selected project in Streamlit:
+
+```text
+Build corpus → backend simple
+```
+
+For MMORE retrieval:
+
+```text
+Build corpus → export MMORE corpus → build MMORE index → backend mmore
+```

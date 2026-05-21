@@ -6,10 +6,10 @@ from docask.retrieval.simple_retriever import load_corpus, retrieve
 
 
 """
-Debug the local simple retriever.
+Debug the local simple retriever directly.
 
-This script retrieves documents from the JSONL corpus and prints detailed
-information about the ranked results.
+This script bypasses project profiles, query expansion, filtering, reranking,
+and MMORE retrieval. It is useful for inspecting the raw simple retriever.
 """
 
 

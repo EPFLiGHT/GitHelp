@@ -2,21 +2,54 @@
 
 This page explains how information moves through DocAsk.
 
-## Step 1: source files
+## Step 1: project selection
 
 DocAsk starts from a target project repository.
 
-For the MMORE use case, the relevant sources are:
+The Streamlit interface lets a user select a local project path. For example, the MMORE repository may be located at:
 
 ```text
-../../mmore/docs/source       -> Markdown and RST documentation
-../../mmore/src/mmore         -> Python source code
-../../mmore/examples          -> YAML example configs
-../../mmore/production-config -> YAML production configs
-../../mmore                   -> repository structure
+/path/to/mmore
 ```
 
-## Step 2: normalized records
+DocAsk then creates a project-specific working folder:
+
+```text
+data/projects/<project_name>/
+```
+
+For MMORE:
+
+```text
+data/projects/mmore/
+```
+
+## Step 2: project configuration
+
+DocAsk generates or reads a project configuration file.
+
+For a Streamlit-selected project, this is usually:
+
+```text
+data/projects/<project_name>/project_config.yaml
+```
+
+For older command-line workflows, the default config remains:
+
+```text
+configs/project_config.yaml
+```
+
+The project config points to:
+
+```text
+docs_path          -> Markdown and RST documentation
+code_path          -> Python source code
+yaml_config_paths  -> YAML example or production configs
+repo_path          -> repository structure
+```
+
+## Step 3: normalized records
 
 Each source is converted into a `DocumentRecord`.
 
@@ -40,28 +73,37 @@ production_config
 repo_structure
 ```
 
-## Step 3: corpus file
+## Step 4: corpus file
 
-All records are saved to:
+All records are saved to JSONL.
+
+Default command-line corpus:
 
 ```text
 data/processed/corpus.jsonl
 ```
 
+Project-specific corpus:
+
+```text
+data/projects/<project_name>/corpus.jsonl
+```
+
 Each line is one serialized `DocumentRecord`.
 
-## Step 4: retrieval
+## Step 5: retrieval
 
 There are two retrieval paths.
 
 ### Simple retrieval
 
-The simple retriever reads `corpus.jsonl` directly.
+The simple retriever reads the selected `corpus.jsonl` directly.
 
 It is useful for:
 
 - debugging corpus quality;
 - testing queries quickly;
+- using newly built project corpora;
 - avoiding MMORE indexing during development.
 
 ### MMORE retrieval
@@ -69,13 +111,41 @@ It is useful for:
 For MMORE, the corpus is first converted to:
 
 ```text
+data/projects/<project_name>/mmore_corpus.jsonl
+```
+
+or, in the default workflow:
+
+```text
 data/processed/mmore_corpus.jsonl
 ```
 
 Then MMORE indexes it and retrieves from the generated index.
 
-## Step 5: prompt and answer
+The MMORE backend does not automatically read a newly built `corpus.jsonl`. The index must be rebuilt when the target corpus changes.
 
-Retrieved sources are formatted into a prompt.
+## Step 6: project profile
 
-The current answerer is extractive and temporary. It returns content from the top source. Later, this will be replaced by source-grounded LLM generation.
+After retrieval, DocAsk can apply a project profile.
+
+A project profile can:
+
+- expand queries with project-specific terms;
+- filter low-value or irrelevant results;
+- rerank results for known intents;
+- answer some structured questions directly without calling the LLM.
+
+The MMORE profile, for example, can answer some Milvus parameter questions deterministically to avoid unrelated configuration fields.
+
+## Step 7: prompt and answer
+
+If no direct answer is returned by the project profile, retrieved sources are formatted into a prompt.
+
+The LLM is instructed to:
+
+- answer only from the provided sources;
+- cite every factual statement;
+- avoid inventing commands, paths, APIs, or configuration keys;
+- say clearly when the available sources are insufficient.
+
+The final output is an answer with cited sources.
