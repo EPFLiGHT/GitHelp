@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from textwrap import dedent
+
 from docask.retrieval.base import RetrievalResult
 
 
@@ -58,6 +60,7 @@ def format_context(results: list[RetrievalResult]) -> str:
     for index, result in enumerate(results, start=1):
         doc = result.document
         label = format_source_label(result, index)
+        content = (doc.content or "").strip()
 
         blocks.append(
             "\n".join(
@@ -65,7 +68,7 @@ def format_context(results: list[RetrievalResult]) -> str:
                     label,
                     f"score: {result.score:.4f}",
                     "",
-                    doc.content.strip(),
+                    content,
                 ]
             )
         )
@@ -75,29 +78,33 @@ def format_context(results: list[RetrievalResult]) -> str:
 
 def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
     """
-    Build the user prompt sent to the LLM.
+    Build the prompt sent to the LLM.
 
-    The prompt includes instructions, the original question, and the retrieved
-    sources.
+    The prompt includes the system instructions, the original question, the
+    retrieved sources, and answer-formatting constraints.
     """
     context = format_context(results)
 
-    return f"""{SYSTEM_PROMPT}
+    return dedent(
+        f"""
+        {SYSTEM_PROMPT}
 
-    Question:
-    {question}
+        Question:
+        {question}
 
-    Sources:
-    {context}
+        Sources:
+        {context}
 
-    Answer:
-    Write the answer in 2 to 8 concise bullet points.
-    Every bullet point must include at least one inline citation such as [Source 1].
-    If a source contains an explicit command relevant to the question, include that command exactly.
-    If the question asks for parameters, fields, or keys, list only the parameters, fields, or keys that directly answer the question.
-    If the question asks about Milvus parameters, only include fields that belong to a Milvus configuration block or are explicitly described as Milvus parameters.
-    Do not include unrelated configuration fields from other sources.
-    If you mention a command, cite the source that contains the command.
-    If you mention a configuration file, cite the source that contains the file path.
-    If the sources are insufficient, say so clearly and cite the relevant sources.
-    """
+        Answer:
+        Write the answer in 2 to 8 concise bullet points.
+        Every bullet point must include at least one inline citation such as [Source 1].
+        If a source contains an explicit command relevant to the question, include that command exactly.
+        If the question asks for parameters, fields, or keys, list only the parameters, fields, or keys that directly answer the question.
+        When listing parameters, fields, or keys, list each one only once unless repetition is necessary for clarity.
+        When listing parameters, prefer one bullet per parameter unless a compact grouped answer is clearer.
+        Do not include unrelated configuration fields from other sources.
+        If you mention a command, cite the source that contains the command.
+        If you mention a configuration file, cite the source that contains the file path.
+        If the sources are insufficient, say so clearly and cite the relevant sources.
+        """
+    ).strip()
