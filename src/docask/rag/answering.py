@@ -224,3 +224,51 @@ def answer_question_with_llm(
     answer = llm_provider.generate(prompt)
 
     return answer, results
+
+
+def answer_question_with_provider(
+    question: str,
+    llm_provider,
+    corpus_path: str | Path = "data/processed/corpus.jsonl",
+    top_k: int = 5,
+    backend: str = "simple",
+    config_path: str | Path = "configs/app_config.yaml",
+) -> tuple[str, list[RetrievalResult]]:
+    """
+    Retrieve sources and generate a source-grounded LLM answer using an
+    already-created LLM provider.
+
+    This is useful for Streamlit, where the provider can be cached and reused
+    across questions.
+    """
+    results, config = _retrieve_and_prepare_results(
+        question=question,
+        corpus_path=corpus_path,
+        top_k=top_k,
+        backend=backend,
+        config_path=config_path,
+    )
+
+    project_profile = create_project_profile(config)
+
+    if is_subjective_recommendation_question(question):
+        return (
+            "The available sources do not provide enough information to determine "
+            "the best option for the user's private dataset. They show retrieved "
+            "documentation and configuration examples, but they do not establish "
+            "a general recommendation for an unseen dataset.",
+            results,
+        )
+
+    if not results:
+        return "I could not find relevant sources in the corpus.", results
+
+    direct_answer = project_profile.answer_directly(question, results)
+
+    if direct_answer is not None:
+        return direct_answer, results
+
+    prompt = build_user_prompt(question, results)
+    answer = llm_provider.generate(prompt)
+
+    return answer, results

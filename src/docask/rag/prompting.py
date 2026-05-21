@@ -21,6 +21,7 @@ Use only the provided sources to answer.
 Important rules:
 - Do not infer missing setup steps.
 - Do not invent commands, configuration keys, file paths, APIs, modules, or workflows.
+- Do not expand abbreviations or infer the meaning of configuration values unless the sources explicitly explain them.
 - If the retrieved sources only mention a topic indirectly, say that the available sources are insufficient.
 - If the sources do not explain the requested procedure, say so clearly.
 - Cite every factual statement with [Source 1], [Source 2], etc.
@@ -102,6 +103,7 @@ def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
         If the question asks for parameters, fields, or keys, list only the parameters, fields, or keys that directly answer the question.
         When listing parameters, fields, or keys, list each one only once unless repetition is necessary for clarity.
         When listing parameters, prefer one bullet per parameter unless a compact grouped answer is clearer.
+        For configuration values such as "IP", "L2", "true", or model names, report the value exactly and do not explain its meaning unless the source explains it.
         Do not include unrelated configuration fields from other sources.
         If you mention a command, cite the source that contains the command.
         If you mention a configuration file, cite the source that contains the file path.
