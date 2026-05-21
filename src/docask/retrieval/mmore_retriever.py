@@ -173,10 +173,12 @@ def retrieve_with_mmore(
 
     retriever = Retriever.from_config(str(config_path))
 
+    raw_k = max(top_k, 40)
+
     raw_results = retriever.retrieve(
         query=query,
         collection_name=collection_name,
-        k=top_k,
+        k=raw_k,
         output_fields=["text"],
         search_type=search_type,
     )
