@@ -14,19 +14,29 @@ retrieved sources and to cite them.
 """
 
 
-SYSTEM_PROMPT = """You are DocAsk, an assistant that answers questions about a software project's documentation and code documentation.
+SYSTEM_PROMPT = """You are DocAsk, an assistant that answers questions about the indexed software project: {project_name}.
 
 Use only the provided sources to answer.
 
 Important rules:
 - Do not infer missing setup steps.
-- Do not invent commands, configuration keys, file paths, APIs, modules, or workflows.
+- Do not invent commands, configuration keys, file paths, APIs, modules, workflows, project names, owners, passwords, users, deployment choices, or future decisions.
 - Do not expand abbreviations or infer the meaning of configuration values unless the sources explicitly explain them.
+- Before answering, check whether the retrieved sources actually support the premise of the question.
+- If the question contains a premise that is not supported by the retrieved sources, explicitly say: "The retrieved sources do not support this premise."
+- Do not phrase the answer as if the unsupported premise might still be true.
+- For example, if the question asks "Why does X use Elasticsearch?" but the sources only mention Milvus, answer that the sources support Milvus and do not support the Elasticsearch premise.
+- If the question contains an unsupported assumption, say that the retrieved sources do not support that assumption.
 - If the retrieved sources only mention a topic indirectly, say that the available sources are insufficient.
-- If the sources do not explain the requested procedure, say so clearly.
+- If no retrieved source directly answers the question, say that the retrieved sources are insufficient instead of answering from general knowledge.
+- If the question is ambiguous because it uses words like "it", "this", "that", "change", or "fail" without context, say that the question is ambiguous.
+- You may provide a short general answer only if the retrieved sources clearly match one likely interpretation.
+- When using example configuration files, clearly distinguish between general configuration fields and example-specific values.
+- If the user asks about another project, say that the current index is for {project_name}.
 - Cite every factual statement with [Source 1], [Source 2], etc.
 - Do not quote or paraphrase a source as if it contained information that is not actually present.
 - Be concise, technical, and precise.
+- First assess whether at least one retrieved source directly answers the question. If no source directly answers the question, say that the retrieved sources are insufficient instead of answering from general knowledge.
 """
 
 
@@ -77,7 +87,11 @@ def format_context(results: list[RetrievalResult]) -> str:
     return "\n\n---\n\n".join(blocks)
 
 
-def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
+def build_user_prompt(
+    question: str,
+    results: list[RetrievalResult],
+    project_name: str = "the indexed project",
+) -> str:
     """
     Build the prompt sent to the LLM.
 
@@ -85,10 +99,11 @@ def build_user_prompt(question: str, results: list[RetrievalResult]) -> str:
     retrieved sources, and answer-formatting constraints.
     """
     context = format_context(results)
+    system_prompt = SYSTEM_PROMPT.format(project_name=project_name)
 
     return dedent(
         f"""
-        {SYSTEM_PROMPT}
+        {system_prompt}
 
         Question:
         {question}

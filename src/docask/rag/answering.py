@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
+import re
 
 from docask.config import load_yaml
 from docask.project_profiles.factory import create_project_profile
@@ -22,7 +24,144 @@ project profiles, not in this module.
 """
 
 
+def _extract_filename_tokens(question: str) -> list[str]:
+    """
+    Extract explicit filename-like tokens from the question.
+    """
+    pattern = r"[\w.-]+\.(?:py|md|rst|yaml|yml|json|toml|txt)"
+    return re.findall(pattern, question)
+
+
+def _boost_filename_matches(
+    results: list[RetrievalResult],
+    question: str,
+    boost: float = 1.0,
+) -> list[RetrievalResult]:
+    """
+    Boost results whose relative path or title contains filenames mentioned
+    explicitly in the question.
+    """
+    filename_tokens = [token.lower() for token in _extract_filename_tokens(question)]
+
+    if not filename_tokens:
+        return results
+
+    boosted_results: list[RetrievalResult] = []
+
+    for result in results:
+        doc = result.document
+        relative_path = str(doc.metadata.get("relative_path") or "").lower()
+        title = str(doc.title or "").lower()
+        haystack = f"{relative_path} {title}"
+
+        if any(token in haystack for token in filename_tokens):
+            boosted_results.append(
+                RetrievalResult(
+                    document=result.document,
+                    score=result.score + boost,
+                )
+            )
+        else:
+            boosted_results.append(result)
+
+    return sorted(
+        boosted_results,
+        key=lambda result: result.score,
+        reverse=True,
+    )
+
+
+def _get_project_config_path(config: dict[str, Any]) -> str | None:
+    """
+    Get the project config path from the app config.
+
+    This supports several possible config layouts to keep the answering
+    pipeline flexible.
+    """
+    if "project_config_path" in config:
+        return str(config["project_config_path"])
+
+    project = config.get("project")
+    if isinstance(project, dict):
+        path = project.get("config_path") or project.get("project_config_path")
+        if path:
+            return str(path)
+
+    return None
+
+
+def _load_project_config(config: dict[str, Any]) -> dict[str, Any]:
+    """
+    Load the project configuration if it is referenced by the app config.
+
+    Returns an empty dict if no project config path is available.
+    """
+    project_config_path = _get_project_config_path(config)
+
+    if not project_config_path:
+        return {}
+
+    return load_yaml(project_config_path)
+
+
+def _get_project_name(
+    config: dict[str, Any],
+    results: list[RetrievalResult] | None = None,
+) -> str:
+    """
+    Get the indexed project name.
+
+    Priority:
+    1. app config;
+    2. project config referenced by the app config;
+    3. retrieved document metadata;
+    4. generic fallback.
+    """
+    project_name = config.get("project_name")
+    if project_name:
+        return str(project_name)
+
+    project_config = _load_project_config(config)
+    project_name = project_config.get("project_name")
+    if project_name:
+        return str(project_name)
+
+    if results:
+        project_name = results[0].document.metadata.get("project_name")
+        if project_name:
+            return str(project_name)
+
+    return "the indexed project"
+
+
+def _resolve_corpus_path(
+    corpus_path: str | Path | None,
+    config: dict[str, Any],
+) -> Path:
+    """
+    Resolve the DocAsk corpus path.
+
+    If a corpus path is explicitly provided, use it. Otherwise, infer it from
+    the indexed project name and use data/projects/{project_name}/corpus.jsonl.
+    """
+    if corpus_path is not None:
+        return Path(corpus_path)
+
+    project_name = _get_project_name(config)
+
+    if project_name == "the indexed project":
+        raise ValueError(
+            "Could not infer the indexed project name. Provide corpus_path "
+            "explicitly or define project_name in the app/project config."
+        )
+
+    return Path("data") / "projects" / project_name / "corpus.jsonl"
+
+
 def _is_code_or_symbol_question(question: str) -> bool:
+    """
+    Detect questions that are likely to benefit from code-aware or config-aware retrieval.
+    """
     question_lower = question.lower()
 
     code_terms = [
@@ -33,6 +172,12 @@ def _is_code_or_symbol_question(question: str) -> bool:
         "symbol",
         "cli",
         "command",
+        "config",
+        "configuration",
+        "yaml",
+        "yml",
+        "file",
+        "path",
         "implemented",
         "implementation",
         "where is",
@@ -42,6 +187,27 @@ def _is_code_or_symbol_question(question: str) -> bool:
     ]
 
     return any(term in question_lower for term in code_terms)
+
+
+def _contains_filename_like_token(question: str) -> bool:
+    """
+    Detect questions that mention an explicit file or path-like token.
+    """
+    question_lower = question.lower()
+
+    filename_markers = [
+        ".py",
+        ".md",
+        ".rst",
+        ".yaml",
+        ".yml",
+        ".json",
+        ".toml",
+        ".txt",
+        "/",
+    ]
+
+    return any(marker in question_lower for marker in filename_markers)
 
 
 def _merge_results_by_doc_id(
@@ -137,27 +303,29 @@ def filter_exact_symbol_results(
 
 def _retrieve_and_prepare_results(
     question: str,
-    corpus_path: str | Path,
+    corpus_path: str | Path | None,
     top_k: int,
     backend: str,
     config_path: str | Path,
-) -> tuple[list[RetrievalResult], dict]:
+) -> tuple[list[RetrievalResult], dict[str, Any]]:
     """
     Shared retrieval pipeline used by prompt preparation and LLM answering.
 
     The retrieval pipeline is:
     1. load application configuration;
-    2. create the selected project profile;
-    3. expand the query using the profile;
-    4. retrieve more candidates than needed;
-    5. for MMORE code-oriented questions, add simple-retriever candidates;
-    6. apply generic exact-symbol filtering;
-    7. apply project-specific filtering and reranking;
-    8. keep the final top_k results.
+    2. resolve the DocAsk corpus path;
+    3. create the selected project profile;
+    4. expand the query using the profile;
+    5. retrieve more candidates than needed;
+    6. for MMORE code-oriented questions, add simple-retriever candidates;
+    7. apply generic exact-symbol filtering;
+    8. apply project-specific filtering and reranking;
+    9. keep the final top_k results.
     """
     config = load_yaml(config_path)
-    project_profile = create_project_profile(config)
+    resolved_corpus_path = _resolve_corpus_path(corpus_path, config)
 
+    project_profile = create_project_profile(config)
     expanded_question = project_profile.expand_query(question)
 
     retrieval_top_k = max(top_k * 8, 40)
@@ -166,15 +334,23 @@ def _retrieve_and_prepare_results(
         query=expanded_question,
         top_k=retrieval_top_k,
         backend=backend,
-        corpus_path=corpus_path,
+        corpus_path=resolved_corpus_path,
     )
 
-    if backend == "mmore" and _is_code_or_symbol_question(question):
+    should_add_lexical_results = (
+        backend == "mmore"
+        and (
+            _is_code_or_symbol_question(question)
+            or _contains_filename_like_token(question)
+        )
+    )
+
+    if should_add_lexical_results:
         simple_results = retrieve_documents(
             query=question,
             top_k=max(top_k * 4, 20),
             backend="simple",
-            corpus_path=corpus_path,
+            corpus_path=resolved_corpus_path,
         )
 
         results = _merge_results_by_doc_id(
@@ -184,6 +360,7 @@ def _retrieve_and_prepare_results(
             ]
         )
 
+    results = _boost_filename_matches(results, question)
     results = filter_exact_symbol_results(results, question)
     results = project_profile.filter_results(results, question)
     results = project_profile.rerank_results(results, question)
@@ -193,7 +370,7 @@ def _retrieve_and_prepare_results(
 
 def prepare_answer_prompt(
     question: str,
-    corpus_path: str | Path = "data/processed/corpus.jsonl",
+    corpus_path: str | Path | None = None,
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
@@ -204,7 +381,7 @@ def prepare_answer_prompt(
     This function does not call an LLM. It only prepares the prompt and returns
     the retrieved sources for inspection.
     """
-    results, _ = _retrieve_and_prepare_results(
+    results, config = _retrieve_and_prepare_results(
         question=question,
         corpus_path=corpus_path,
         top_k=top_k,
@@ -212,16 +389,23 @@ def prepare_answer_prompt(
         config_path=config_path,
     )
 
-    prompt = build_user_prompt(question, results)
+    project_name = _get_project_name(config, results)
+
+    prompt = build_user_prompt(
+        question=question,
+        results=results,
+        project_name=project_name,
+    )
 
     return prompt, results
 
 
 def answer_question(
     question: str,
-    corpus_path: str | Path = "data/processed/corpus.jsonl",
+    corpus_path: str | Path | None = None,
     top_k: int = 5,
     backend: str = "simple",
+    config_path: str | Path = "configs/app_config.yaml",
 ) -> tuple[str, list[RetrievalResult]]:
     """
     Retrieve sources and produce a simple extractive answer.
@@ -229,12 +413,17 @@ def answer_question(
     This is a temporary non-LLM answering path. It is kept for testing retrieval
     before full LLM generation.
     """
+    config = load_yaml(config_path)
+    resolved_corpus_path = _resolve_corpus_path(corpus_path, config)
+
     results = retrieve_documents(
         query=question,
         top_k=top_k,
         backend=backend,
-        corpus_path=corpus_path,
+        corpus_path=resolved_corpus_path,
     )
+
+    results = results[:top_k]
 
     answer = answer_from_sources(question, results)
 
@@ -243,7 +432,7 @@ def answer_question(
 
 def answer_question_with_llm(
     question: str,
-    corpus_path: str | Path = "data/processed/corpus.jsonl",
+    corpus_path: str | Path | None = None,
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
@@ -281,7 +470,13 @@ def answer_question_with_llm(
     if direct_answer is not None:
         return direct_answer, results
 
-    prompt = build_user_prompt(question, results)
+    project_name = _get_project_name(config, results)
+
+    prompt = build_user_prompt(
+        question=question,
+        results=results,
+        project_name=project_name,
+    )
 
     llm_provider = create_llm_provider(config)
     answer = llm_provider.generate(prompt)
@@ -292,7 +487,7 @@ def answer_question_with_llm(
 def answer_question_with_provider(
     question: str,
     llm_provider,
-    corpus_path: str | Path = "data/processed/corpus.jsonl",
+    corpus_path: str | Path | None = None,
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
@@ -331,7 +526,14 @@ def answer_question_with_provider(
     if direct_answer is not None:
         return direct_answer, results
 
-    prompt = build_user_prompt(question, results)
+    project_name = _get_project_name(config, results)
+
+    prompt = build_user_prompt(
+        question=question,
+        results=results,
+        project_name=project_name,
+    )
+
     answer = llm_provider.generate(prompt)
 
     return answer, results

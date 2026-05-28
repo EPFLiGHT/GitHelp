@@ -14,6 +14,10 @@ project_profile: mmore  # change to generic for another repository
 llm:
   provider: qwen
   model_name: Qwen/Qwen3-4B
-  max_new_tokens: 768
+  max_new_tokens: 512
   temperature: 0.0
   enable_thinking: false
+
+
+project:
+  config_path: configs/project_config.yaml
