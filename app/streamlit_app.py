@@ -619,7 +619,7 @@ def main() -> None:
         height=100,
     )
 
-    col_ask, col_clear_question, _ = st.columns([1, 1, 6])
+    col_ask, col_clear_question = st.columns([1, 1])
 
     with col_ask:
         ask_button = st.button("Ask", type="primary")
