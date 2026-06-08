@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from docask.loaders.markdown_loader import load_markdown_documents
+from githelp.loaders.markdown_loader import load_markdown_documents
 
 
 def test_load_markdown_documents_from_single_file(tmp_path: Path):

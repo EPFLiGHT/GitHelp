@@ -1,6 +1,6 @@
 # Streamlit app
 
-The Streamlit app is the main user-facing interface for DocAsk.
+The Streamlit app is the main user-facing interface for GitHelp.
 
 Current file:
 
@@ -13,7 +13,7 @@ app/streamlit_app.py
 The app lets a user:
 
 - select a local software project;
-- build a DocAsk corpus for that project;
+- build a GitHelp corpus for that project;
 - ask questions about the selected project;
 - choose the retrieval backend;
 - enable or disable LLM generation;
@@ -48,7 +48,7 @@ Planned mode:
 Public GitHub repository URL
 ```
 
-When a local project path is provided, DocAsk can build a project-specific corpus.
+When a local project path is provided, GitHelp can build a project-specific corpus.
 
 For example:
 

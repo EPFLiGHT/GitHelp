@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from docask.data_models import DocumentRecord
-from docask.rag.prompting import build_user_prompt, format_source_label
-from docask.retrieval.base import RetrievalResult
+from githelp.data_models import DocumentRecord
+from githelp.rag.prompting import build_user_prompt, format_source_label
+from githelp.retrieval.base import RetrievalResult
 
 
 def make_result() -> RetrievalResult:

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from docask.projects.project_builder import (
+from githelp.projects.project_builder import (
     build_project_config,
     infer_code_path,
     infer_docs_path,
@@ -103,43 +103,43 @@ def test_write_project_config(tmp_path: Path):
 
 
 def test_prepare_project_paths(tmp_path: Path):
-    docask_root = tmp_path / "docask"
+    githelp_root = tmp_path / "githelp"
     project_path = tmp_path / "target_project"
 
-    docask_root.mkdir()
+    githelp_root.mkdir()
     project_path.mkdir()
 
     prepared = prepare_project_paths(
-        docask_root=docask_root,
+        githelp_root=githelp_root,
         project_path=project_path,
         project_name="Target Project",
     )
 
     assert prepared["project_name"] == "target-project"
-    assert prepared["project_dir"] == docask_root / "data" / "projects" / "target-project"
+    assert prepared["project_dir"] == githelp_root / "data" / "projects" / "target-project"
     assert prepared["project_config_path"] == (
-        docask_root / "data" / "projects" / "target-project" / "project_config.yaml"
+        githelp_root / "data" / "projects" / "target-project" / "project_config.yaml"
     )
     assert prepared["corpus_path"] == (
-        docask_root / "data" / "projects" / "target-project" / "corpus.jsonl"
+        githelp_root / "data" / "projects" / "target-project" / "corpus.jsonl"
     )
 
 
 def test_prepare_project_with_simple_index_uses_corpus_builder(monkeypatch, tmp_path):
-    docask_root = tmp_path / "docask"
+    githelp_root = tmp_path / "githelp"
     project_path = tmp_path / "target_project"
 
-    docask_root.mkdir()
+    githelp_root.mkdir()
     project_path.mkdir()
 
     def fake_build_corpus_for_project(
-        docask_root,
+        githelp_root,
         project_path,
         project_name=None,
     ):
         return {
             "project_name": "target-project",
-            "project_dir": str(tmp_path / "docask" / "data" / "projects" / "target-project"),
+            "project_dir": str(tmp_path / "githelp" / "data" / "projects" / "target-project"),
             "project_config_path": str(tmp_path / "project_config.yaml"),
             "corpus_path": str(tmp_path / "corpus.jsonl"),
             "stdout": "built",
@@ -147,12 +147,12 @@ def test_prepare_project_with_simple_index_uses_corpus_builder(monkeypatch, tmp_
         }
 
     monkeypatch.setattr(
-        "docask.projects.project_builder.build_corpus_for_project",
+        "githelp.projects.project_builder.build_corpus_for_project",
         fake_build_corpus_for_project,
     )
 
     result = prepare_project_with_simple_index(
-        docask_root=docask_root,
+        githelp_root=githelp_root,
         project_path=project_path,
     )
 

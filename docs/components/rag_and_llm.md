@@ -7,12 +7,12 @@ Its job is to turn retrieved sources into a grounded answer.
 ## Relevant files
 
 ```text
-src/docask/rag/prompting.py
-src/docask/rag/extractive_answerer.py
-src/docask/rag/answering.py
-src/docask/rag/llm_provider.py
-src/docask/rag/llm_factory.py
-src/docask/rag/qwen_provider.py
+src/githelp/rag/prompting.py
+src/githelp/rag/extractive_answerer.py
+src/githelp/rag/answering.py
+src/githelp/rag/llm_provider.py
+src/githelp/rag/llm_factory.py
+src/githelp/rag/qwen_provider.py
 ```
 
 ## Prompting
@@ -20,7 +20,7 @@ src/docask/rag/qwen_provider.py
 File:
 
 ```text
-src/docask/rag/prompting.py
+src/githelp/rag/prompting.py
 ```
 
 This module formats retrieved sources into a prompt.
@@ -45,10 +45,10 @@ PYTHONPATH=src python scripts/debug_prompting.py \
 
 ## LLM providers
 
-DocAsk uses a provider interface:
+GitHelp uses a provider interface:
 
 ```text
-src/docask/rag/llm_provider.py
+src/githelp/rag/llm_provider.py
 ```
 
 The active provider is selected from:
@@ -75,7 +75,7 @@ The Qwen provider uses Hugging Face Transformers.
 File:
 
 ```text
-src/docask/rag/answering.py
+src/githelp/rag/answering.py
 ```
 
 This module exposes:
@@ -110,7 +110,7 @@ For example, the MMORE profile can answer Milvus parameter questions directly. T
 File:
 
 ```text
-src/docask/rag/extractive_answerer.py
+src/githelp/rag/extractive_answerer.py
 ```
 
 This remains available when LLM generation is disabled.

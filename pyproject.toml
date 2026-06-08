@@ -1,5 +1,5 @@
 [project]
-name = "docask"
+name = "githelp"
 version = "0.1.0"
 description = "Conversational interface for querying project documentation with MMORE"
 readme = "README.md"

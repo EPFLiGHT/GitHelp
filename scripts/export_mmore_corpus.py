@@ -3,14 +3,14 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from docask.indexing.mmore_format import export_corpus_to_mmore_jsonl
-from docask.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
+from githelp.indexing.mmore_format import export_corpus_to_mmore_jsonl
+from githelp.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
 
 
 """
-Export the DocAsk corpus to MMORE-compatible JSONL format.
+Export the GitHelp corpus to MMORE-compatible JSONL format.
 
-The DocAsk corpus uses DocumentRecord objects. MMORE expects a JSONL file
+The GitHelp corpus uses DocumentRecord objects. MMORE expects a JSONL file
 containing samples with a text field, metadata, and modalities.
 
 By default, it keeps the original behavior:
@@ -26,14 +26,14 @@ It can also be used dynamically:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Export a DocAsk corpus to MMORE-compatible JSONL format."
+        description="Export a GitHelp corpus to MMORE-compatible JSONL format."
     )
 
     parser.add_argument(
         "--corpus-path",
         type=Path,
         default=PROCESSED_DATA_DIR / "corpus.jsonl",
-        help="Path to the DocAsk corpus JSONL file.",
+        help="Path to the GitHelp corpus JSONL file.",
     )
 
     parser.add_argument(
@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_path(path: Path) -> Path:
     """
-    Resolve a path relative to the DocAsk project root if it is not absolute.
+    Resolve a path relative to the GitHelp project root if it is not absolute.
     """
     if path.is_absolute():
         return path
@@ -57,7 +57,7 @@ def resolve_path(path: Path) -> Path:
 
 
 def main() -> None:
-    """Export the processed DocAsk corpus to MMORE format."""
+    """Export the processed GitHelp corpus to MMORE format."""
     args = parse_args()
 
     corpus_path = resolve_path(args.corpus_path)

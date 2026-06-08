@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from docask.retrieval.retriever_factory import retrieve_documents
+from githelp.retrieval.retriever_factory import retrieve_documents
 
 
 def test_retriever_factory_uses_simple_backend(tmp_path: Path):

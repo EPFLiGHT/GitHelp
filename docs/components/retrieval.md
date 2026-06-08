@@ -2,7 +2,7 @@
 
 Retrieval is the step that finds relevant documents for a user question.
 
-DocAsk currently supports two retrieval backends:
+GitHelp currently supports two retrieval backends:
 
 ```text
 simple
@@ -14,7 +14,7 @@ mmore
 File:
 
 ```text
-src/docask/retrieval/base.py
+src/githelp/retrieval/base.py
 ```
 
 The shared result type is:
@@ -33,7 +33,7 @@ It contains:
 File:
 
 ```text
-src/docask/retrieval/simple_retriever.py
+src/githelp/retrieval/simple_retriever.py
 ```
 
 The simple retriever is a local debugging and dynamic-project backend.
@@ -60,14 +60,14 @@ PYTHONPATH=src python scripts/debug_retrieval.py \
 File:
 
 ```text
-src/docask/retrieval/mmore_retriever.py
+src/githelp/retrieval/mmore_retriever.py
 ```
 
 The MMORE retriever:
 
 - loads a MMORE retriever from config;
 - calls `retriever.retrieve(...)`;
-- parses DocAsk metadata from retrieved text;
+- parses GitHelp metadata from retrieved text;
 - converts raw MMORE results back into `RetrievalResult` objects.
 
 Command example:
@@ -83,10 +83,10 @@ PYTHONPATH=src python scripts/prepare_answer.py \
 File:
 
 ```text
-src/docask/retrieval/retriever_factory.py
+src/githelp/retrieval/retriever_factory.py
 ```
 
-This file gives the rest of DocAsk one entry point:
+This file gives the rest of GitHelp one entry point:
 
 ```python
 retrieve_documents(...)
@@ -106,7 +106,7 @@ Retrieval results can be refined by a project profile.
 Project profiles live in:
 
 ```text
-src/docask/project_profiles/
+src/githelp/project_profiles/
 ```
 
 They can:
@@ -116,7 +116,7 @@ They can:
 - rerank retrieved results;
 - answer some structured questions directly.
 
-This keeps the core DocAsk retrieval pipeline generic while allowing MMORE-specific improvements to remain isolated.
+This keeps the core GitHelp retrieval pipeline generic while allowing MMORE-specific improvements to remain isolated.
 
 ## Backend choice
 

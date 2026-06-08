@@ -1,14 +1,14 @@
 # Indexing
 
-DocAsk has its own corpus format, but MMORE expects a different JSONL format.
+GitHelp has its own corpus format, but MMORE expects a different JSONL format.
 
 The indexing layer bridges the two.
 
 ## Relevant files
 
 ```text
-src/docask/indexing/mmore_format.py
-src/docask/indexing/mmore_indexer.py
+src/githelp/indexing/mmore_format.py
+src/githelp/indexing/mmore_indexer.py
 scripts/export_mmore_corpus.py
 scripts/build_index.py
 ```
@@ -51,7 +51,7 @@ MMORE-compatible records look like:
 }
 ```
 
-DocAsk adds a short source header inside the text field before indexing. This makes it possible to reconstruct source information after MMORE retrieval.
+GitHelp adds a short source header inside the text field before indexing. This makes it possible to reconstruct source information after MMORE retrieval.
 
 ## Step 2: build the MMORE index
 

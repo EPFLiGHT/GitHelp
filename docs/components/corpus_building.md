@@ -1,6 +1,6 @@
 # Corpus building
 
-Corpus building is the first main step of DocAsk.
+Corpus building is the first main step of GitHelp.
 
 It is orchestrated by:
 
@@ -11,7 +11,7 @@ scripts/build_corpus.py
 and implemented mainly in:
 
 ```text
-src/docask/corpus/builder.py
+src/githelp/corpus/builder.py
 ```
 
 ## What `build_corpus.py` does

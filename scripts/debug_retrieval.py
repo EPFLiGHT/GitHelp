@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from docask.retrieval.simple_retriever import load_corpus, retrieve
+from githelp.retrieval.simple_retriever import load_corpus, retrieve
 
 
 """
@@ -16,7 +16,7 @@ and MMORE retrieval. It is useful for inspecting the raw simple retriever.
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Debug DocAsk simple retrieval."
+        description="Debug GitHelp simple retrieval."
     )
     parser.add_argument("query", help="Query used to retrieve documents.")
     parser.add_argument("--top-k", type=int, default=5)

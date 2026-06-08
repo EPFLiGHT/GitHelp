@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from docask.config import load_all_configs
-from docask.indexing.mmore_indexer import build_mmore_index
-from docask.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
+from githelp.config import load_all_configs
+from githelp.indexing.mmore_indexer import build_mmore_index
+from githelp.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
 
 
 """
-Build an MMORE index from the DocAsk MMORE-compatible corpus.
+Build an MMORE index from the GitHelp MMORE-compatible corpus.
 
 By default, it keeps the original behavior:
     data/processed/mmore_corpus.jsonl
@@ -24,7 +24,7 @@ It can also be used dynamically:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Build an MMORE index from a DocAsk MMORE-compatible corpus."
+        description="Build an MMORE index from a GitHelp MMORE-compatible corpus."
     )
 
     parser.add_argument(
@@ -59,7 +59,7 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_path(path: Path) -> Path:
     """
-    Resolve a path relative to the DocAsk project root if it is not absolute.
+    Resolve a path relative to the GitHelp project root if it is not absolute.
     """
     if path.is_absolute():
         return path
@@ -79,7 +79,7 @@ def main() -> None:
 
     collection_name = (
         args.collection_name
-        or indexing_config.get("collection_name", "docask_docs")
+        or indexing_config.get("collection_name", "githelp_docs")
     )
 
     documents_path = resolve_path(args.documents_path)

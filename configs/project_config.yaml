@@ -1,9 +1,9 @@
-# Project indexed by DocAsk.
+# Project indexed by GitHelp.
 
 project_name: mmore
 package_name: mmore
 
-# Paths are relative to the DocAsk repository root.
+# Paths are relative to the GitHelp repository root.
 repo_path: ../../mmore
 docs_path: ../../mmore/docs/source
 code_path: ../../mmore/src/mmore

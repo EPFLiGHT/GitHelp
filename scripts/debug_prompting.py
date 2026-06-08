@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import argparse
 
-from docask.rag.answering import prepare_answer_prompt
+from githelp.rag.answering import prepare_answer_prompt
 
 
 """
-Debug prompt construction through the normal DocAsk answering pipeline.
+Debug prompt construction through the normal GitHelp answering pipeline.
 
 This script retrieves sources, applies the selected project profile, builds the
 LLM prompt, and prints it without calling an LLM.
@@ -16,7 +16,7 @@ LLM prompt, and prints it without calling an LLM.
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Debug DocAsk prompt construction."
+        description="Debug GitHelp prompt construction."
     )
 
     parser.add_argument(
@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--corpus-path",
         default="data/processed/corpus.jsonl",
-        help="Path to the DocAsk corpus.",
+        help="Path to the GitHelp corpus.",
     )
 
     parser.add_argument(

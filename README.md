@@ -1,18 +1,18 @@
-# DocAsk
+# GitHelp
 
-DocAsk is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
+GitHelp is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
 
-The initial use case is the [MMORE](https://github.com/swiss-ai/mmore) repository. DocAsk can use MMORE internally for indexing and retrieval, while also providing a simpler project-level interface through Streamlit.
+The initial use case is the [MMORE](https://github.com/swiss-ai/mmore) repository. GitHelp can use MMORE internally for indexing and retrieval, while also providing a simpler project-level interface through Streamlit.
 
 Full documentation is available here:
 
-➡️ [DocAsk documentation](https://epflight.github.io/docask/)
+➡️ [GitHelp documentation](https://epflight.github.io/githelp/)
 
 ---
 
 ## Goal
 
-DocAsk aims to help users ask questions about a software project, such as:
+GitHelp aims to help users ask questions about a software project, such as:
 
 - How do I install or run the project?
 - How do I configure indexing or retrieval?
@@ -37,7 +37,7 @@ The longer-term goal is to support multiple repositories by combining several so
 ```text
 target project repository
         ↓
-DocAsk loaders and extractors
+GitHelp loaders and extractors
         ↓
 DocumentRecord objects
         ↓

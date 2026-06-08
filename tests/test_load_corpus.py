@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from docask.retrieval.simple_retriever import load_corpus
+from githelp.retrieval.simple_retriever import load_corpus
 
 
 def test_load_corpus_from_jsonl(tmp_path: Path):

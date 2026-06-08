@@ -1,6 +1,6 @@
 # Streamlit application settings.
 
-app_title: DocAsk
+app_title: GitHelp
 app_subtitle: Ask questions about a project's documentation
 
 # Whether retrieved sources should be displayed in the UI.

@@ -7,7 +7,7 @@ from typing import Any
 
 
 """
-Preview records from the DocAsk corpus.
+Preview records from the GitHelp corpus.
 
 This script is useful for quickly inspecting the JSONL corpus and checking
 whether Markdown sections, code docstrings, YAML configs, or repository
@@ -18,7 +18,7 @@ structure documents were extracted correctly.
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Preview documents from the DocAsk JSONL corpus."
+        description="Preview documents from the GitHelp JSONL corpus."
     )
     parser.add_argument(
         "--source-type",
@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--corpus-path",
         default="data/processed/corpus.jsonl",
-        help="Path to the DocAsk corpus JSONL file.",
+        help="Path to the GitHelp corpus JSONL file.",
     )
     return parser.parse_args()
 

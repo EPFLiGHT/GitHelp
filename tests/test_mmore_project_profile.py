@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from docask.data_models import DocumentRecord
-from docask.project_profiles.mmore import MMoreProjectProfile
-from docask.retrieval.base import RetrievalResult
+from githelp.data_models import DocumentRecord
+from githelp.project_profiles.mmore import MMoreProjectProfile
+from githelp.retrieval.base import RetrievalResult
 
 
 def make_result(

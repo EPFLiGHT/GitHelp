@@ -1,5 +1,5 @@
-from docask.data_models import DocumentRecord
-from docask.retrieval.simple_retriever import retrieve
+from githelp.data_models import DocumentRecord
+from githelp.retrieval.simple_retriever import retrieve
 
 
 def test_simple_retriever_boosts_exact_python_symbol_match():
@@ -23,9 +23,9 @@ def test_simple_retriever_boosts_exact_python_symbol_match():
             content="Extract Python documentation from source files.",
             source_type="python_function",
             title="extract_python_docs",
-            file_path="src/docask/extractors/python_doc_extractor.py",
+            file_path="src/githelp/extractors/python_doc_extractor.py",
             section_title=None,
-            module_name="docask.extractors.python_doc_extractor",
+            module_name="githelp.extractors.python_doc_extractor",
             symbol_name="extract_python_docs",
             signature="extract_python_docs(code_path: str)",
             language="en",

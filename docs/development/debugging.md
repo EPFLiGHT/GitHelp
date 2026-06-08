@@ -84,7 +84,7 @@ Then rebuild the project corpus from the Streamlit interface or from the command
 ## Check for old imports after refactoring
 
 ```bash
-grep -R "docask.retrieval.answering\|docask.retrieval.prompting\|docask.retrieval.extractive_answerer\|docask.retrieval.mmore_format\|docask.retrieval.mmore_indexer" -n src scripts app docs
+grep -R "githelp.retrieval.answering\|githelp.retrieval.prompting\|githelp.retrieval.extractive_answerer\|githelp.retrieval.mmore_format\|githelp.retrieval.mmore_indexer" -n src scripts app docs
 ```
 
 This should return nothing after moving files into `rag/` and `indexing/`.
@@ -93,7 +93,7 @@ This should return nothing after moving files into `rag/` and `indexing/`.
 
 ```bash
 find . -type d -name "__pycache__" -prune -exec rm -rf {} +
-rm -rf src/docask.egg-info
+rm -rf src/githelp.egg-info
 ```
 
 ## Avoid grepping inside the virtual environment

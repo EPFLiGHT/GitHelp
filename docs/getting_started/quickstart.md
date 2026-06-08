@@ -1,12 +1,12 @@
 # Quickstart
 
-This page explains the shortest path to run DocAsk locally.
+This page explains the shortest path to run GitHelp locally.
 
-The recommended way to use DocAsk is the Streamlit interface. The command-line scripts remain available for debugging and development.
+The recommended way to use GitHelp is the Streamlit interface. The command-line scripts remain available for debugging and development.
 
 ## 1. Install the project
 
-From the root of the `docask` repository:
+From the root of the `GitHelp` repository:
 
 ```bash
 python -m pip install -e .
@@ -26,7 +26,7 @@ python -m pip install streamlit
 
 ## 2. Launch the Streamlit app
 
-From the root of the `docask` repository:
+From the root of the `githelp` repository:
 
 ```bash
 streamlit run app/streamlit_app.py
@@ -48,7 +48,7 @@ For the MMORE use case, enter the local path to the MMORE repository, for exampl
 /Users/<user>/path/to/mmore
 ```
 
-DocAsk can currently build a corpus from a local project path.
+GitHelp can currently build a corpus from a local project path.
 
 Public GitHub repository support is planned, but the main supported workflow for now is local project selection.
 
@@ -60,7 +60,7 @@ Click:
 Build corpus
 ```
 
-DocAsk generates a dedicated project folder:
+GitHelp generates a dedicated project folder:
 
 ```text
 data/projects/<project_name>/
@@ -86,11 +86,11 @@ After the corpus is built, use the **Ask questions** section.
 
 ### Choose an indexing mode
 
-DocAsk supports two indexing modes.
+GitHelp supports two indexing modes.
 
 #### Simple index
 
-The simple index builds a DocAsk JSONL corpus and uses the local simple retriever.
+The simple index builds a GitHelp JSONL corpus and uses the local simple retriever.
 
 Use it when:
 
@@ -102,7 +102,7 @@ Use it when:
 
 The MMORE index is the recommended mode for better retrieval quality.
 
-It builds the DocAsk corpus, exports it to MMORE format, and builds the MMORE index.
+It builds the GitHelp corpus, exports it to MMORE format, and builds the MMORE index.
 
 Use it when:
 
@@ -127,7 +127,7 @@ Where are the example configs located?
 
 ## 6. Inspect sources
 
-By default, DocAsk displays retrieved sources under the answer.
+By default, GitHelp displays retrieved sources under the answer.
 
 The sidebar options let you:
 
@@ -139,7 +139,7 @@ The sidebar options let you:
 
 ## 7. Persistent app state
 
-DocAsk stores the last selected project and UI settings in:
+GitHelp stores the last selected project and UI settings in:
 
 ```text
 data/app_state.json

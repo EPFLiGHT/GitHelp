@@ -1,9 +1,9 @@
 # Repository structure
 
-DocAsk uses a `src/` layout.
+GitHelp uses a `src/` layout.
 
 ```text
-docask/
+githelp/
 ├── README.md
 ├── pyproject.toml
 ├── .env.example
@@ -14,7 +14,7 @@ docask/
 ├── scripts/
 ├── app/
 ├── src/
-│   └── docask/
+│   └── githelp/
 └── tests/
 ```
 
@@ -26,13 +26,13 @@ docask/
 | `configs/` | YAML configuration files for app settings, indexed project defaults, retrieval, and indexing. |
 | `data/` | Local generated data: corpora, app state, extracted docs, and indexes. |
 | `docs/` | Project documentation, optionally built with Sphinx/MyST. |
-| `scripts/` | Command-line utilities for building, debugging, indexing, and running DocAsk. |
-| `src/docask/` | Main Python package. |
+| `scripts/` | Command-line utilities for building, debugging, indexing, and running GitHelp. |
+| `src/githelp/` | Main Python package. |
 | `tests/` | Automated tests. |
 
 ## Generated data layout
 
-DocAsk can still use the default corpus path:
+GitHelp can still use the default corpus path:
 
 ```text
 data/processed/corpus.jsonl
@@ -59,7 +59,7 @@ This file is machine-specific and should normally not be committed.
 ## Python package structure
 
 ```text
-src/docask/
+src/githelp/
 ├── config.py
 ├── data_models.py
 ├── loaders/

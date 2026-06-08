@@ -1,4 +1,4 @@
-# MMORE indexing configuration used to build the DocAsk retrieval index.
+# MMORE indexing configuration used to build the GitHelp retrieval index.
 
 indexer:
   dense_model:
@@ -10,11 +10,11 @@ indexer:
     is_multimodal: false
 
   db:
-    uri: ./data/indexes/mmore/docask.db
+    uri: ./data/indexes/mmore/githelp.db
     name: my_db
 
-# Collection used to store the indexed DocAsk corpus.
+# Collection used to store the indexed GitHelp corpus.
 collection_name: mmore_docs
 
-# MMORE-compatible JSONL file produced from the DocAsk corpus.
+# MMORE-compatible JSONL file produced from the GitHelp corpus.
 documents_path: data/processed/mmore_corpus.jsonl

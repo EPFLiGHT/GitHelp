@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from docask.config import load_all_configs, load_yaml
-from docask.corpus.builder import build_corpus, save_corpus_jsonl, summarize_corpus
-from docask.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
+from githelp.config import load_all_configs, load_yaml
+from githelp.corpus.builder import build_corpus, save_corpus_jsonl, summarize_corpus
+from githelp.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
 
 
 """
-Build the DocAsk corpus from configured project sources.
+Build the GitHelp corpus from configured project sources.
 
 This script reads a project configuration, loads documentation sources such as
 Markdown files, Python docstrings, YAML configs, and repository structure, then
@@ -28,7 +28,7 @@ It can also be used dynamically:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Build a DocAsk corpus from a project configuration."
+        description="Build a GitHelp corpus from a project configuration."
     )
 
     parser.add_argument(
@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "Path to the project configuration YAML file. "
-            "If omitted, DocAsk uses the default project config."
+            "If omitted, GitHelp uses the default project config."
         ),
     )
 
@@ -53,7 +53,7 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_path(path: Path) -> Path:
     """
-    Resolve a path relative to the DocAsk project root if it is not absolute.
+    Resolve a path relative to the GitHelp project root if it is not absolute.
     """
     if path.is_absolute():
         return path
@@ -77,7 +77,7 @@ def load_project_config(config_path: Path | None) -> dict:
 
 
 def main() -> None:
-    """Build and save the configured DocAsk corpus."""
+    """Build and save the configured GitHelp corpus."""
     args = parse_args()
 
     project_config = load_project_config(args.config)
@@ -96,7 +96,7 @@ def main() -> None:
     include_repo_structure = project_config.get("include_repo_structure", False)
     repo_structure_max_depth = project_config.get("repo_structure_max_depth", 4)
 
-    print("Building DocAsk corpus")
+    print("Building GitHelp corpus")
     print("-" * 80)
 
     if args.config is None:

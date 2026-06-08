@@ -1,6 +1,6 @@
 # Architecture overview
 
-DocAsk is organized around a simple idea: all sources are converted into the same internal document format before retrieval.
+GitHelp is organized around a simple idea: all sources are converted into the same internal document format before retrieval.
 
 The initial use case is MMORE, but the core pipeline is designed to remain project-agnostic. Project-specific behavior is isolated in optional project profiles.
 
@@ -14,7 +14,7 @@ Target project repository
         |  YAML config files
         |  repository tree
         v
-DocAsk loaders and extractors
+GitHelp loaders and extractors
         v
 DocumentRecord objects
         v
@@ -45,7 +45,7 @@ answer with cited sources
 
 ## Main design choices
 
-DocAsk separates the pipeline into clear blocks:
+GitHelp separates the pipeline into clear blocks:
 
 | Block | Role |
 |---|---|
@@ -59,9 +59,9 @@ DocAsk separates the pipeline into clear blocks:
 | `projects/` | Manage selected projects, generated project configs, and persisted app state. |
 | `app/` | Streamlit user interface. |
 
-## Why keep a DocAsk format?
+## Why keep a GitHelp format?
 
-DocAsk uses its own `DocumentRecord` format instead of exposing MMORE everywhere.
+GitHelp uses its own `DocumentRecord` format instead of exposing MMORE everywhere.
 
 This keeps the project modular:
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from docask.corpus.builder import build_corpus
+from githelp.corpus.builder import build_corpus
 
 
 def test_build_corpus_with_markdown_and_python(tmp_path: Path):
