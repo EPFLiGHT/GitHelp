@@ -6,7 +6,7 @@ The recommended way to use GitHelp is the Streamlit interface. The command-line 
 
 ## 1. Install the project
 
-From the root of the `githelp` repository:
+From the root of the `GitHelp` repository:
 
 ```bash
 python -m pip install -e .
