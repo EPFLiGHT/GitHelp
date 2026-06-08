@@ -45,5 +45,6 @@ components/streamlit_app
 :caption: Development
 
 development/debugging
+development/project_profiles
 development/roadmap
 ```

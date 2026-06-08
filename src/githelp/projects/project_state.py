@@ -8,6 +8,7 @@ from typing import Any
 DEFAULT_APP_STATE = {
     "project_name": "",
     "project_path": "",
+    "github_repository_url": "",
     "corpus_path": "",
     "project_config_path": "",
     "mmore_corpus_path": "",

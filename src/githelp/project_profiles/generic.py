@@ -4,7 +4,7 @@ from githelp.project_profiles.base import ProjectProfile
 from githelp.retrieval.base import RetrievalResult
 
 
-class GenericProjectProfile:
+class GenericProjectProfile(ProjectProfile):
     """Default project profile used for project-agnostic behavior."""
 
     PYTHON_SOURCE_TYPES = {

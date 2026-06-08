@@ -42,22 +42,29 @@ http://localhost:8501/
 
 In the Streamlit interface, use the **Project setup** section.
 
-For the MMORE use case, enter the local path to the MMORE repository, for example:
+For the MMORE use case, either enter the local path to the MMORE repository:
 
 ```text
 /Users/<user>/path/to/mmore
 ```
 
-GitHelp can currently build a corpus from a local project path.
+or select the GitHub repository option and enter:
 
-Public GitHub repository support is planned. The intended workflow is to enter a repository URL, let GitHelp clone or download it locally, then run the same corpus, indexing, retrieval, and RAG pipeline on that local copy. The main supported workflow for now is local project selection.
+```text
+https://github.com/swiss-ai/mmore
+```
+
+For GitHub URLs, GitHelp clones the repository into `data/repositories/` and
+then runs the same corpus, indexing, retrieval, and RAG pipeline on that local
+copy.
 
 ## 4. Build the corpus
 
-Click:
+Click one of the index build buttons:
 
 ```text
-Build corpus
+Build simple index
+Build MMORE index
 ```
 
 GitHelp generates a dedicated project folder:

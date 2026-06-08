@@ -13,6 +13,7 @@ streamlit run app/streamlit_app.py
 The app lets a user:
 
 - select a local target project;
+- clone a public GitHub repository into a local GitHelp-managed folder;
 - build a project-specific corpus;
 - ask questions;
 - inspect retrieved sources;
@@ -43,6 +44,22 @@ PYTHONPATH=src python scripts/build_corpus.py \
 ```
 
 This is the command used internally by the Streamlit project setup flow.
+
+## Load a public GitHub repository
+
+```bash
+PYTHONPATH=src python scripts/load_github_repository.py \
+  https://github.com/swiss-ai/mmore
+```
+
+This clones the repository into:
+
+```text
+data/repositories/swiss-ai-mmore/
+```
+
+The printed local path can then be used as the project path in Streamlit or in
+project-specific corpus-building commands.
 
 ## Preview a corpus
 
@@ -87,6 +104,20 @@ PYTHONPATH=src python scripts/debug_retrieval.py \
   "How do I configure indexing?" \
   --corpus-path data/projects/mmore/corpus.jsonl
 ```
+
+## Evaluate retrieval on a question set
+
+```bash
+PYTHONPATH=src python scripts/evaluate_retrieval.py \
+  --questions-path githelp_eval_questions.txt \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --backend simple \
+  --top-k 5
+```
+
+This prints the top retrieved sources for each question without calling an LLM.
+Use it to inspect whether retrieval is finding useful evidence before tuning
+prompts or answer generation.
 
 ## Debug prompt construction
 

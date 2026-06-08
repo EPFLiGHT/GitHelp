@@ -5,38 +5,77 @@ from typing import Callable
 
 import streamlit as st
 
+from githelp.projects.github_loader import load_github_repository
 from githelp.projects.project_builder import (
     prepare_project_with_mmore_index,
     prepare_project_with_simple_index,
 )
 
 
+def _resolve_project_path(
+    project_root: Path,
+    project_source: str,
+    project_path: str,
+    github_repository_url: str,
+) -> tuple[str, str]:
+    """Resolve the selected project source to a local project path."""
+    if project_source == "Public GitHub repository URL":
+        if not github_repository_url.strip():
+            raise ValueError("Please provide a GitHub repository URL.")
+
+        github_result = load_github_repository(
+            githelp_root=project_root,
+            repository_url=github_repository_url,
+        )
+
+        st.session_state["github_repository_url"] = github_result["repository_url"]
+
+        if github_result["cloned"]:
+            st.write(f"Cloned `{github_result['repository_url']}`.")
+        else:
+            st.write(f"Using existing local clone of `{github_result['repository_url']}`.")
+
+        return github_result["repository_path"], github_result["project_name"]
+
+    return project_path, ""
+
+
 def _build_mmore_index(
     project_root: Path,
+    project_source: str,
     project_path: str,
+    github_repository_url: str,
     project_name: str,
     persist_current_state: Callable[[], None],
 ) -> None:
     """Build the GitHelp corpus and MMORE index for the selected project."""
-    if not project_path.strip():
+    if project_source == "Local project path" and not project_path.strip():
         st.warning("Please provide a local project path.")
         return
 
     with st.status("Building MMORE index...", expanded=True) as status:
         try:
+            local_project_path, inferred_github_project_name = _resolve_project_path(
+                project_root=project_root,
+                project_source=project_source,
+                project_path=project_path,
+                github_repository_url=github_repository_url,
+            )
+            final_project_name = project_name or inferred_github_project_name or None
+
             st.write("Building GitHelp corpus...")
             st.write("Exporting corpus to MMORE format...")
             st.write("Building MMORE index...")
 
             build_result = prepare_project_with_mmore_index(
                 githelp_root=project_root,
-                project_path=project_path,
-                project_name=project_name or None,
+                project_path=local_project_path,
+                project_name=final_project_name,
                 collection_name="mmore_docs",
             )
 
             st.session_state["project_name"] = build_result["project_name"]
-            st.session_state["project_path"] = str(Path(project_path).resolve())
+            st.session_state["project_path"] = str(Path(local_project_path).resolve())
             st.session_state["project_config_path"] = build_result[
                 "project_config_path"
             ]
@@ -103,27 +142,37 @@ def _build_mmore_index(
 
 def _build_simple_index(
     project_root: Path,
+    project_source: str,
     project_path: str,
+    github_repository_url: str,
     project_name: str,
     persist_current_state: Callable[[], None],
 ) -> None:
     """Build only the GitHelp corpus for the selected project."""
-    if not project_path.strip():
+    if project_source == "Local project path" and not project_path.strip():
         st.warning("Please provide a local project path.")
         return
 
     with st.status("Building simple index...", expanded=True) as status:
         try:
+            local_project_path, inferred_github_project_name = _resolve_project_path(
+                project_root=project_root,
+                project_source=project_source,
+                project_path=project_path,
+                github_repository_url=github_repository_url,
+            )
+            final_project_name = project_name or inferred_github_project_name or None
+
             st.write("Building GitHelp corpus...")
 
             build_result = prepare_project_with_simple_index(
                 githelp_root=project_root,
-                project_path=project_path,
-                project_name=project_name or None,
+                project_path=local_project_path,
+                project_name=final_project_name,
             )
 
             st.session_state["project_name"] = build_result["project_name"]
-            st.session_state["project_path"] = str(Path(project_path).resolve())
+            st.session_state["project_path"] = str(Path(local_project_path).resolve())
             st.session_state["project_config_path"] = build_result[
                 "project_config_path"
             ]
@@ -184,25 +233,24 @@ def _render_project_setup_form(
     )
 
     if project_source == "Public GitHub repository URL":
-        st.info(
-            "GitHub repository support is planned. GitHelp will clone or download "
-            "the repository locally, then run the same indexing pipeline. For now, "
-            "use a local project path."
+        st.caption(
+            "GitHelp clones the repository into `data/repositories/`, then runs "
+            "the same corpus and indexing pipeline used for local projects."
         )
 
-        st.text_input(
+        github_repository_url = st.text_input(
             "GitHub repository URL",
+            value=st.session_state.get("github_repository_url", ""),
             placeholder="https://github.com/swiss-ai/mmore",
-            disabled=True,
         )
-
-        return
-
-    project_path = st.text_input(
-        "Local project path",
-        value=default_project_path,
-        placeholder="/path/to/software/project",
-    )
+        project_path = ""
+    else:
+        github_repository_url = ""
+        project_path = st.text_input(
+            "Local project path",
+            value=default_project_path,
+            placeholder="/path/to/software/project",
+        )
 
     project_name = st.text_input(
         "Project name",
@@ -214,6 +262,7 @@ def _render_project_setup_form(
 
     if save_button:
         st.session_state["project_path"] = project_path
+        st.session_state["github_repository_url"] = github_repository_url
         st.session_state["project_name"] = project_name
         persist_current_state()
         st.success("Project settings saved.")
@@ -254,7 +303,9 @@ def _render_project_setup_form(
     if build_mmore_button:
         _build_mmore_index(
             project_root,
+            project_source,
             project_path,
+            github_repository_url,
             project_name,
             persist_current_state,
         )
@@ -262,7 +313,9 @@ def _render_project_setup_form(
     if build_simple_button:
         _build_simple_index(
             project_root,
+            project_source,
             project_path,
+            github_repository_url,
             project_name,
             persist_current_state,
         )
@@ -311,6 +364,11 @@ def render_project_setup(
 
             if collection_name:
                 st.markdown(f"**MMORE collection:** `{collection_name}`")
+
+            github_repository_url = st.session_state.get("github_repository_url", "")
+
+            if github_repository_url:
+                st.markdown(f"**GitHub repository:** `{github_repository_url}`")
 
         return
 

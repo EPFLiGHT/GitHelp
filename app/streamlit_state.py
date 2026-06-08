@@ -18,6 +18,7 @@ def initialize_session_state(app_state_path: str | Path) -> None:
         "last_metadata": {},
         "project_name": app_state.get("project_name", ""),
         "project_path": app_state.get("project_path", ""),
+        "github_repository_url": app_state.get("github_repository_url", ""),
         "corpus_path": app_state.get("corpus_path", ""),
         "project_config_path": app_state.get("project_config_path", ""),
         "mmore_corpus_path": app_state.get("mmore_corpus_path", ""),
@@ -54,6 +55,7 @@ def persist_current_state(app_state_path: str | Path) -> None:
     state = {
         "project_name": st.session_state.get("project_name", ""),
         "project_path": st.session_state.get("project_path", ""),
+        "github_repository_url": st.session_state.get("github_repository_url", ""),
         "corpus_path": st.session_state.get("corpus_path", ""),
         "project_config_path": st.session_state.get("project_config_path", ""),
         "mmore_corpus_path": st.session_state.get("mmore_corpus_path", ""),
