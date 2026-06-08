@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from docask.rag.answering import answer_question, answer_question_with_llm
 
@@ -33,9 +34,15 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--project-name",
+        default="mmore",
+        help="Name of the indexed project.",
+    )
+
+    parser.add_argument(
         "--corpus-path",
-        default="data/processed/corpus.jsonl",
-        help="Path to the DocAsk corpus.",
+        default=None,
+        help="Path to the DocAsk corpus. If omitted, uses data/projects/{project_name}/corpus.jsonl.",
     )
 
     parser.add_argument(
@@ -63,11 +70,18 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     """Retrieve sources and print an answer."""
     args = parse_args()
+    project_name = args.project_name
+
+    corpus_path = (
+        Path(args.corpus_path)
+        if args.corpus_path is not None
+        else Path("data") / "projects" / project_name / "corpus.jsonl"
+    )
 
     if args.llm:
         answer, results = answer_question_with_llm(
             question=args.question,
-            corpus_path=args.corpus_path,
+            corpus_path=corpus_path,
             top_k=args.top_k,
             backend=args.backend,
             config_path=args.config_path,
@@ -75,9 +89,10 @@ def main() -> None:
     else:
         answer, results = answer_question(
             question=args.question,
-            corpus_path=args.corpus_path,
+            corpus_path=corpus_path,
             top_k=args.top_k,
             backend=args.backend,
+            config_path=args.config_path,
         )
 
     print("Answer:")
@@ -89,7 +104,8 @@ def main() -> None:
     for index, result in enumerate(results, start=1):
         doc = result.document
         print(
-            f"{index}. {doc.source_type} | "
+            f"{index}. score={result.score:.4f} | "
+            f"{doc.source_type} | "
             f"{doc.metadata.get('relative_path')} | "
             f"{doc.title}"
         )

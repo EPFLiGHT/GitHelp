@@ -410,12 +410,6 @@ def _render_project_setup_form(
             "format, and builds the MMORE retrieval index."
         )
 
-        build_mmore_button = st.button(
-            "Build MMORE index",
-            type="primary",
-            use_container_width=True,
-        )
-
     with col_simple:
         st.markdown("**Simple index**")
         st.caption(
@@ -423,6 +417,16 @@ def _render_project_setup_form(
             "the local simple retriever."
         )
 
+    col_mmore_button, col_simple_button = st.columns(2)
+
+    with col_mmore_button:
+        build_mmore_button = st.button(
+            "Build MMORE index",
+            type="primary",
+            use_container_width=True,
+        )
+
+    with col_simple_button:
         build_simple_button = st.button(
             "Build simple index",
             use_container_width=True,
@@ -659,6 +663,7 @@ def main() -> None:
                         corpus_path=corpus,
                         top_k=options["top_k"],
                         backend=options["backend"],
+                        config_path=options["config_path"],
                     )
 
             except Exception as error:
