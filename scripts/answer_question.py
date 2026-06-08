@@ -3,11 +3,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from docask.rag.answering import answer_question, answer_question_with_llm
+from githelp.rag.answering import answer_question, answer_question_with_llm
 
 
 """
-Answer a question using DocAsk.
+Answer a question using GitHelp.
 
 By default, this script uses the current non-LLM extractive answerer.
 With --llm, it retrieves relevant sources, builds a grounded prompt, and sends
@@ -18,7 +18,7 @@ it to the configured LLM provider.
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Answer a question using DocAsk."
+        description="Answer a question using GitHelp."
     )
 
     parser.add_argument(
@@ -42,7 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--corpus-path",
         default=None,
-        help="Path to the DocAsk corpus. If omitted, uses data/projects/{project_name}/corpus.jsonl.",
+        help="Path to the GitHelp corpus. If omitted, uses data/projects/{project_name}/corpus.jsonl.",
     )
 
     parser.add_argument(

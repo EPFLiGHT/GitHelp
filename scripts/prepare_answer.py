@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from docask.rag.answering import prepare_answer_prompt
+from githelp.rag.answering import prepare_answer_prompt
 
 
 """
@@ -16,7 +16,7 @@ would be sent to an LLM. It does not call an LLM.
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Prepare an LLM prompt from retrieved DocAsk sources."
+        description="Prepare an LLM prompt from retrieved GitHelp sources."
     )
 
     parser.add_argument(
@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--corpus-path",
         default="data/processed/corpus.jsonl",
-        help="Path to the DocAsk corpus.",
+        help="Path to the GitHelp corpus.",
     )
 
     parser.add_argument(

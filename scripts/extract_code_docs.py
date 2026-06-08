@@ -4,9 +4,9 @@ import argparse
 import json
 from pathlib import Path
 
-from docask.config import load_all_configs, load_yaml
-from docask.extractors.python_doc_extractor import extract_python_docs
-from docask.utils.paths import EXTRACTED_CODE_DOCS_DIR, PROJECT_ROOT
+from githelp.config import load_all_configs, load_yaml
+from githelp.extractors.python_doc_extractor import extract_python_docs
+from githelp.utils.paths import EXTRACTED_CODE_DOCS_DIR, PROJECT_ROOT
 
 
 """
@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "Path to the project configuration YAML file. "
-            "If omitted, DocAsk uses the default project config."
+            "If omitted, GitHelp uses the default project config."
         ),
     )
 
@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def resolve_path(path: Path) -> Path:
-    """Resolve a path relative to the DocAsk project root if needed."""
+    """Resolve a path relative to the GitHelp project root if needed."""
     if path.is_absolute():
         return path
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from docask.projects.project_state import (
+from githelp.projects.project_state import (
     DEFAULT_APP_STATE,
     load_app_state,
     save_app_state,
@@ -25,8 +25,8 @@ def test_save_and_load_app_state(tmp_path: Path):
     expected_state = {
         "project_name": "mmore",
         "project_path": "/tmp/mmore",
-        "corpus_path": "/tmp/docask/data/projects/mmore/corpus.jsonl",
-        "project_config_path": "/tmp/docask/data/projects/mmore/project_config.yaml",
+        "corpus_path": "/tmp/githelp/data/projects/mmore/corpus.jsonl",
+        "project_config_path": "/tmp/githelp/data/projects/mmore/project_config.yaml",
         "backend": "simple",
         "top_k": 3,
         "use_llm": False,

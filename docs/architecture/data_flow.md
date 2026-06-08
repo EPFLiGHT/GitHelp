@@ -1,10 +1,10 @@
 # Data flow
 
-This page explains how information moves through DocAsk.
+This page explains how information moves through GitHelp.
 
 ## Step 1: project selection
 
-DocAsk starts from a target project repository.
+GitHelp starts from a target project repository.
 
 The Streamlit interface lets a user select a local project path. For example, the MMORE repository may be located at:
 
@@ -12,7 +12,7 @@ The Streamlit interface lets a user select a local project path. For example, th
 /path/to/mmore
 ```
 
-DocAsk then creates a project-specific working folder:
+GitHelp then creates a project-specific working folder:
 
 ```text
 data/projects/<project_name>/
@@ -26,7 +26,7 @@ data/projects/mmore/
 
 ## Step 2: project configuration
 
-DocAsk generates or reads a project configuration file.
+GitHelp generates or reads a project configuration file.
 
 For a Streamlit-selected project, this is usually:
 
@@ -126,7 +126,7 @@ The MMORE backend does not automatically read a newly built `corpus.jsonl`. The 
 
 ## Step 6: project profile
 
-After retrieval, DocAsk can apply a project profile.
+After retrieval, GitHelp can apply a project profile.
 
 A project profile can:
 

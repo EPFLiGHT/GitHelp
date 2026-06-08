@@ -1,5 +1,5 @@
-project = "DocAsk"
-author = "DocAsk contributors"
+project = "GitHelp"
+author = "GitHelp contributors"
 
 extensions = [
     "myst_parser",
@@ -11,7 +11,7 @@ source_suffix = {
 }
 
 html_theme = "furo"
-html_title = "DocAsk Documentation"
+html_title = "GitHelp Documentation"
 
 myst_enable_extensions = [
     "colon_fence",

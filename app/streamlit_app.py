@@ -13,17 +13,17 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 
-from docask.config import load_yaml
-from docask.projects.project_builder import (
+from githelp.config import load_yaml
+from githelp.projects.project_builder import (
     prepare_project_with_simple_index,
     prepare_project_with_mmore_index,
 )
-from docask.projects.project_state import load_app_state, save_app_state
-from docask.rag.answering import (
+from githelp.projects.project_state import load_app_state, save_app_state
+from githelp.rag.answering import (
     answer_question,
     answer_question_with_provider,
 )
-from docask.rag.llm_factory import create_llm_provider
+from githelp.rag.llm_factory import create_llm_provider
 
 
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "app_config.yaml"
@@ -31,7 +31,7 @@ DEFAULT_APP_STATE_PATH = PROJECT_ROOT / "data" / "app_state.json"
 
 
 st.set_page_config(
-    page_title="DocAsk",
+    page_title="GitHelp",
     page_icon="📚",
     layout="wide",
 )
@@ -206,19 +206,19 @@ def display_debug_information(
 
 
 def _build_mmore_index(project_path: str, project_name: str) -> None:
-    """Build the DocAsk corpus and MMORE index for the selected project."""
+    """Build the GitHelp corpus and MMORE index for the selected project."""
     if not project_path.strip():
         st.warning("Please provide a local project path.")
         return
 
     with st.status("Building MMORE index...", expanded=True) as status:
         try:
-            st.write("Building DocAsk corpus...")
+            st.write("Building GitHelp corpus...")
             st.write("Exporting corpus to MMORE format...")
             st.write("Building MMORE index...")
 
             build_result = prepare_project_with_mmore_index(
-                docask_root=PROJECT_ROOT,
+                githelp_root=PROJECT_ROOT,
                 project_path=project_path,
                 project_name=project_name or None,
                 collection_name="mmore_docs",
@@ -291,17 +291,17 @@ def _build_mmore_index(project_path: str, project_name: str) -> None:
 
 
 def _build_simple_index(project_path: str, project_name: str) -> None:
-    """Build only the DocAsk corpus for the selected project."""
+    """Build only the GitHelp corpus for the selected project."""
     if not project_path.strip():
         st.warning("Please provide a local project path.")
         return
 
     with st.status("Building simple index...", expanded=True) as status:
         try:
-            st.write("Building DocAsk corpus...")
+            st.write("Building GitHelp corpus...")
 
             build_result = prepare_project_with_simple_index(
-                docask_root=PROJECT_ROOT,
+                githelp_root=PROJECT_ROOT,
                 project_path=project_path,
                 project_name=project_name or None,
             )
@@ -356,7 +356,7 @@ def _render_project_setup_form(
     st.header("Project setup")
 
     project_source = st.radio(
-        "How should DocAsk access the project?",
+        "How should GitHelp access the project?",
         options=[
             "Local project path",
             "Public GitHub repository URL",
@@ -406,14 +406,14 @@ def _render_project_setup_form(
     with col_mmore:
         st.markdown("**MMORE index**")
         st.caption(
-            "Recommended mode. Builds the DocAsk corpus, exports it to MMORE "
+            "Recommended mode. Builds the GitHelp corpus, exports it to MMORE "
             "format, and builds the MMORE retrieval index."
         )
 
     with col_simple:
         st.markdown("**Simple index**")
         st.caption(
-            "Fast debug mode. Builds only the DocAsk JSONL corpus and uses "
+            "Fast debug mode. Builds only the GitHelp JSONL corpus and uses "
             "the local simple retriever."
         )
 
@@ -599,7 +599,7 @@ def main() -> None:
     initialize_session_state()
     apply_pending_state_updates()
 
-    st.title("DocAsk")
+    st.title("GitHelp")
     st.caption(
         "Ask questions about a software project's documentation and code documentation."
     )

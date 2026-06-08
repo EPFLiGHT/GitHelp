@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 
-from docask.rag.qwen_provider import QwenLLMProvider
+from githelp.rag.qwen_provider import QwenLLMProvider
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Test Qwen generation through the DocAsk provider."
+        description="Test Qwen generation through the GitHelp provider."
     )
 
     parser.add_argument(

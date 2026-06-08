@@ -2,7 +2,7 @@
 
 This page lists the main commands used during development.
 
-Run all commands from the root of the `docask` repository.
+Run all commands from the root of the `githelp` repository.
 
 ## Run the Streamlit app
 

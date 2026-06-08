@@ -1,13 +1,13 @@
 # Loaders and extractors
 
-DocAsk uses loaders and extractors to convert project sources into `DocumentRecord` objects.
+GitHelp uses loaders and extractors to convert project sources into `DocumentRecord` objects.
 
 ## Markdown loader
 
 File:
 
 ```text
-src/docask/loaders/markdown_loader.py
+src/githelp/loaders/markdown_loader.py
 ```
 
 Role:
@@ -28,7 +28,7 @@ markdown_section
 File:
 
 ```text
-src/docask/extractors/python_doc_extractor.py
+src/githelp/extractors/python_doc_extractor.py
 ```
 
 Role:
@@ -59,7 +59,7 @@ Current limitation:
 File:
 
 ```text
-src/docask/loaders/yaml_config_loader.py
+src/githelp/loaders/yaml_config_loader.py
 ```
 
 Role:
@@ -81,7 +81,7 @@ yaml_config
 File:
 
 ```text
-src/docask/loaders/repo_structure_loader.py
+src/githelp/loaders/repo_structure_loader.py
 ```
 
 Role:

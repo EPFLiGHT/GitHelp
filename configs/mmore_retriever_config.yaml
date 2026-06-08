@@ -1,4 +1,4 @@
-# MMORE retrieval configuration used by the DocAsk MMORE backend.
+# MMORE retrieval configuration used by the GitHelp MMORE backend.
 
 db:
   uri: ./data/indexes/mmore/proc_demo.db
@@ -10,10 +10,10 @@ hybrid_search_weight: 0.5
 # Default number of retrieved results.
 k: 5
 
-# Collection containing the indexed DocAsk corpus.
+# Collection containing the indexed GitHelp corpus.
 collection_name: mmore_docs
 
-# Web search is disabled because DocAsk should answer from the indexed project corpus.
+# Web search is disabled because GitHelp should answer from the indexed project corpus.
 use_web: false
 
 # Optional reranker model. Null means no reranker is used.

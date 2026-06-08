@@ -1,10 +1,10 @@
-# DocAsk documentation
+# GitHelp documentation
 
-DocAsk is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
+GitHelp is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
 
 The initial use case is the MMORE repository, but the architecture is designed to support other Python projects through project-specific configuration and optional project profiles.
 
-DocAsk can be used in two ways:
+GitHelp can be used in two ways:
 
 - through the Streamlit interface, where a user selects a local project, builds a corpus, and asks questions;
 - through command-line scripts, which are useful for debugging corpus construction, retrieval, prompting, and indexing.

@@ -1,12 +1,12 @@
 # Configuration
 
-DocAsk uses YAML configuration files stored in `configs/`, plus project-specific configuration files generated under `data/projects/`.
+GitHelp uses YAML configuration files stored in `configs/`, plus project-specific configuration files generated under `data/projects/`.
 
 There are two levels of configuration:
 
 ```text
 configs/
-→ global DocAsk settings
+→ global GitHelp settings
 
 data/projects/<project_name>/
 → generated configuration and corpus for a selected target project
@@ -19,7 +19,7 @@ This file stores application-level settings.
 Example:
 
 ```yaml
-app_title: DocAsk
+app_title: GitHelp
 app_subtitle: Ask questions about a project's documentation
 show_sources: true
 default_top_k: 5
@@ -43,7 +43,7 @@ llm:
 | `show_sources` | Whether sources should be shown by default. |
 | `default_top_k` | Default number of retrieved sources. |
 | `project_profile` | Project-specific behavior profile, for example `generic` or `mmore`. |
-| `llm.provider` | LLM provider used by DocAsk. |
+| `llm.provider` | LLM provider used by GitHelp. |
 | `llm.model_name` | Model name used by the provider. |
 | `llm.max_new_tokens` | Maximum number of generated tokens. |
 | `llm.temperature` | Generation temperature. |
@@ -59,7 +59,7 @@ The default configuration is:
 configs/project_config.yaml
 ```
 
-When using the Streamlit interface, DocAsk also generates a project-specific config:
+When using the Streamlit interface, GitHelp also generates a project-specific config:
 
 ```text
 data/projects/<project_name>/project_config.yaml
@@ -169,8 +169,8 @@ It can contain:
 {
   "project_name": "mmore",
   "project_path": "/path/to/mmore",
-  "corpus_path": "/path/to/docask/data/projects/mmore/corpus.jsonl",
-  "project_config_path": "/path/to/docask/data/projects/mmore/project_config.yaml",
+  "corpus_path": "/path/to/githelp/data/projects/mmore/corpus.jsonl",
+  "project_config_path": "/path/to/githelp/data/projects/mmore/project_config.yaml",
   "backend": "simple",
   "top_k": 5,
   "use_llm": true,

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from docask.extractors.python_doc_extractor import extract_python_docs
+from githelp.extractors.python_doc_extractor import extract_python_docs
 
 
 def test_extract_python_function_docstring(tmp_path: Path):

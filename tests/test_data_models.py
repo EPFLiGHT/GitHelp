@@ -1,4 +1,4 @@
-from docask.data_models import DocumentRecord
+from githelp.data_models import DocumentRecord
 
 
 def test_document_record_creation():

@@ -1,0 +1,2 @@
+[console_scripts]
+mmore = mmore.cli:main

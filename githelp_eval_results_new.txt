@@ -1,0 +1,290 @@
+================================================================================
+QUESTION: cat > githelp_eval_questions.txt << 'EOF'
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+I0528 15:12:21.839994  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840031  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840033  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840034  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840035  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840044  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840046  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840047  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:12:21.840048  407427 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:05<00:10,  5.08s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:08<00:04,  4.25s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.37s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.96s/it]
+Answer:
+- The default dense embedding model used is `sentence-transformers/all-MiniLM-L6-v2` [Source 2].  
+- The default sparse embedding model used is `splade` [Source 2].  
+- The RAG evaluator configuration class is `mmore.rag.evaluator.EvalConfig` with a score of 0.8630 [Source 1].  
+- The `TextProcessor` accepts files that are plain text files with the .txt extension [Source 3].  
+- The `TextProcessor` processes text files by cleaning their content and returning a dictionary with the cleaned text [Source 5].  
+- The supported file types include .txt, .pdf, .docx, .pptx, .md, .txt, .xlsx, .xls, .csv, .mp4, .avi, .mov, .mkv, .mp3, .wav, .aac, .eml, .html, .htm [Source 2].  
+- The `RAGEvaluator` method `_get_eval_dataset` updates the dataset with 'response' and 'retrieved_contexts' [Source 4].
+
+================================================================================
+Sources:
+1. score=0.8630 | python_class | rag/evaluator.py | mmore.rag.evaluator.EvalConfig
+2. score=0.8510 | markdown_section | developer_documentation/index_api.md | 🔌 Indexer API Documentation - 🧰 Developer notes
+3. score=0.8445 | python_method | process/processors/txt_processor.py | mmore.process.processors.txt_processor.TextProcessor.accepts
+4. score=0.8382 | python_method | rag/evaluator.py | mmore.rag.evaluator.RAGEvaluator._get_eval_dataset
+5. score=0.8345 | python_method | process/processors/txt_processor.py | mmore.process.processors.txt_processor.TextProcessor.process
+
+================================================================================
+QUESTION: What is MMORE used for?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+I0528 15:14:25.313922  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313961  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313964  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313966  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313967  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313969  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313972  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313973  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313974  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313975  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313976  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313978  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313979  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313980  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313981  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313982  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:14:25.313984  411878 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:09,  4.83s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:08<00:04,  4.11s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.29s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.86s/it]
+Answer:
+- MMORE is an open-source multimodal ingestion and retrieval framework designed for heterogeneous document collections [Source 1].  
+- It provides tools to process documents, build indexes, run retrieval pipelines, support multimodal workflows, and run distributed processing for larger collections [Source 1].  
+- MMORE is organized around three main executable stages: `run_process` for ingestion and processing, `run_indexer` for indexing and multimodal retrieval, and `run_rag` for retrieval and RAG workflows [Source 3].  
+- The system supports distributed execution for larger workloads, including parallelized ingestion and computationally expensive document processing [Source 5].  
+- MMORE helps build retrieval systems over complex document collections by combining ingestion, indexing, retrieval, RAG workflows, and evaluation tools [Source 4].
+
+================================================================================
+Sources:
+1. score=0.8733 | markdown_section | index.md | MMORE Documentation
+2. score=0.8726 | markdown_section | getting_started/architecture.md | 🏗️ Architecture
+3. score=0.8580 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - Overview
+4. score=0.8525 | markdown_section | index.md | MMORE Documentation - What is MMORE?
+5. score=0.8518 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - 6. Distributed processing
+
+================================================================================
+QUESTION: Which Milvus parameters are used in the ColPali config?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Answer:
+- `db_path` is used as a Milvus configuration parameter. [Source 1]
+- `collection_name` is used as a Milvus configuration parameter. [Source 1]
+- `create_collection` is used as a Milvus configuration parameter. [Source 1]
+- `dim` is used as a Milvus configuration parameter. [Source 1]
+- `metric_type` is used as a Milvus configuration parameter. [Source 1]
+
+================================================================================
+Sources:
+1. score=1.8146 | example_config | examples/colpali/config_index.yml | mmore config - examples/colpali/config_index.yml
+2. score=1.6013 | example_config | examples/colpali/config_retrieval.yml | mmore config - examples/colpali/config_retrieval.yml
+3. score=0.9011 | markdown_section | core_features/colpali.md | Start the retrieval API server - 2. Index embeddings into Milvus
+4. score=0.4949 | python_method | colpali/milvuscolpali.py | mmore.colpali.milvuscolpali.MilvusColpaliManager.__init__
+5. score=0.8983 | markdown_section | core_features/colpali.md | Start the retrieval API server
+
+================================================================================
+QUESTION: What is the difference between config_index.yml and config_retrieval.yml?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+I0528 15:16:09.428774  415134 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(8, generation: 1)
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:09,  4.61s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:08<00:04,  4.01s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.24s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.78s/it]
+Answer:
+The retrieved sources do not explicitly explain the difference between `config_index.yml` and `config_retrieval.yml`. The provided examples only describe indexing configuration files like `config.yaml` but do not mention a `config_retrieval.yml` file. Therefore, the available sources are insufficient to answer the question. [Sources 1-5]
+
+================================================================================
+Sources:
+1. score=0.9167 | example_config | examples/index/bge/config.yaml | mmore config - examples/index/bge/config.yaml
+2. score=0.9112 | example_config | examples/who/index/index_config_gte.yaml | mmore config - examples/who/index/index_config_gte.yaml
+3. score=0.9111 | example_config | examples/index/qwen/config.yaml | mmore config - examples/index/qwen/config.yaml
+4. score=0.9099 | example_config | examples/who/index/index_config_bge.yaml | mmore config - examples/who/index/index_config_bge.yaml
+5. score=0.9098 | example_config | examples/pubmedqa/index_bge.yaml | mmore config - examples/pubmedqa/index_bge.yaml
+
+================================================================================
+QUESTION: Why does MMORE use Elasticsearch instead of Milvus?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:08,  4.00s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.56s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  1.99s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.46s/it]
+Answer:
+The retrieved sources do not support this premise. The sources mention that MMORE uses Milvus for storage and retrieval [Source 2], [Source 3], [Source 5], but there is no information indicating that Elasticsearch is used instead of Milvus.
+
+================================================================================
+Sources:
+1. score=0.8680 | python_class | index/indexer.py | mmore.index.indexer.IndexerConfig
+2. score=0.8451 | python_class | index/indexer.py | mmore.index.indexer.Indexer
+3. score=0.8416 | python_method | index/indexer.py | mmore.index.indexer.Indexer._create_collection_with_schema
+4. score=0.8404 | python_module | rag/pipeline.py | mmore.rag.pipeline
+5. score=0.8389 | python_class | rag/retriever.py | mmore.rag.retriever.Retriever
+
+================================================================================
+QUESTION: Explain why MMORE only supports PDF files.
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:03<00:07,  3.78s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.47s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  1.93s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.38s/it]
+Answer:
+The retrieved sources do not support the premise that MMORE only supports PDF files. The sources describe MMORE as a framework for handling heterogeneous document collections, including plain text, structured metadata, images, and multimodal data [Source 1]. There is no mention in the provided sources that MMORE is limited to PDF files. Therefore, the premise of the question is not supported by the retrieved sources.
+
+================================================================================
+Sources:
+1. score=0.8550 | markdown_section | index.md | MMORE Documentation
+2. score=0.8496 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - 6. Distributed processing
+3. score=0.8423 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - 5. Multimodal support
+4. score=0.8411 | markdown_section | index.md | MMORE Documentation - What is MMORE?
+5. score=0.8402 | python_method | process/processors/base.py | mmore.process.processors.base.Processor.get_file_len
+
+================================================================================
+QUESTION: What will be the future roadmap of MMORE next year?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:08,  4.37s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.89s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.18s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.69s/it]
+Answer:
+The retrieved sources do not support this premise. [Source 1]
+
+================================================================================
+Sources:
+1. score=0.8610 | markdown_section | getting_started/architecture.md | 🏗️ Architecture
+2. score=0.8431 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - Design principles
+3. score=0.8378 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - Overview
+4. score=0.8377 | markdown_section | advanced_usage/rcp_and_production.md | 🚀 Cluster and Production Deployment
+5. score=0.8356 | markdown_section | index.md | MMORE Documentation
+
+================================================================================
+QUESTION: Why does it fail?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:03<00:07,  3.88s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.73s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.08s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.55s/it]
+Answer:
+The retrieved sources do not support the premise of the question. The question "Why does it fail?" is ambiguous without context about what is failing. The sources provide troubleshooting tips and common issues but do not explicitly address the failure of a specific component or process. [Source 1] mentions common first-run problems, [Source 3] provides troubleshooting steps for distributed processing, and [Source 2] includes system dependency installation commands. However, none of the sources directly explain why a specific failure occurs.
+
+================================================================================
+Sources:
+1. score=0.7589 | markdown_section | getting_started/quickstart.md | Quickstart - Common mistakes
+2. score=0.7375 | markdown_section | developer_documentation/for_devs.md | 💻 Developer Documentation - macOS
+3. score=0.7161 | markdown_section | advanced_usage/distributed_processing.md | Clone the repository (if not already done) - 🔧 Troubleshooting
+4. score=0.6701 | python_method | process/processors/base.py | mmore.process.processors.base.Processor.ping_dashboard
+5. score=0.6655 | python_method | process/crawler.py | mmore.process.crawler.Crawler.__init__
+
+================================================================================
+QUESTION: What should I change?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+I0528 15:21:07.075930  423404 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:21:07.075974  423404 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:21:07.075976  423404 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+I0528 15:21:07.075977  423404 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:08,  4.31s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.75s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.09s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.59s/it]
+Answer:
+The question is ambiguous because it uses the word "change" without context. Please specify what aspect of the system or configuration you would like to change. The retrieved sources do not support this premise.
+
+================================================================================
+Sources:
+1. score=0.6947 | markdown_section | developer_documentation/for_devs.md | 💻 Developer Documentation - 🔀 Pull Request Process
+2. score=0.6760 | python_class | process/post_processor/translator/base.py | mmore.process.post_processor.translator.base.TranslatorPostProcessor
+3. score=0.6409 | markdown_section | developer_documentation/for_devs.md | 💻 Developer Documentation - Linux (Ubuntu/Debian)
+4. score=0.6352 | python_method | process/post_processor/translator/base.py | mmore.process.post_processor.translator.base.TranslatorPostProcessor.__init__
+5. score=0.6312 | python_function | utils.py | mmore.utils.create_new_indexer
+
+================================================================================
+QUESTION: How can I check whether the retrieved sources are relevant before trusting the generated answer?
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:08,  4.45s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:08<00:03,  3.93s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.19s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:08<00:00,  2.72s/it]
+Answer:
+- Check if the system returns relevant documents for test queries [Source 2].  
+- Verify that the retrieved chunks are meaningful and coherent [Source 2].  
+- Ensure that the index was created as expected and documents were correctly parsed [Source 4].  
+- Use the `retrieve` function with a configuration file to test retrieval [Source 5].  
+- Confirm that simple test queries return results and the index is functioning properly [Source 4].
+
+================================================================================
+Sources:
+1. score=0.8010 | python_method | rag/retriever.py | mmore.rag.retriever.Retriever._get_relevant_documents
+2. score=0.8008 | markdown_section | getting_started/quickstart.md | Quickstart - 4. Run retrieval
+3. score=0.7945 | markdown_section | getting_started/architecture.md | 🏗️ Architecture - 3. Retrieval
+4. score=0.7894 | markdown_section | getting_started/quickstart.md | Quickstart - Recommended first checks
+5. score=0.7851 | python_function | run_retriever.py | mmore.run_retriever.retrieve
+
+================================================================================
+QUESTION: Based only on the retrieved sources, explain the role of YAML configuration files in MMORE.
+================================================================================
+/Users/claradelandre/miniforge3/envs/githelp/lib/python3.11/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+I0528 15:23:05.504061  426415 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(6, generation: 1)
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [00:04<00:08,  4.03s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.59s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.00s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.47s/it]
+Answer:
+- YAML configuration files in MMORE define the settings for indexing processes, including model specifications and database connections [Source 1].  
+- They specify the `dense_model` and `sparse_model` to be used, such as `sentence-transformers/all-MiniLM-L6-v2` [Source 1].  
+- The `db` section in the YAML file defines the database URI and name, e.g., `uri: ./proc_demo.db` and `name: my_db` [Source 1].  
+- The `collection_name` and `documents_path` parameters are set in the YAML to identify the collection and document source [Source 1].  
+- YAML files are used across different examples to configure MMORE for various use cases, such as RAG or different model integrations [Source 3].
+
+================================================================================
+Sources:
+1. score=1.7923 | example_config | examples/index/config.yaml | mmore config - examples/index/config.yaml
+2. score=1.7841 | example_config | examples/index/qwen/config.yaml | mmore config - examples/index/qwen/config.yaml
+3. score=1.7815 | example_config | examples/rag/evaluation/indexer_eval_example_config.yaml | mmore config - examples/rag/evaluation/indexer_eval_example_config.yaml
+4. score=1.7813 | example_config | examples/index/bge/config.yaml | mmore config - examples/index/bge/config.yaml
+5. score=1.7807 | example_config | examples/index/openai/config.yaml | mmore config - examples/index/openai/config.yaml
+

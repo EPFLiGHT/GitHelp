@@ -1,0 +1,12 @@
+cat > githelp_eval_questions.txt << 'EOF'
+What is MMORE used for?
+Which Milvus parameters are used in the ColPali config?
+What is the difference between config_index.yml and config_retrieval.yml?
+Why does MMORE use Elasticsearch instead of Milvus?
+Explain why MMORE only supports PDF files.
+What will be the future roadmap of MMORE next year?
+Why does it fail?
+What should I change?
+How can I check whether the retrieved sources are relevant before trusting the generated answer?
+Based only on the retrieved sources, explain the role of YAML configuration files in MMORE.
+EOF

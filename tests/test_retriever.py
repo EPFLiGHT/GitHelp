@@ -1,6 +1,6 @@
-from docask.data_models import DocumentRecord
-from docask.retrieval.base import RetrievalResult
-from docask.retrieval.simple_retriever import retrieve
+from githelp.data_models import DocumentRecord
+from githelp.retrieval.base import RetrievalResult
+from githelp.retrieval.simple_retriever import retrieve
 
 
 def test_simple_retriever_returns_retrieval_results():

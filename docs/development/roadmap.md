@@ -1,6 +1,6 @@
 # Roadmap
 
-DocAsk is currently an early but functional prototype.
+GitHelp is currently an early but functional prototype.
 
 ## Implemented
 
