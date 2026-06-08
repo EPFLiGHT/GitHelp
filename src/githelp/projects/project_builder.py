@@ -10,6 +10,34 @@ from typing import Any
 import yaml
 
 
+class ProjectCommandError(RuntimeError):
+    """
+    Error raised when a GitHelp project preparation subprocess fails.
+
+    The command output is kept as structured attributes so UI code, tests, or
+    future logging can inspect it without parsing the formatted message.
+    """
+
+    def __init__(
+        self,
+        label: str,
+        command: list[str],
+        stdout: str,
+        stderr: str,
+    ) -> None:
+        self.label = label
+        self.command = command
+        self.stdout = stdout
+        self.stderr = stderr
+
+        super().__init__(
+            f"{label}.\n\n"
+            f"Command:\n{' '.join(command)}\n\n"
+            f"stdout:\n{stdout}\n\n"
+            f"stderr:\n{stderr}"
+        )
+
+
 def slugify_project_name(name: str) -> str:
     """
     Convert a project name into a safe folder name.
@@ -273,11 +301,11 @@ def build_corpus_for_project(
     )
 
     if completed_process.returncode != 0:
-        raise RuntimeError(
-            "Corpus build failed.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{completed_process.stdout}\n\n"
-            f"stderr:\n{completed_process.stderr}"
+        raise ProjectCommandError(
+            label="Corpus build failed",
+            command=command,
+            stdout=completed_process.stdout,
+            stderr=completed_process.stderr,
         )
 
     return {
@@ -325,11 +353,11 @@ def export_mmore_corpus_for_project(
     )
 
     if completed_process.returncode != 0:
-        raise RuntimeError(
-            "MMORE corpus export failed.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{completed_process.stdout}\n\n"
-            f"stderr:\n{completed_process.stderr}"
+        raise ProjectCommandError(
+            label="MMORE corpus export failed",
+            command=command,
+            stdout=completed_process.stdout,
+            stderr=completed_process.stderr,
         )
 
     return {
@@ -371,11 +399,11 @@ def build_mmore_index_for_project(
     )
 
     if completed_process.returncode != 0:
-        raise RuntimeError(
-            "MMORE index build failed.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{completed_process.stdout}\n\n"
-            f"stderr:\n{completed_process.stderr}"
+        raise ProjectCommandError(
+            label="MMORE index build failed",
+            command=command,
+            stdout=completed_process.stdout,
+            stderr=completed_process.stderr,
         )
 
     return {

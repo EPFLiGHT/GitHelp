@@ -20,6 +20,30 @@ to make GitHelp usable before the final MMORE retrieval backend is connected.
 
 TOKEN_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
+LONG_IDENTIFIER_MIN_LENGTH = 8
+
+STRONG_EXACT_SYMBOL_BOOST = 10.0
+WEAK_EXACT_SYMBOL_BOOST = 1.5
+SYMBOL_PARTS_BOOST = 6.0
+IDENTIFIER_QUERY_BOOST = 8.0
+WEAK_IDENTIFIER_QUERY_BOOST = 1.5
+SIGNATURE_MATCH_BOOST = 4.0
+MODULE_MATCH_BOOST = 3.0
+TITLE_MATCH_BOOST = 2.0
+FULL_QUERY_MATCH_BOOST = 1.0
+UNRELATED_SIGNATURE_PENALTY = 3.0
+USER_DOC_MARKDOWN_BOOST = 2.0
+USER_DOC_QUERY_WORDS = {
+    "how",
+    "install",
+    "run",
+    "use",
+    "start",
+    "setup",
+    "configure",
+    "command",
+}
+
 
 def _tokenize(text: str) -> list[str]:
     """
@@ -77,17 +101,6 @@ def retrieve(
         if "_" in token or "." in token
     }
 
-    user_doc_words = {
-        "how",
-        "install",
-        "run",
-        "use",
-        "start",
-        "setup",
-        "configure",
-        "command",
-    }
-
     results: list[RetrievalResult] = []
 
     for doc in documents:
@@ -118,34 +131,44 @@ def retrieve(
 
         if doc.symbol_name:
             symbol_lower = doc.symbol_name.lower()
-            is_specific_identifier = "_" in symbol_lower or len(symbol_lower) >= 8
+            is_specific_identifier = (
+                "_" in symbol_lower or len(symbol_lower) >= LONG_IDENTIFIER_MIN_LENGTH
+            )
 
             # Strongly boost explicit code symbol matches.
             if symbol_lower in query_lower:
                 exact_symbol_match = True
-                score += 10.0 if is_specific_identifier else 1.5
+                score += (
+                    STRONG_EXACT_SYMBOL_BOOST
+                    if is_specific_identifier
+                    else WEAK_EXACT_SYMBOL_BOOST
+                )
 
             # Also match queries written with spaces instead of underscores.
             symbol_parts = symbol_lower.split("_")
             if len(symbol_parts) > 1 and all(part in query_token_set for part in symbol_parts):
                 exact_symbol_match = True
-                score += 6.0
+                score += SYMBOL_PARTS_BOOST
 
             if symbol_lower in query_identifiers:
                 exact_symbol_match = True
-                score += 8.0 if is_specific_identifier else 1.5
+                score += (
+                    IDENTIFIER_QUERY_BOOST
+                    if is_specific_identifier
+                    else WEAK_IDENTIFIER_QUERY_BOOST
+                )
 
         if doc.signature and doc.signature.lower() in query_lower:
-            score += 4.0
+            score += SIGNATURE_MATCH_BOOST
 
         if doc.module_name and doc.module_name.lower() in query_lower:
-            score += 3.0
+            score += MODULE_MATCH_BOOST
 
         if doc.title and doc.title.lower() in query_lower:
-            score += 2.0
+            score += TITLE_MATCH_BOOST
 
         if query_lower in searchable_lower:
-            score += 1.0
+            score += FULL_QUERY_MATCH_BOOST
 
         # If the user asks for a signature, avoid returning unrelated code docs.
         if (
@@ -153,12 +176,11 @@ def retrieve(
             and doc.source_type.startswith("python")
             and not exact_symbol_match
         ):
-            score -= 3.0
+            score -= UNRELATED_SIGNATURE_PENALTY
 
         # For user-facing questions, prefer human-written documentation.
-        if doc.source_type.startswith("markdown") and query_token_set & user_doc_words:
-            score += 2.0
-
+        if doc.source_type.startswith("markdown") and query_token_set & USER_DOC_QUERY_WORDS:
+            score += USER_DOC_MARKDOWN_BOOST
         results.append(RetrievalResult(document=doc, score=score))
 
     results.sort(key=lambda result: result.score, reverse=True)

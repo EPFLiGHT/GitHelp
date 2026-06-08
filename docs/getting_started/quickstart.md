@@ -50,7 +50,7 @@ For the MMORE use case, enter the local path to the MMORE repository, for exampl
 
 GitHelp can currently build a corpus from a local project path.
 
-Public GitHub repository support is planned, but the main supported workflow for now is local project selection.
+Public GitHub repository support is planned. The intended workflow is to enter a repository URL, let GitHelp clone or download it locally, then run the same corpus, indexing, retrieval, and RAG pipeline on that local copy. The main supported workflow for now is local project selection.
 
 ## 4. Build the corpus
 
@@ -114,6 +114,7 @@ After building the MMORE index, select:
 
 ```text
 Retrieval backend: mmore
+```
 
 The simple backend remains available for debugging or quick corpus checks.
 

@@ -48,7 +48,9 @@ Planned mode:
 Public GitHub repository URL
 ```
 
-When a local project path is provided, GitHelp can build a project-specific corpus.
+The planned GitHub workflow is to clone or download the repository locally, then reuse the same project-specific corpus and indexing pipeline.
+
+When a local project path is provided, GitHelp can already build a project-specific corpus.
 
 For example:
 

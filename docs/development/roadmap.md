@@ -30,7 +30,7 @@ GitHelp is currently an early but functional prototype.
 
 ## Current limitations
 
-- Public GitHub repository loading is planned but not fully integrated.
+- Public GitHub repository loading is planned but not implemented yet.
 - Streamlit currently supports local project paths as the main project setup mode.
 - Building a corpus does not automatically rebuild the MMORE index.
 - The `simple` backend is useful for newly built corpora, but it is not a semantic retriever.
@@ -40,7 +40,7 @@ GitHelp is currently an early but functional prototype.
 
 ## Next steps
 
-1. Add public GitHub repository loading.
+1. Add public GitHub repository loading by cloning or downloading a repository URL into a local GitHelp-managed folder.
 2. Add an optional Streamlit action to export a project corpus to MMORE format.
 3. Add an optional Streamlit action to build or rebuild the MMORE index.
 4. Make backend selection clearer when the selected corpus and MMORE index may not match.
