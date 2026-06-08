@@ -81,6 +81,16 @@ and stores the index under:
 data/indexes/mmore/
 ```
 
+If answering with backend `mmore` fails with `KeyError: 'model_name'`, restart
+Streamlit after rebuilding the index. GitHelp can recover from missing Milvus
+model metadata by reading model names from `configs/mmore_index_config.yaml`,
+but an already-running Streamlit process may still be using older adapter code.
+
+In local environments where native MMORE/Milvus retrieval crashes, GitHelp runs
+native retrieval in an isolated child process. If that process fails, the
+`mmore` backend falls back to the exported `mmore_corpus.jsonl` so Streamlit can
+still answer from the MMORE-formatted corpus.
+
 ## Why keep indexing separate?
 
 The corpus can be built and inspected before MMORE is involved.

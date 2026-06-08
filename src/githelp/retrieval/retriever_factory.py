@@ -51,6 +51,10 @@ def retrieve_documents(
     if backend == "mmore":
         from githelp.retrieval.mmore_retriever import retrieve_with_mmore
 
-        return retrieve_with_mmore(query=query, top_k=top_k)
+        return retrieve_with_mmore(
+            query=query,
+            top_k=top_k,
+            corpus_path=corpus_path,
+        )
 
     raise ValueError(f"Unknown retrieval backend: {backend}")

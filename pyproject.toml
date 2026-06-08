@@ -10,9 +10,10 @@ dependencies = [
     "pytest",
     "streamlit",
     "python-dotenv",
-    "transformers>=4.51.0",
+    "transformers>=4.51.0,<5",
     "accelerate",
     "torch",
+    "langchain-community",
     "mmore[index,rag]==1.2.2",
 ]
 

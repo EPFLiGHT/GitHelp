@@ -28,10 +28,24 @@ project_profile: mmore
 
 llm:
   provider: qwen
-  model_name: Qwen/Qwen3-1.7B
+  model_name: Qwen/Qwen3-4B
   max_new_tokens: 512
   temperature: 0.0
   enable_thinking: false
+```
+
+MMORE sparse indexing currently requires Transformers 4.x. GitHelp pins:
+
+```text
+transformers>=4.51.0,<5
+```
+
+If MMORE index building fails with a tokenizer error such as
+`BertTokenizer has no attribute batch_encode_plus`, reinstall the compatible
+version:
+
+```bash
+python -m pip install "transformers>=4.51.0,<5"
 ```
 
 ### Main fields
@@ -132,7 +146,7 @@ indexer:
     model_name: splade
     is_multimodal: false
   db:
-    uri: ./data/indexes/mmore/proc_demo.db
+    uri: ./data/indexes/mmore/githelp.db
     name: my_db
 
 collection_name: mmore_docs
@@ -145,7 +159,7 @@ This file configures MMORE retrieval.
 
 ```yaml
 db:
-  uri: ./data/indexes/mmore/proc_demo.db
+  uri: ./data/indexes/mmore/githelp.db
   name: my_db
 
 hybrid_search_weight: 0.5

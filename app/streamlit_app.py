@@ -66,6 +66,39 @@ def render_answer_controls() -> tuple[str, bool]:
     return question, ask_button
 
 
+def _is_incomplete_mmore_index_error(error: Exception) -> bool:
+    """Detect the known partial-MMORE-index failure."""
+    return "MMORE index metadata is incomplete" in str(error)
+
+
+def _answer_with_backend(
+    question: str,
+    corpus: Path,
+    options: dict,
+    backend: str,
+):
+    """Answer a question with a selected backend."""
+    if options["use_llm"]:
+        llm_provider = get_llm_provider(options["config_path"])
+
+        return answer_question_with_provider(
+            question=question,
+            llm_provider=llm_provider,
+            corpus_path=corpus,
+            top_k=options["top_k"],
+            backend=backend,
+            config_path=options["config_path"],
+        )
+
+    return answer_question(
+        question=question,
+        corpus_path=corpus,
+        top_k=options["top_k"],
+        backend=backend,
+        config_path=options["config_path"],
+    )
+
+
 def answer_current_question(question: str, options: dict) -> None:
     """Answer the current question and persist the displayed result."""
     if not question.strip():
@@ -85,26 +118,42 @@ def answer_current_question(question: str, options: dict) -> None:
         return
 
     with st.spinner("Retrieving sources and generating answer..."):
-        try:
-            if options["use_llm"]:
-                llm_provider = get_llm_provider(options["config_path"])
+        backend_used = options["backend"]
 
-                answer, results = answer_question_with_provider(
-                    question=question,
-                    llm_provider=llm_provider,
-                    corpus_path=corpus,
-                    top_k=options["top_k"],
-                    backend=options["backend"],
-                    config_path=options["config_path"],
+        try:
+            answer, results = _answer_with_backend(
+                question=question,
+                corpus=corpus,
+                options=options,
+                backend=backend_used,
+            )
+
+        except RuntimeError as error:
+            if backend_used == "mmore" and _is_incomplete_mmore_index_error(error):
+                st.warning(
+                    "The MMORE index is incomplete, so GitHelp answered with "
+                    "the simple backend from the current corpus. Rebuild the "
+                    "MMORE index after fixing the MMORE dependencies to use "
+                    "`mmore` retrieval again."
                 )
+                backend_used = "simple"
+                st.session_state["pending_backend"] = "simple"
+
+                try:
+                    answer, results = _answer_with_backend(
+                        question=question,
+                        corpus=corpus,
+                        options=options,
+                        backend=backend_used,
+                    )
+                except Exception as fallback_error:
+                    st.error("An error occurred while answering with the fallback backend.")
+                    st.exception(fallback_error)
+                    return
             else:
-                answer, results = answer_question(
-                    question=question,
-                    corpus_path=corpus,
-                    top_k=options["top_k"],
-                    backend=options["backend"],
-                    config_path=options["config_path"],
-                )
+                st.error("An error occurred while answering the question.")
+                st.exception(error)
+                return
 
         except Exception as error:
             st.error("An error occurred while answering the question.")
@@ -115,7 +164,7 @@ def answer_current_question(question: str, options: dict) -> None:
     st.session_state["last_results"] = results
     st.session_state["last_metadata"] = {
         "question": question,
-        "backend": options["backend"],
+        "backend": backend_used,
         "top_k": options["top_k"],
         "use_llm": options["use_llm"],
         "corpus_path": corpus_path,

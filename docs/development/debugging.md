@@ -184,3 +184,22 @@ backend simple
 ```
 
 unless the MMORE export and index have also been rebuilt.
+
+## macOS OpenMP conflict while loading MMORE
+
+On some macOS environments, MMORE model loading can fail before retrieval with:
+
+```text
+OMP: Error #15: Initializing libomp.dylib, but found libomp.dylib already initialized.
+```
+
+This is an environment conflict between native numerical libraries. For a local
+debugging run, you can try:
+
+```bash
+KMP_DUPLICATE_LIB_OK=TRUE streamlit run app/streamlit_app.py
+```
+
+Use this only as a local workaround. The cleaner fix is to reinstall the
+environment so PyTorch, transformers, and MMORE share a compatible OpenMP
+runtime.

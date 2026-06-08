@@ -4,15 +4,15 @@ project_name: mmore
 package_name: mmore
 
 # Paths are relative to the GitHelp repository root.
-repo_path: ../../mmore
-docs_path: ../../mmore/docs/source
-code_path: ../../mmore/src/mmore
+repo_path: ../mmore
+docs_path: ../mmore/docs/source
+code_path: ../mmore/src/mmore
 
 # Include YAML configuration files from the target project.
 include_yaml_configs: true
 yaml_config_paths:
-  - ../../mmore/examples
-  - ../../mmore/production-config
+  - ../mmore/examples
+  - ../mmore/production-config
 
 # Add a synthetic document describing the repository tree.
 include_repo_structure: true

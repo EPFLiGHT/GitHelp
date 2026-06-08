@@ -1,7 +1,7 @@
 # MMORE retrieval configuration used by the GitHelp MMORE backend.
 
 db:
-  uri: ./data/indexes/mmore/proc_demo.db
+  uri: ./data/indexes/mmore/githelp.db
   name: my_db
 
 # Weight between dense and sparse retrieval in hybrid search.
