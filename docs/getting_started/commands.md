@@ -61,6 +61,17 @@ data/repositories/swiss-ai-mmore/
 The printed local path can then be used as the project path in Streamlit or in
 project-specific corpus-building commands.
 
+## Prepare a GitHub repository with the simple backend
+
+```bash
+PYTHONPATH=src python scripts/prepare_github_project.py \
+  https://github.com/swiss-ai/mmore
+```
+
+This clones or reuses the repository, generates a project config, builds the
+GitHelp JSONL corpus, and prepares the project for the `simple` retrieval
+backend.
+
 ## Preview a corpus
 
 Default corpus:
@@ -118,6 +129,17 @@ PYTHONPATH=src python scripts/evaluate_retrieval.py \
 This prints the top retrieved sources for each question without calling an LLM.
 Use it to inspect whether retrieval is finding useful evidence before tuning
 prompts or answer generation.
+
+To include expected-source checks:
+
+```bash
+PYTHONPATH=src python scripts/evaluate_retrieval.py \
+  --questions-path githelp_eval_questions.txt \
+  --expected-sources-path githelp_eval_expected_sources.example.json \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --backend simple \
+  --top-k 5
+```
 
 ## Debug prompt construction
 

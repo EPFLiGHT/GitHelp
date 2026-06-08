@@ -6,7 +6,12 @@ from pathlib import Path
 from typing import TypedDict
 from urllib.parse import urlparse
 
-from githelp.projects.project_builder import ProjectCommandError, slugify_project_name
+from githelp.projects.project_builder import (
+    ProjectCommandError,
+    SimpleIndexProjectResult,
+    prepare_project_with_simple_index,
+    slugify_project_name,
+)
 
 
 GITHUB_HTTPS_RE = re.compile(
@@ -33,6 +38,14 @@ class GitHubRepositoryLoadResult(TypedDict):
     owner: str
     repo: str
     project_name: str
+    repository_path: str
+    cloned: bool
+
+
+class GitHubSimpleIndexResult(SimpleIndexProjectResult):
+    """Result returned after cloning a GitHub repository and building a simple index."""
+
+    repository_url: str
     repository_path: str
     cloned: bool
 
@@ -141,4 +154,31 @@ def load_github_repository(
         "project_name": reference["project_name"],
         "repository_path": str(repository_path),
         "cloned": True,
+    }
+
+
+def prepare_github_project_with_simple_index(
+    githelp_root: str | Path,
+    repository_url: str,
+    project_name: str | None = None,
+) -> GitHubSimpleIndexResult:
+    """
+    Clone or reuse a public GitHub repository and build a simple GitHelp index.
+    """
+    github_result = load_github_repository(
+        githelp_root=githelp_root,
+        repository_url=repository_url,
+    )
+
+    index_result = prepare_project_with_simple_index(
+        githelp_root=githelp_root,
+        project_path=github_result["repository_path"],
+        project_name=project_name or github_result["project_name"],
+    )
+
+    return {
+        **index_result,
+        "repository_url": github_result["repository_url"],
+        "repository_path": github_result["repository_path"],
+        "cloned": github_result["cloned"],
     }

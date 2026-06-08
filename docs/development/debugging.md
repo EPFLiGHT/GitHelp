@@ -156,6 +156,17 @@ PYTHONPATH=src python scripts/evaluate_retrieval.py \
 This prints ranked source summaries for each question. It is useful for
 comparing retrieval changes before checking generated answers.
 
+To check expected sources as pass/fail criteria, provide a JSON file:
+
+```bash
+PYTHONPATH=src python scripts/evaluate_retrieval.py \
+  --questions-path githelp_eval_questions.txt \
+  --expected-sources-path githelp_eval_expected_sources.example.json \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --backend simple \
+  --top-k 5
+```
+
 ## Backend mismatch
 
 A common issue is using:

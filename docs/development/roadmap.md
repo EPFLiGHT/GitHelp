@@ -25,7 +25,9 @@ GitHelp is currently an early but functional prototype.
 - project profiles for project-specific query expansion, filtering, reranking, and direct answers;
 - MMORE project profile with deterministic Milvus parameter answers;
 - public GitHub repository cloning into local GitHelp-managed folders;
+- command-line GitHub preparation for the simple backend;
 - retrieval evaluation script for benchmark question sets;
+- expected-source checks for retrieval evaluation;
 - Streamlit interface for project setup, corpus building, question answering, and source inspection;
 - tests for corpus building, retrieval, prompting, project state, project builder, and project profiles;
 - GitHub Actions workflow for running tests.
@@ -33,6 +35,7 @@ GitHelp is currently an early but functional prototype.
 ## Current limitations
 
 - Public GitHub repository loading currently supports public repositories through local `git clone`.
+- Existing GitHub clones are reused as-is and are not automatically updated.
 - Streamlit currently supports local project paths as the main project setup mode.
 - Building a corpus does not automatically rebuild the MMORE index.
 - The `simple` backend is useful for newly built corpora, but it is not a semantic retriever.
@@ -45,10 +48,9 @@ GitHelp is currently an early but functional prototype.
 1. Add an optional Streamlit action to export a project corpus to MMORE format.
 2. Add an optional Streamlit action to build or rebuild the MMORE index.
 3. Make backend selection clearer when the selected corpus and MMORE index may not match.
-4. Extend retrieval evaluation with expected source checks.
-5. Add richer support for code-aware questions.
-6. Add better source browsing in the Streamlit interface.
-7. Add deployment instructions for local lab machines or servers.
+4. Add richer support for code-aware questions.
+5. Add better source browsing in the Streamlit interface.
+6. Add deployment instructions for local lab machines or servers.
 
 ## Future ideas
 

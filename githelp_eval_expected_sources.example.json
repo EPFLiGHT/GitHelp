@@ -1,0 +1,14 @@
+{
+  "What is MMORE used for?": [
+    {
+      "relative_path": "index.md",
+      "source_type": "markdown_section"
+    }
+  ],
+  "Which Milvus parameters are used in the ColPali config?": [
+    {
+      "relative_path": "examples/colpali/config_index.yml",
+      "source_type": "example_config"
+    }
+  ]
+}
