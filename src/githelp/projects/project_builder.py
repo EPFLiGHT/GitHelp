@@ -10,7 +10,7 @@ from typing import Literal, TypedDict
 import yaml
 
 
-class ProjectConfig(TypedDict):
+class GeneratedProjectConfig(TypedDict):
     """Configuration generated for one target project."""
 
     project_name: str
@@ -33,7 +33,7 @@ class PreparedProjectPaths(TypedDict):
     project_dir: Path
     project_config_path: Path
     corpus_path: Path
-    config: ProjectConfig
+    config: GeneratedProjectConfig
 
 
 class CorpusBuildResult(TypedDict):
@@ -222,7 +222,7 @@ def infer_yaml_config_paths(project_path: str | Path) -> list[str]:
 def build_project_config(
     project_path: str | Path,
     project_name: str | None = None,
-) -> ProjectConfig:
+) -> GeneratedProjectConfig:
     """
     Build a GitHelp project configuration dictionary for a local project.
     """
@@ -278,7 +278,7 @@ def build_project_config(
 
 
 def write_project_config(
-    config: ProjectConfig,
+    config: GeneratedProjectConfig,
     output_path: str | Path,
 ) -> Path:
     """

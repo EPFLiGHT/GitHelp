@@ -17,6 +17,9 @@ converted back into GitHelp RetrievalResult objects.
 """
 
 
+MIN_MMORE_RAW_RESULTS = 40
+
+
 def _get_result_field(result: dict[str, Any], field_name: str) -> Any:
     """
     Get a field from a raw MMORE result.
@@ -173,7 +176,7 @@ def retrieve_with_mmore(
 
     retriever = Retriever.from_config(str(config_path))
 
-    raw_k = max(top_k, 40)
+    raw_k = max(top_k, MIN_MMORE_RAW_RESULTS)
 
     raw_results = retriever.retrieve(
         query=query,

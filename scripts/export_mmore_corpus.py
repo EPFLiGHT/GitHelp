@@ -4,7 +4,11 @@ import argparse
 from pathlib import Path
 
 from githelp.indexing.mmore_format import export_corpus_to_mmore_jsonl
-from githelp.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
+from githelp.utils.paths import (
+    PROCESSED_DATA_DIR,
+    ensure_parent_dir,
+    resolve_project_path,
+)
 
 
 """
@@ -46,23 +50,12 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_path(path: Path) -> Path:
-    """
-    Resolve a path relative to the GitHelp project root if it is not absolute.
-    """
-    if path.is_absolute():
-        return path
-
-    return PROJECT_ROOT / path
-
-
 def main() -> None:
     """Export the processed GitHelp corpus to MMORE format."""
     args = parse_args()
 
-    corpus_path = resolve_path(args.corpus_path)
-    output_path = resolve_path(args.output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    corpus_path = resolve_project_path(args.corpus_path)
+    output_path = ensure_parent_dir(resolve_project_path(args.output_path))
 
     print("Exporting corpus to MMORE format")
     print("-" * 80)

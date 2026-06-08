@@ -4,9 +4,13 @@ import argparse
 import json
 from pathlib import Path
 
-from githelp.config import load_all_configs, load_yaml
+from githelp.config import ProjectConfig, load_project_config
 from githelp.extractors.python_doc_extractor import extract_python_docs
-from githelp.utils.paths import EXTRACTED_CODE_DOCS_DIR, PROJECT_ROOT
+from githelp.utils.paths import (
+    EXTRACTED_CODE_DOCS_DIR,
+    ensure_parent_dir,
+    resolve_project_path,
+)
 
 
 """
@@ -51,35 +55,28 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_path(path: Path) -> Path:
-    """Resolve a path relative to the GitHelp project root if needed."""
-    if path.is_absolute():
-        return path
-
-    return PROJECT_ROOT / path
-
-
-def load_project_config(config_path: Path | None) -> dict:
+def load_config(config_path: Path | None) -> ProjectConfig:
     """Load the project configuration."""
     if config_path is None:
-        configs = load_all_configs()
-        return configs["project"]
+        return load_project_config()
 
-    return load_yaml(resolve_path(config_path))
+    return load_project_config(resolve_project_path(config_path))
 
 
 def main() -> None:
     """Extract Python docstrings and signatures from the configured code path."""
     args = parse_args()
 
-    project_config = load_project_config(args.config)
+    project_config = load_config(args.config)
 
-    code_path = project_config["code_path"]
-    project_name = project_config.get("project_name", "project")
-    package_name = project_config.get("package_name")
+    if project_config.code_path is None:
+        raise ValueError("Project config must define code_path to extract code docs.")
 
-    output_path = resolve_path(args.output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    code_path = project_config.code_path
+    project_name = project_config.project_name
+    package_name = project_config.package_name
+
+    output_path = ensure_parent_dir(resolve_project_path(args.output_path))
 
     print("Extracting Python documentation")
     print("-" * 80)
@@ -87,7 +84,7 @@ def main() -> None:
     if args.config is None:
         print("project_config: default configs/project_config.yaml")
     else:
-        print(f"project_config: {resolve_path(args.config)}")
+        print(f"project_config: {resolve_project_path(args.config)}")
 
     print(f"project_name: {project_name}")
     print(f"package_name: {package_name}")

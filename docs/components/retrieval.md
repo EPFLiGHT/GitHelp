@@ -50,7 +50,7 @@ It does not use embeddings or MMORE.
 Command:
 
 ```bash
-PYTHONPATH=src python scripts/debug_retrieval.py \
+python scripts/debug_retrieval.py \
   "How do I configure indexing?" \
   --corpus-path data/projects/mmore/corpus.jsonl
 ```
@@ -73,7 +73,7 @@ The MMORE retriever:
 Command example:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py \
+python scripts/prepare_answer.py \
   "How do I configure indexing?" \
   --backend mmore
 ```

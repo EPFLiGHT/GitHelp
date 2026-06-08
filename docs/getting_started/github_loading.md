@@ -44,7 +44,7 @@ JSONL corpus and uses the local simple retriever.
 To clone or reuse a repository and build a simple index in one command:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_github_project.py \
+python scripts/prepare_github_project.py \
   https://github.com/swiss-ai/mmore
 ```
 
@@ -58,7 +58,7 @@ This prints:
 The resulting corpus can be used with:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py \
+python scripts/prepare_answer.py \
   "What is MMORE used for?" \
   --backend simple \
   --corpus-path data/projects/mmore/corpus.jsonl
@@ -69,7 +69,7 @@ PYTHONPATH=src python scripts/prepare_answer.py \
 If you only want to clone or reuse the repository without building the corpus:
 
 ```bash
-PYTHONPATH=src python scripts/load_github_repository.py \
+python scripts/load_github_repository.py \
   https://github.com/swiss-ai/mmore
 ```
 

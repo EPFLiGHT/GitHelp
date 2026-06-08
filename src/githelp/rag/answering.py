@@ -24,6 +24,12 @@ project profiles, not in this module.
 """
 
 
+RETRIEVAL_CANDIDATE_MULTIPLIER = 8
+MIN_RETRIEVAL_CANDIDATES = 40
+LEXICAL_FALLBACK_CANDIDATE_MULTIPLIER = 4
+MIN_LEXICAL_FALLBACK_CANDIDATES = 20
+
+
 def _extract_filename_tokens(question: str) -> list[str]:
     """
     Extract explicit filename-like tokens from the question.
@@ -328,7 +334,12 @@ def _retrieve_and_prepare_results(
     project_profile = create_project_profile(config)
     expanded_question = project_profile.expand_query(question)
 
-    retrieval_top_k = max(top_k * 8, 40)
+    # Retrieve a wider pool before profile filtering/reranking so project
+    # profiles can rescue useful sources that are not in the first few raw hits.
+    retrieval_top_k = max(
+        top_k * RETRIEVAL_CANDIDATE_MULTIPLIER,
+        MIN_RETRIEVAL_CANDIDATES,
+    )
 
     results = retrieve_documents(
         query=expanded_question,
@@ -348,7 +359,10 @@ def _retrieve_and_prepare_results(
     if should_add_lexical_results:
         simple_results = retrieve_documents(
             query=question,
-            top_k=max(top_k * 4, 20),
+            top_k=max(
+                top_k * LEXICAL_FALLBACK_CANDIDATE_MULTIPLIER,
+                MIN_LEXICAL_FALLBACK_CANDIDATES,
+            ),
             backend="simple",
             corpus_path=resolved_corpus_path,
         )

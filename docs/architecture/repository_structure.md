@@ -56,6 +56,10 @@ data/app_state.json
 
 This file is machine-specific and should normally not be committed.
 
+Only placeholder `.gitkeep` files are tracked under `data/`. Generated corpora,
+project folders, app state, and indexes are created by the code when needed and
+are ignored by Git.
+
 ## Python package structure
 
 ```text

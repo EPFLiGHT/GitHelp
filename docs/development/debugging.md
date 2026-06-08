@@ -5,7 +5,7 @@ This page lists useful checks during development.
 ## Run all tests
 
 ```bash
-PYTHONPATH=src pytest -q
+pytest -q
 ```
 
 This is the main check before committing changes.
@@ -21,7 +21,7 @@ This catches syntax errors and some import issues.
 ## Test default corpus build
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py
+python scripts/build_corpus.py
 ```
 
 This should write:
@@ -33,7 +33,7 @@ data/processed/corpus.jsonl
 ## Test dynamic corpus build
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py \
+python scripts/build_corpus.py \
   --config configs/project_config.yaml \
   --output-path data/projects/mmore/corpus.jsonl
 ```
@@ -47,7 +47,7 @@ data/projects/mmore/corpus.jsonl
 ## Test answering on a project-specific corpus
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py \
+python scripts/answer_question.py \
   "Which Milvus parameters are used in the ColPali config?" \
   --llm \
   --backend simple \
@@ -117,21 +117,21 @@ grep -R "test_prompting\|test_retrieval" -n .
 Build the full corpus:
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py
+python scripts/build_corpus.py
 ```
 
 Preview specific source types:
 
 ```bash
-PYTHONPATH=src python scripts/preview_corpus.py --source-type python_function --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type example_config --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type repo_structure --limit 1
+python scripts/preview_corpus.py --source-type python_function --limit 3
+python scripts/preview_corpus.py --source-type example_config --limit 3
+python scripts/preview_corpus.py --source-type repo_structure --limit 1
 ```
 
 ## Debug retrieval quality
 
 ```bash
-PYTHONPATH=src python scripts/debug_retrieval.py "How do I configure indexing?"
+python scripts/debug_retrieval.py "How do I configure indexing?"
 ```
 
 If results are poor, check:
@@ -146,7 +146,7 @@ If results are poor, check:
 ## Evaluate retrieval on benchmark questions
 
 ```bash
-PYTHONPATH=src python scripts/evaluate_retrieval.py \
+python scripts/evaluate_retrieval.py \
   --questions-path githelp_eval_questions.txt \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
@@ -159,7 +159,7 @@ comparing retrieval changes before checking generated answers.
 To check expected sources as pass/fail criteria, provide a JSON file:
 
 ```bash
-PYTHONPATH=src python scripts/evaluate_retrieval.py \
+python scripts/evaluate_retrieval.py \
   --questions-path githelp_eval_questions.txt \
   --expected-sources-path githelp_eval_expected_sources.example.json \
   --corpus-path data/projects/mmore/corpus.jsonl \
