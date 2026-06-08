@@ -36,7 +36,7 @@ The prompt instructs the LLM to:
 Debug command:
 
 ```bash
-PYTHONPATH=src python scripts/debug_prompting.py \
+python scripts/debug_prompting.py \
   "How do I configure indexing?" \
   --backend simple \
   --corpus-path data/projects/mmore/corpus.jsonl \
@@ -124,7 +124,7 @@ It:
 Command:
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py \
+python scripts/answer_question.py \
   "How do I configure indexing?" \
   --backend simple
 ```
@@ -134,7 +134,7 @@ PYTHONPATH=src python scripts/answer_question.py \
 LLM generation can be enabled with:
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py \
+python scripts/answer_question.py \
   "How do I configure indexing?" \
   --llm \
   --backend simple \

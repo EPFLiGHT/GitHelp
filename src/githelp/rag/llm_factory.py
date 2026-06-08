@@ -1,13 +1,25 @@
 from __future__ import annotations
 
+from githelp.config import AppConfig, LLMConfig
 from githelp.rag.dummy_provider import DummyLLMProvider
 from githelp.rag.llm_provider import LLMProvider
 
 
-def create_llm_provider(config: dict) -> LLMProvider:
+def _coerce_llm_config(config: AppConfig | LLMConfig | dict) -> LLMConfig:
+    """Return a typed LLM config from app, LLM, or legacy dictionary config."""
+    if isinstance(config, LLMConfig):
+        return config
+
+    if isinstance(config, AppConfig):
+        return config.llm
+
+    return LLMConfig.from_mapping(config.get("llm", {}))
+
+
+def create_llm_provider(config: AppConfig | LLMConfig | dict) -> LLMProvider:
     """Create an LLM provider from a configuration dictionary."""
-    llm_config = config.get("llm", {})
-    provider = llm_config.get("provider", "dummy")
+    llm_config = _coerce_llm_config(config)
+    provider = llm_config.provider
 
     if provider == "dummy":
         return DummyLLMProvider()
@@ -16,10 +28,10 @@ def create_llm_provider(config: dict) -> LLMProvider:
         from githelp.rag.qwen_provider import QwenLLMProvider
 
         return QwenLLMProvider(
-            model_name=llm_config.get("model_name", "Qwen/Qwen3-8B"),
-            max_new_tokens=llm_config.get("max_new_tokens", 512),
-            temperature=llm_config.get("temperature", 0.0),
-            enable_thinking=llm_config.get("enable_thinking", False),
+            model_name=llm_config.model_name,
+            max_new_tokens=llm_config.max_new_tokens,
+            temperature=llm_config.temperature,
+            enable_thinking=llm_config.enable_thinking,
         )
 
     raise ValueError(f"Unsupported LLM provider: {provider}")

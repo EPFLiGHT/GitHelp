@@ -28,7 +28,7 @@ Depending on the project config, it can include:
 ## Default command
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py
+python scripts/build_corpus.py
 ```
 
 This reads:
@@ -48,7 +48,7 @@ data/processed/corpus.jsonl
 The script can also build a corpus for a project-specific config:
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py \
+python scripts/build_corpus.py \
   --config data/projects/mmore/project_config.yaml \
   --output-path data/projects/mmore/corpus.jsonl
 ```

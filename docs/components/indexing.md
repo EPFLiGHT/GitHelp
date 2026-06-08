@@ -18,7 +18,7 @@ scripts/build_index.py
 Default command:
 
 ```bash
-PYTHONPATH=src python scripts/export_mmore_corpus.py
+python scripts/export_mmore_corpus.py
 ```
 
 Default input:
@@ -36,7 +36,7 @@ data/processed/mmore_corpus.jsonl
 Project-specific command:
 
 ```bash
-PYTHONPATH=src python scripts/export_mmore_corpus.py \
+python scripts/export_mmore_corpus.py \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --output-path data/projects/mmore/mmore_corpus.jsonl
 ```
@@ -58,13 +58,13 @@ GitHelp adds a short source header inside the text field before indexing. This m
 Default command:
 
 ```bash
-PYTHONPATH=src python scripts/build_index.py
+python scripts/build_index.py
 ```
 
 Project-specific command:
 
 ```bash
-PYTHONPATH=src python scripts/build_index.py \
+python scripts/build_index.py \
   --documents-path data/projects/mmore/mmore_corpus.jsonl \
   --collection-name mmore_docs
 ```

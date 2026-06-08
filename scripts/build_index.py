@@ -3,9 +3,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from githelp.config import load_all_configs
+from githelp.config import load_indexing_config
 from githelp.indexing.mmore_indexer import build_mmore_index
-from githelp.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
+from githelp.utils.paths import PROCESSED_DATA_DIR, resolve_project_path
 
 
 """
@@ -57,32 +57,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_path(path: Path) -> Path:
-    """
-    Resolve a path relative to the GitHelp project root if it is not absolute.
-    """
-    if path.is_absolute():
-        return path
-
-    return PROJECT_ROOT / path
-
-
 def main() -> None:
     """Build the configured MMORE index."""
     args = parse_args()
 
-    configs = load_all_configs()
-    indexing_config = configs["indexing"]
+    indexing_config = load_indexing_config()
 
-    config_path = args.config_path or Path(indexing_config["mmore_index_config_path"])
-    config_path = resolve_path(config_path)
+    config_path = args.config_path or Path(indexing_config.mmore_index_config_path)
+    config_path = resolve_project_path(config_path)
 
-    collection_name = (
-        args.collection_name
-        or indexing_config.get("collection_name", "githelp_docs")
-    )
+    collection_name = args.collection_name or indexing_config.collection_name
 
-    documents_path = resolve_path(args.documents_path)
+    documents_path = resolve_project_path(args.documents_path)
 
     print("Building MMORE index")
     print("-" * 80)

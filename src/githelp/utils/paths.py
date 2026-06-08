@@ -27,3 +27,25 @@ EXTRACTED_CODE_DOCS_DIR = DATA_DIR / "extracted_code_docs"
 # Index directories.
 INDEXES_DIR = DATA_DIR / "indexes"
 MMORE_INDEX_DIR = INDEXES_DIR / "mmore"
+
+
+def resolve_project_path(path: str | Path, root: str | Path = PROJECT_ROOT) -> Path:
+    """
+    Resolve a path relative to the GitHelp project root.
+    """
+    path = Path(path)
+
+    if path.is_absolute():
+        return path
+
+    return Path(root) / path
+
+
+def ensure_parent_dir(path: str | Path) -> Path:
+    """
+    Ensure a path's parent directory exists and return the path as a Path.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    return path

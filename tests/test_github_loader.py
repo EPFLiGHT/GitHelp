@@ -8,6 +8,7 @@ from githelp.projects.github_loader import (
     get_github_repository_path,
     load_github_repository,
     parse_github_repository_url,
+    prepare_github_project_with_simple_index,
 )
 from githelp.projects.project_builder import ProjectCommandError
 
@@ -132,3 +133,64 @@ def test_load_github_repository_raises_structured_error_on_clone_failure(
     error = error_info.value
     assert error.label == "GitHub repository clone failed"
     assert error.stderr == "clone failed"
+
+
+def test_prepare_github_project_with_simple_index_reuses_project_builder(
+    monkeypatch,
+    tmp_path: Path,
+):
+    calls = []
+
+    def fake_load_github_repository(githelp_root, repository_url):
+        return {
+            "repository_url": "https://github.com/swiss-ai/mmore.git",
+            "owner": "swiss-ai",
+            "repo": "mmore",
+            "project_name": "mmore",
+            "repository_path": str(tmp_path / "data" / "repositories" / "swiss-ai-mmore"),
+            "cloned": True,
+        }
+
+    def fake_prepare_project_with_simple_index(githelp_root, project_path, project_name):
+        calls.append(
+            {
+                "githelp_root": githelp_root,
+                "project_path": project_path,
+                "project_name": project_name,
+            }
+        )
+        return {
+            "project_name": project_name,
+            "project_dir": str(tmp_path / "data" / "projects" / project_name),
+            "project_config_path": str(tmp_path / "project_config.yaml"),
+            "corpus_path": str(tmp_path / "corpus.jsonl"),
+            "stdout": "built",
+            "stderr": "",
+            "indexing_mode": "simple",
+            "backend": "simple",
+        }
+
+    monkeypatch.setattr(
+        "githelp.projects.github_loader.load_github_repository",
+        fake_load_github_repository,
+    )
+    monkeypatch.setattr(
+        "githelp.projects.github_loader.prepare_project_with_simple_index",
+        fake_prepare_project_with_simple_index,
+    )
+
+    result = prepare_github_project_with_simple_index(
+        githelp_root=tmp_path,
+        repository_url="https://github.com/swiss-ai/mmore",
+    )
+
+    assert calls == [
+        {
+            "githelp_root": tmp_path,
+            "project_path": str(tmp_path / "data" / "repositories" / "swiss-ai-mmore"),
+            "project_name": "mmore",
+        }
+    ]
+    assert result["backend"] == "simple"
+    assert result["repository_url"] == "https://github.com/swiss-ai/mmore.git"
+    assert result["cloned"] is True

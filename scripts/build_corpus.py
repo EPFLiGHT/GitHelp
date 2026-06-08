@@ -3,9 +3,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from githelp.config import load_all_configs, load_yaml
+from githelp.config import ProjectConfig, load_project_config
 from githelp.corpus.builder import build_corpus, save_corpus_jsonl, summarize_corpus
-from githelp.utils.paths import PROJECT_ROOT, PROCESSED_DATA_DIR
+from githelp.utils.paths import (
+    PROCESSED_DATA_DIR,
+    ensure_parent_dir,
+    resolve_project_path,
+)
 
 
 """
@@ -51,50 +55,35 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_path(path: Path) -> Path:
-    """
-    Resolve a path relative to the GitHelp project root if it is not absolute.
-    """
-    if path.is_absolute():
-        return path
-
-    return PROJECT_ROOT / path
-
-
-def load_project_config(config_path: Path | None) -> dict:
+def load_config(config_path: Path | None) -> ProjectConfig:
     """
     Load the project configuration.
 
     If config_path is None, keep the original behavior and load the default
-    project config through load_all_configs().
+    project config.
     """
     if config_path is None:
-        configs = load_all_configs()
-        return configs["project"]
+        return load_project_config()
 
-    resolved_config_path = resolve_path(config_path)
-    return load_yaml(resolved_config_path)
+    return load_project_config(resolve_project_path(config_path))
 
 
 def main() -> None:
     """Build and save the configured GitHelp corpus."""
     args = parse_args()
 
-    project_config = load_project_config(args.config)
-    output_path = resolve_path(args.output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    project_config = load_config(args.config)
+    output_path = ensure_parent_dir(resolve_project_path(args.output_path))
 
-    project_name = project_config.get("project_name", "project")
-    package_name = project_config.get("package_name")
-    repo_path = project_config.get("repo_path")
-    docs_path = project_config["docs_path"]
-    code_path = project_config.get("code_path")
-
-    include_yaml_configs = project_config.get("include_yaml_configs", False)
-    yaml_config_paths = project_config.get("yaml_config_paths", [])
-
-    include_repo_structure = project_config.get("include_repo_structure", False)
-    repo_structure_max_depth = project_config.get("repo_structure_max_depth", 4)
+    project_name = project_config.project_name
+    package_name = project_config.package_name
+    repo_path = project_config.repo_path
+    docs_path = project_config.docs_path
+    code_path = project_config.code_path
+    include_yaml_configs = project_config.include_yaml_configs
+    yaml_config_paths = project_config.yaml_config_paths
+    include_repo_structure = project_config.include_repo_structure
+    repo_structure_max_depth = project_config.repo_structure_max_depth
 
     print("Building GitHelp corpus")
     print("-" * 80)
@@ -102,7 +91,7 @@ def main() -> None:
     if args.config is None:
         print("project_config: default configs/project_config.yaml")
     else:
-        print(f"project_config: {resolve_path(args.config)}")
+        print(f"project_config: {resolve_project_path(args.config)}")
 
     print(f"project_name: {project_name}")
     print(f"package_name: {package_name}")

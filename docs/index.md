@@ -15,6 +15,7 @@ GitHelp can be used in two ways:
 :caption: Getting started
 
 getting_started/quickstart
+getting_started/github_loading
 getting_started/configuration
 getting_started/commands
 ```

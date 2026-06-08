@@ -4,8 +4,11 @@ import json
 from pathlib import Path
 
 from githelp.evaluation.retrieval_eval import (
+    check_expected_sources,
     evaluate_retrieval_questions,
+    load_expected_sources,
     load_eval_questions,
+    summarize_expectation_checks,
 )
 
 
@@ -74,3 +77,63 @@ def test_evaluate_retrieval_questions_returns_compact_ranked_sources(tmp_path: P
     assert result["doc_id"] == "doc::install"
     assert result["source_type"] == "markdown_section"
     assert result["relative_path"] == "docs/install.md"
+
+
+def test_load_expected_sources_reads_json_mapping(tmp_path: Path):
+    expected_path = tmp_path / "expected.json"
+    expected_path.write_text(
+        '{"How do I install it?": [{"relative_path": "docs/install.md"}]}',
+        encoding="utf-8",
+    )
+
+    assert load_expected_sources(expected_path) == {
+        "How do I install it?": [{"relative_path": "docs/install.md"}]
+    }
+
+
+def test_check_expected_sources_reports_matches_and_misses():
+    evaluation = {
+        "How do I install it?": [
+            {
+                "question": "How do I install it?",
+                "rank": 1,
+                "score": 1.0,
+                "doc_id": "doc::install",
+                "source_type": "markdown_section",
+                "relative_path": "docs/install.md",
+                "title": "Installation",
+            }
+        ]
+    }
+
+    checks = check_expected_sources(
+        evaluation,
+        {
+            "How do I install it?": [
+                {"relative_path": "docs/install.md"},
+                {"relative_path": "docs/missing.md"},
+            ]
+        },
+    )
+    summary = summarize_expectation_checks(checks)
+
+    assert checks == [
+        {
+            "question": "How do I install it?",
+            "expected": {"relative_path": "docs/install.md"},
+            "matched": True,
+            "matched_rank": 1,
+        },
+        {
+            "question": "How do I install it?",
+            "expected": {"relative_path": "docs/missing.md"},
+            "matched": False,
+            "matched_rank": None,
+        },
+    ]
+    assert summary == {
+        "total": 2,
+        "matched": 1,
+        "missed": 1,
+        "accuracy": 0.5,
+    }

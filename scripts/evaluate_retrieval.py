@@ -3,8 +3,11 @@ from __future__ import annotations
 import argparse
 
 from githelp.evaluation.retrieval_eval import (
+    check_expected_sources,
     evaluate_retrieval_questions,
+    load_expected_sources,
     load_eval_questions,
+    summarize_expectation_checks,
 )
 
 
@@ -48,6 +51,15 @@ def parse_args() -> argparse.Namespace:
         help="Number of sources to retrieve per question.",
     )
 
+    parser.add_argument(
+        "--expected-sources-path",
+        default=None,
+        help=(
+            "Optional JSON file mapping questions to expected source criteria. "
+            "When provided, the script prints pass/fail checks."
+        ),
+    )
+
     return parser.parse_args()
 
 
@@ -81,6 +93,31 @@ def main() -> None:
             )
 
         print()
+
+    if args.expected_sources_path is None:
+        return
+
+    expected_sources = load_expected_sources(args.expected_sources_path)
+    checks = check_expected_sources(evaluation, expected_sources)
+    summary = summarize_expectation_checks(checks)
+
+    print("=" * 80)
+    print("EXPECTED SOURCE CHECKS")
+    print("=" * 80)
+
+    for check in checks:
+        status = "PASS" if check["matched"] else "MISS"
+        rank = check["matched_rank"] if check["matched_rank"] is not None else "-"
+        print(
+            f"{status} | rank={rank} | {check['question']} | "
+            f"expected={check['expected']}"
+        )
+
+    print()
+    print(
+        f"Summary: {summary['matched']}/{summary['total']} matched "
+        f"({summary['accuracy']:.2%}), {summary['missed']} missed"
+    )
 
 
 if __name__ == "__main__":

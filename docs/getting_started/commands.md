@@ -4,6 +4,12 @@ This page lists the main commands used during development.
 
 Run all commands from the root of the `GitHelp` repository.
 
+Install the package in editable mode first:
+
+```bash
+python -m pip install -e .
+```
+
 ## Run the Streamlit app
 
 ```bash
@@ -23,7 +29,7 @@ The app lets a user:
 ## Build the default corpus
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py
+python scripts/build_corpus.py
 ```
 
 What it does:
@@ -38,7 +44,7 @@ What it does:
 ## Build a project-specific corpus
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py \
+python scripts/build_corpus.py \
   --config data/projects/mmore/project_config.yaml \
   --output-path data/projects/mmore/corpus.jsonl
 ```
@@ -48,7 +54,7 @@ This is the command used internally by the Streamlit project setup flow.
 ## Load a public GitHub repository
 
 ```bash
-PYTHONPATH=src python scripts/load_github_repository.py \
+python scripts/load_github_repository.py \
   https://github.com/swiss-ai/mmore
 ```
 
@@ -61,18 +67,29 @@ data/repositories/swiss-ai-mmore/
 The printed local path can then be used as the project path in Streamlit or in
 project-specific corpus-building commands.
 
+## Prepare a GitHub repository with the simple backend
+
+```bash
+python scripts/prepare_github_project.py \
+  https://github.com/swiss-ai/mmore
+```
+
+This clones or reuses the repository, generates a project config, builds the
+GitHelp JSONL corpus, and prepares the project for the `simple` retrieval
+backend.
+
 ## Preview a corpus
 
 Default corpus:
 
 ```bash
-PYTHONPATH=src python scripts/preview_corpus.py --limit 2
+python scripts/preview_corpus.py --limit 2
 ```
 
 Project-specific corpus:
 
 ```bash
-PYTHONPATH=src python scripts/preview_corpus.py \
+python scripts/preview_corpus.py \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --limit 2
 ```
@@ -80,19 +97,19 @@ PYTHONPATH=src python scripts/preview_corpus.py \
 Useful filters:
 
 ```bash
-PYTHONPATH=src python scripts/preview_corpus.py --source-type markdown_section --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type python_function --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type python_class --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type python_method --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type example_config --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type production_config --limit 3
-PYTHONPATH=src python scripts/preview_corpus.py --source-type repo_structure --limit 1
+python scripts/preview_corpus.py --source-type markdown_section --limit 3
+python scripts/preview_corpus.py --source-type python_function --limit 3
+python scripts/preview_corpus.py --source-type python_class --limit 3
+python scripts/preview_corpus.py --source-type python_method --limit 3
+python scripts/preview_corpus.py --source-type example_config --limit 3
+python scripts/preview_corpus.py --source-type production_config --limit 3
+python scripts/preview_corpus.py --source-type repo_structure --limit 1
 ```
 
 ## Debug local retrieval
 
 ```bash
-PYTHONPATH=src python scripts/debug_retrieval.py "How do I configure indexing?"
+python scripts/debug_retrieval.py "How do I configure indexing?"
 ```
 
 This directly tests the simple local retriever.
@@ -100,7 +117,7 @@ This directly tests the simple local retriever.
 For a project-specific corpus:
 
 ```bash
-PYTHONPATH=src python scripts/debug_retrieval.py \
+python scripts/debug_retrieval.py \
   "How do I configure indexing?" \
   --corpus-path data/projects/mmore/corpus.jsonl
 ```
@@ -108,7 +125,7 @@ PYTHONPATH=src python scripts/debug_retrieval.py \
 ## Evaluate retrieval on a question set
 
 ```bash
-PYTHONPATH=src python scripts/evaluate_retrieval.py \
+python scripts/evaluate_retrieval.py \
   --questions-path githelp_eval_questions.txt \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
@@ -119,10 +136,21 @@ This prints the top retrieved sources for each question without calling an LLM.
 Use it to inspect whether retrieval is finding useful evidence before tuning
 prompts or answer generation.
 
+To include expected-source checks:
+
+```bash
+python scripts/evaluate_retrieval.py \
+  --questions-path githelp_eval_questions.txt \
+  --expected-sources-path githelp_eval_expected_sources.example.json \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --backend simple \
+  --top-k 5
+```
+
 ## Debug prompt construction
 
 ```bash
-PYTHONPATH=src python scripts/debug_prompting.py \
+python scripts/debug_prompting.py \
   "How do I configure indexing?" \
   --backend simple \
   --corpus-path data/projects/mmore/corpus.jsonl \
@@ -141,7 +169,7 @@ What it does:
 Simple backend:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py \
+python scripts/prepare_answer.py \
   "How do I configure indexing?" \
   --backend simple \
   --corpus-path data/projects/mmore/corpus.jsonl \
@@ -151,7 +179,7 @@ PYTHONPATH=src python scripts/prepare_answer.py \
 MMORE backend:
 
 ```bash
-PYTHONPATH=src python scripts/prepare_answer.py \
+python scripts/prepare_answer.py \
   "How do I configure indexing?" \
   --backend mmore \
   --config-path configs/app_config.yaml
@@ -164,7 +192,7 @@ The MMORE backend requires an MMORE index to be built first.
 Simple backend with LLM:
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py \
+python scripts/answer_question.py \
   "How do I configure indexing?" \
   --llm \
   --backend simple \
@@ -175,7 +203,7 @@ PYTHONPATH=src python scripts/answer_question.py \
 Simple backend without LLM:
 
 ```bash
-PYTHONPATH=src python scripts/answer_question.py \
+python scripts/answer_question.py \
   "How do I configure indexing?" \
   --backend simple \
   --corpus-path data/projects/mmore/corpus.jsonl
@@ -186,13 +214,13 @@ Some project profiles can answer structured questions directly without loading t
 ## Extract Python documentation only
 
 ```bash
-PYTHONPATH=src python scripts/extract_code_docs.py
+python scripts/extract_code_docs.py
 ```
 
 If the script is run dynamically:
 
 ```bash
-PYTHONPATH=src python scripts/extract_code_docs.py \
+python scripts/extract_code_docs.py \
   --config data/projects/mmore/project_config.yaml \
   --output-path data/projects/mmore/code_docs.jsonl
 ```
@@ -202,13 +230,13 @@ PYTHONPATH=src python scripts/extract_code_docs.py \
 Default corpus:
 
 ```bash
-PYTHONPATH=src python scripts/export_mmore_corpus.py
+python scripts/export_mmore_corpus.py
 ```
 
 Project-specific corpus:
 
 ```bash
-PYTHONPATH=src python scripts/export_mmore_corpus.py \
+python scripts/export_mmore_corpus.py \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --output-path data/projects/mmore/mmore_corpus.jsonl
 ```
@@ -218,13 +246,13 @@ PYTHONPATH=src python scripts/export_mmore_corpus.py \
 Default MMORE corpus:
 
 ```bash
-PYTHONPATH=src python scripts/build_index.py
+python scripts/build_index.py
 ```
 
 Project-specific MMORE corpus:
 
 ```bash
-PYTHONPATH=src python scripts/build_index.py \
+python scripts/build_index.py \
   --documents-path data/projects/mmore/mmore_corpus.jsonl \
   --collection-name mmore_docs
 ```
@@ -232,7 +260,7 @@ PYTHONPATH=src python scripts/build_index.py \
 ## Run tests
 
 ```bash
-PYTHONPATH=src pytest -q
+pytest -q
 ```
 
 The GitHub Actions workflow also runs these tests on push and pull request.

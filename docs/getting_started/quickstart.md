@@ -162,7 +162,7 @@ This file is local state and should normally not be committed.
 The default command still works:
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py
+python scripts/build_corpus.py
 ```
 
 It reads:
@@ -180,7 +180,7 @@ data/processed/corpus.jsonl
 You can also build a project-specific corpus manually:
 
 ```bash
-PYTHONPATH=src python scripts/build_corpus.py \
+python scripts/build_corpus.py \
   --config data/projects/mmore/project_config.yaml \
   --output-path data/projects/mmore/corpus.jsonl
 ```
