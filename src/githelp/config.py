@@ -9,9 +9,17 @@ indexing settings, and application settings.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 import yaml
+
+
+class GitHelpConfigs(TypedDict):
+    """Configuration sections loaded from the default config directory."""
+
+    project: dict[str, Any]
+    indexing: dict[str, Any]
+    app: dict[str, Any]
 
 
 def load_yaml(path: str | Path) -> dict[str, Any]:
@@ -49,7 +57,7 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
     return data
 
 
-def load_all_configs(config_dir: str | Path = "configs") -> dict[str, dict[str, Any]]:
+def load_all_configs(config_dir: str | Path = "configs") -> GitHelpConfigs:
     """
     Load all configuration files used by GitHelp.
 
@@ -60,7 +68,7 @@ def load_all_configs(config_dir: str | Path = "configs") -> dict[str, dict[str, 
 
     Returns
     -------
-    dict[str, dict[str, Any]]
+    GitHelpConfigs
         Dictionary containing project, indexing, and app configuration.
     """
     config_dir = Path(config_dir)

@@ -430,27 +430,16 @@ def answer_question(
     return answer, results
 
 
-def answer_question_with_llm(
+def _prepare_llm_answer_input(
     question: str,
-    corpus_path: str | Path | None = None,
-    top_k: int = 5,
-    backend: str = "simple",
-    config_path: str | Path = "configs/app_config.yaml",
-) -> tuple[str, list[RetrievalResult]]:
-    """
-    Retrieve sources and generate a source-grounded LLM answer.
+    results: list[RetrievalResult],
+    config: dict[str, Any],
+) -> tuple[str, list[RetrievalResult], bool]:
+    """Apply shared pre-generation checks and build the LLM prompt.
 
-    The LLM provider and project profile are selected from the app
-    configuration file.
+    The boolean indicates whether the returned text should be sent to the LLM.
+    If it is False, the returned text is already the final answer.
     """
-    results, config = _retrieve_and_prepare_results(
-        question=question,
-        corpus_path=corpus_path,
-        top_k=top_k,
-        backend=backend,
-        config_path=config_path,
-    )
-
     project_profile = create_project_profile(config)
 
     if is_subjective_recommendation_question(question):
@@ -460,27 +449,55 @@ def answer_question_with_llm(
             "documentation and configuration examples, but they do not establish "
             "a general recommendation for an unseen dataset.",
             results,
+            False,
         )
 
     if not results:
-        return "I could not find relevant sources in the corpus.", results
+        return "I could not find relevant sources in the corpus.", results, False
 
     direct_answer = project_profile.answer_directly(question, results)
-
     if direct_answer is not None:
-        return direct_answer, results
+        return direct_answer, results, False
 
     project_name = _get_project_name(config, results)
-
     prompt = build_user_prompt(
         question=question,
         results=results,
         project_name=project_name,
     )
+    return prompt, results, True
+
+
+def answer_question_with_llm(
+    question: str,
+    corpus_path: str | Path | None = None,
+    top_k: int = 5,
+    backend: str = "simple",
+    config_path: str | Path = "configs/app_config.yaml",
+) -> tuple[str, list[RetrievalResult]]:
+    """Retrieve sources and generate a source-grounded LLM answer.
+
+    The LLM provider and project profile are selected from the app configuration file.
+    """
+    results, config = _retrieve_and_prepare_results(
+        question=question,
+        corpus_path=corpus_path,
+        top_k=top_k,
+        backend=backend,
+        config_path=config_path,
+    )
+
+    prompt_or_answer, results, should_generate = _prepare_llm_answer_input(
+        question=question,
+        results=results,
+        config=config,
+    )
+
+    if not should_generate:
+        return prompt_or_answer, results
 
     llm_provider = create_llm_provider(config)
-    answer = llm_provider.generate(prompt)
-
+    answer = llm_provider.generate(prompt_or_answer)
     return answer, results
 
 
@@ -492,9 +509,7 @@ def answer_question_with_provider(
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
 ) -> tuple[str, list[RetrievalResult]]:
-    """
-    Retrieve sources and generate a source-grounded LLM answer using an
-    already-created LLM provider.
+    """Retrieve sources and generate an answer with a provided LLM provider.
 
     This is useful for Streamlit, where the provider can be cached and reused
     across questions.
@@ -507,33 +522,14 @@ def answer_question_with_provider(
         config_path=config_path,
     )
 
-    project_profile = create_project_profile(config)
-
-    if is_subjective_recommendation_question(question):
-        return (
-            "The available sources do not provide enough information to determine "
-            "the best option for the user's private dataset. They show retrieved "
-            "documentation and configuration examples, but they do not establish "
-            "a general recommendation for an unseen dataset.",
-            results,
-        )
-
-    if not results:
-        return "I could not find relevant sources in the corpus.", results
-
-    direct_answer = project_profile.answer_directly(question, results)
-
-    if direct_answer is not None:
-        return direct_answer, results
-
-    project_name = _get_project_name(config, results)
-
-    prompt = build_user_prompt(
+    prompt_or_answer, results, should_generate = _prepare_llm_answer_input(
         question=question,
         results=results,
-        project_name=project_name,
+        config=config,
     )
 
-    answer = llm_provider.generate(prompt)
+    if not should_generate:
+        return prompt_or_answer, results
 
+    answer = llm_provider.generate(prompt_or_answer)
     return answer, results

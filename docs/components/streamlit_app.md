@@ -36,19 +36,22 @@ http://localhost:8501/
 
 The app contains a **Project setup** section.
 
-Current supported mode:
+Supported modes:
 
 ```text
 Local project path
-```
-
-Planned mode:
-
-```text
 Public GitHub repository URL
 ```
 
-When a local project path is provided, GitHelp can build a project-specific corpus.
+For GitHub URLs, GitHelp clones the repository into:
+
+```text
+data/repositories/<owner>-<repo>/
+```
+
+It then reuses the same project-specific corpus and indexing pipeline as local paths.
+
+When a local project path is provided, GitHelp builds the corpus directly from that folder.
 
 For example:
 

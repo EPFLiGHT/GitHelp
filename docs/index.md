@@ -1,4 +1,4 @@
-# GitHelp documentation
+# GitHelp Documentation
 
 GitHelp is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
 
@@ -45,5 +45,6 @@ components/streamlit_app
 :caption: Development
 
 development/debugging
+development/project_profiles
 development/roadmap
 ```

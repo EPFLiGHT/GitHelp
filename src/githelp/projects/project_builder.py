@@ -5,9 +5,116 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Literal, TypedDict
 
 import yaml
+
+
+class ProjectConfig(TypedDict):
+    """Configuration generated for one target project."""
+
+    project_name: str
+    package_name: str
+    repo_path: str
+    docs_path: str
+    code_path: str
+    include_yaml_configs: bool
+    yaml_config_paths: list[str]
+    include_repo_structure: bool
+    repo_structure_max_depth: int
+    include_extensions: list[str]
+    exclude_patterns: list[str]
+
+
+class PreparedProjectPaths(TypedDict):
+    """Generated project paths before running indexing commands."""
+
+    project_name: str
+    project_dir: Path
+    project_config_path: Path
+    corpus_path: Path
+    config: ProjectConfig
+
+
+class CorpusBuildResult(TypedDict):
+    """Result returned after building a GitHelp JSONL corpus."""
+
+    project_name: str
+    project_dir: str
+    project_config_path: str
+    corpus_path: str
+    stdout: str
+    stderr: str
+
+
+class SimpleIndexProjectResult(CorpusBuildResult):
+    """Project preparation result for the simple retrieval backend."""
+
+    indexing_mode: Literal["simple"]
+    backend: Literal["simple"]
+
+
+class MmoreCorpusExportResult(TypedDict):
+    """Result returned after exporting a corpus to MMORE JSONL format."""
+
+    mmore_corpus_path: str
+    stdout: str
+    stderr: str
+
+
+class MmoreIndexBuildResult(TypedDict):
+    """Result returned after building a MMORE index."""
+
+    collection_name: str
+    stdout: str
+    stderr: str
+
+
+class MmoreIndexProjectResult(TypedDict):
+    """Project preparation result for the MMORE retrieval backend."""
+
+    project_name: str
+    project_dir: str
+    project_config_path: str
+    corpus_path: str
+    mmore_corpus_path: str
+    collection_name: str
+    indexing_mode: Literal["mmore"]
+    backend: Literal["mmore"]
+    build_corpus_stdout: str
+    build_corpus_stderr: str
+    export_mmore_stdout: str
+    export_mmore_stderr: str
+    build_index_stdout: str
+    build_index_stderr: str
+
+
+class ProjectCommandError(RuntimeError):
+    """
+    Error raised when a GitHelp project preparation subprocess fails.
+
+    The command output is kept as structured attributes so UI code, tests, or
+    future logging can inspect it without parsing the formatted message.
+    """
+
+    def __init__(
+        self,
+        label: str,
+        command: list[str],
+        stdout: str,
+        stderr: str,
+    ) -> None:
+        self.label = label
+        self.command = command
+        self.stdout = stdout
+        self.stderr = stderr
+
+        super().__init__(
+            f"{label}.\n\n"
+            f"Command:\n{' '.join(command)}\n\n"
+            f"stdout:\n{stdout}\n\n"
+            f"stderr:\n{stderr}"
+        )
 
 
 def slugify_project_name(name: str) -> str:
@@ -115,7 +222,7 @@ def infer_yaml_config_paths(project_path: str | Path) -> list[str]:
 def build_project_config(
     project_path: str | Path,
     project_name: str | None = None,
-) -> dict[str, Any]:
+) -> ProjectConfig:
     """
     Build a GitHelp project configuration dictionary for a local project.
     """
@@ -171,7 +278,7 @@ def build_project_config(
 
 
 def write_project_config(
-    config: dict[str, Any],
+    config: ProjectConfig,
     output_path: str | Path,
 ) -> Path:
     """
@@ -195,7 +302,7 @@ def prepare_project_paths(
     githelp_root: str | Path,
     project_path: str | Path,
     project_name: str | None = None,
-) -> dict[str, Path | str]:
+) -> PreparedProjectPaths:
     """
     Prepare output paths for a GitHelp project.
     """
@@ -225,7 +332,7 @@ def build_corpus_for_project(
     githelp_root: str | Path,
     project_path: str | Path,
     project_name: str | None = None,
-) -> dict[str, str]:
+) -> CorpusBuildResult:
     """
     Generate a project config and run the GitHelp corpus builder.
 
@@ -273,11 +380,11 @@ def build_corpus_for_project(
     )
 
     if completed_process.returncode != 0:
-        raise RuntimeError(
-            "Corpus build failed.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{completed_process.stdout}\n\n"
-            f"stderr:\n{completed_process.stderr}"
+        raise ProjectCommandError(
+            label="Corpus build failed",
+            command=command,
+            stdout=completed_process.stdout,
+            stderr=completed_process.stderr,
         )
 
     return {
@@ -294,7 +401,7 @@ def export_mmore_corpus_for_project(
     githelp_root: str | Path,
     corpus_path: str | Path,
     output_path: str | Path,
-) -> dict[str, str]:
+) -> MmoreCorpusExportResult:
     """
     Export a project-specific GitHelp corpus to MMORE-compatible JSONL format.
     """
@@ -325,11 +432,11 @@ def export_mmore_corpus_for_project(
     )
 
     if completed_process.returncode != 0:
-        raise RuntimeError(
-            "MMORE corpus export failed.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{completed_process.stdout}\n\n"
-            f"stderr:\n{completed_process.stderr}"
+        raise ProjectCommandError(
+            label="MMORE corpus export failed",
+            command=command,
+            stdout=completed_process.stdout,
+            stderr=completed_process.stderr,
         )
 
     return {
@@ -343,7 +450,7 @@ def build_mmore_index_for_project(
     githelp_root: str | Path,
     documents_path: str | Path,
     collection_name: str = "mmore_docs",
-) -> dict[str, str]:
+) -> MmoreIndexBuildResult:
     """
     Build the MMORE index for a project-specific MMORE corpus.
     """
@@ -371,11 +478,11 @@ def build_mmore_index_for_project(
     )
 
     if completed_process.returncode != 0:
-        raise RuntimeError(
-            "MMORE index build failed.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{completed_process.stdout}\n\n"
-            f"stderr:\n{completed_process.stderr}"
+        raise ProjectCommandError(
+            label="MMORE index build failed",
+            command=command,
+            stdout=completed_process.stdout,
+            stderr=completed_process.stderr,
         )
 
     return {
@@ -389,22 +496,23 @@ def prepare_project_with_simple_index(
     githelp_root: str | Path,
     project_path: str | Path,
     project_name: str | None = None,
-) -> dict[str, str]:
+) -> SimpleIndexProjectResult:
     """
     Prepare a project for the simple backend.
 
     This builds only the GitHelp JSONL corpus.
     """
-    result = build_corpus_for_project(
+    corpus_result = build_corpus_for_project(
         githelp_root=githelp_root,
         project_path=project_path,
         project_name=project_name,
     )
 
-    result["indexing_mode"] = "simple"
-    result["backend"] = "simple"
-
-    return result
+    return {
+        **corpus_result,
+        "indexing_mode": "simple",
+        "backend": "simple",
+    }
 
 
 def prepare_project_with_mmore_index(
@@ -412,7 +520,7 @@ def prepare_project_with_mmore_index(
     project_path: str | Path,
     project_name: str | None = None,
     collection_name: str = "mmore_docs",
-) -> dict[str, str]:
+) -> MmoreIndexProjectResult:
     """
     Prepare a project for the MMORE backend.
 

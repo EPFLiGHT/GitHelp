@@ -143,6 +143,19 @@ If results are poor, check:
 - whether the query is too vague;
 - whether a project profile should expand, filter, or rerank that intent.
 
+## Evaluate retrieval on benchmark questions
+
+```bash
+PYTHONPATH=src python scripts/evaluate_retrieval.py \
+  --questions-path githelp_eval_questions.txt \
+  --corpus-path data/projects/mmore/corpus.jsonl \
+  --backend simple \
+  --top-k 5
+```
+
+This prints ranked source summaries for each question. It is useful for
+comparing retrieval changes before checking generated answers.
+
 ## Backend mismatch
 
 A common issue is using:

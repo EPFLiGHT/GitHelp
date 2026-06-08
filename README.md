@@ -6,7 +6,7 @@ The initial use case is the [MMORE](https://github.com/swiss-ai/mmore) repositor
 
 Full documentation is available here:
 
-➡️ [GitHelp documentation](https://epflight.github.io/githelp/)
+➡️ [GitHelp documentation](https://epflight.github.io/GitHelp/)
 
 ---
 

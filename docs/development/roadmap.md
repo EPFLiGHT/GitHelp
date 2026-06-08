@@ -24,13 +24,15 @@ GitHelp is currently an early but functional prototype.
 - optional extractive answering path;
 - project profiles for project-specific query expansion, filtering, reranking, and direct answers;
 - MMORE project profile with deterministic Milvus parameter answers;
+- public GitHub repository cloning into local GitHelp-managed folders;
+- retrieval evaluation script for benchmark question sets;
 - Streamlit interface for project setup, corpus building, question answering, and source inspection;
 - tests for corpus building, retrieval, prompting, project state, project builder, and project profiles;
 - GitHub Actions workflow for running tests.
 
 ## Current limitations
 
-- Public GitHub repository loading is planned but not fully integrated.
+- Public GitHub repository loading currently supports public repositories through local `git clone`.
 - Streamlit currently supports local project paths as the main project setup mode.
 - Building a corpus does not automatically rebuild the MMORE index.
 - The `simple` backend is useful for newly built corpora, but it is not a semantic retriever.
@@ -40,15 +42,13 @@ GitHelp is currently an early but functional prototype.
 
 ## Next steps
 
-1. Add public GitHub repository loading.
-2. Add an optional Streamlit action to export a project corpus to MMORE format.
-3. Add an optional Streamlit action to build or rebuild the MMORE index.
-4. Make backend selection clearer when the selected corpus and MMORE index may not match.
-5. Improve retrieval evaluation with a small benchmark set.
-6. Add richer support for code-aware questions.
-7. Add better source browsing in the Streamlit interface.
-8. Add documentation for adding a new project profile.
-9. Add deployment instructions for local lab machines or servers.
+1. Add an optional Streamlit action to export a project corpus to MMORE format.
+2. Add an optional Streamlit action to build or rebuild the MMORE index.
+3. Make backend selection clearer when the selected corpus and MMORE index may not match.
+4. Extend retrieval evaluation with expected source checks.
+5. Add richer support for code-aware questions.
+6. Add better source browsing in the Streamlit interface.
+7. Add deployment instructions for local lab machines or servers.
 
 ## Future ideas
 

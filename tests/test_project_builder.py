@@ -6,10 +6,12 @@ import pytest
 
 from githelp.projects.project_builder import (
     build_project_config,
+    build_corpus_for_project,
     infer_code_path,
     infer_docs_path,
     infer_package_name,
     prepare_project_paths,
+    ProjectCommandError,
     slugify_project_name,
     write_project_config,
     prepare_project_with_simple_index,
@@ -159,3 +161,36 @@ def test_prepare_project_with_simple_index_uses_corpus_builder(monkeypatch, tmp_
     assert result["indexing_mode"] == "simple"
     assert result["backend"] == "simple"
     assert result["project_name"] == "target-project"
+
+
+def test_build_corpus_for_project_raises_structured_command_error(monkeypatch, tmp_path):
+    githelp_root = tmp_path / "githelp"
+    project_path = tmp_path / "target_project"
+
+    (githelp_root / "scripts").mkdir(parents=True)
+    (githelp_root / "src").mkdir()
+    project_path.mkdir()
+
+    class FakeCompletedProcess:
+        returncode = 1
+        stdout = "partial output"
+        stderr = "failure details"
+
+    def fake_run(*args, **kwargs):
+        return FakeCompletedProcess()
+
+    monkeypatch.setattr(
+        "githelp.projects.project_builder.subprocess.run",
+        fake_run,
+    )
+
+    with pytest.raises(ProjectCommandError) as error_info:
+        build_corpus_for_project(
+            githelp_root=githelp_root,
+            project_path=project_path,
+        )
+
+    error = error_info.value
+    assert error.label == "Corpus build failed"
+    assert error.stdout == "partial output"
+    assert error.stderr == "failure details"
