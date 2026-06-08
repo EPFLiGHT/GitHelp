@@ -180,7 +180,7 @@ def test_build_corpus_for_project_raises_structured_command_error(monkeypatch, t
         return FakeCompletedProcess()
 
     monkeypatch.setattr(
-        "githelp.projects.project_builder.subprocess.run",
+        "githelp.projects.project_commands.subprocess.run",
         fake_run,
     )
 

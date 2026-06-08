@@ -76,17 +76,13 @@ This keeps the project modular:
 The `simple` backend reads a selected `corpus.jsonl` directly. It is useful for:
 
 - local development;
-- newly built project corpora;
+- direct checks of newly built project corpora;
 - debugging retrieval quality;
 - avoiding MMORE indexing.
 
-The `mmore` backend retrieves from an MMORE index. It is the target backend, but the index must be built separately.
-
-For a newly selected project, the safe first workflow is:
-
-```text
-Build corpus → use backend simple
-```
+The `mmore` backend is the main MMORE workflow. It retrieves from an MMORE index
+when native retrieval succeeds, and it can fall back to the exported
+`mmore_corpus.jsonl` if the local native process fails.
 
 The full MMORE workflow is:
 

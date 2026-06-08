@@ -17,7 +17,12 @@ from githelp.rag.answering import (  # noqa: E402
     answer_question,
     answer_question_with_provider,
 )
-from streamlit_display import display_debug_information, display_sources  # noqa: E402
+from streamlit_display import (  # noqa: E402
+    display_debug_information,
+    display_sources,
+    format_backend_label,
+    get_retrieval_mode,
+)
 from streamlit_project_setup import render_project_setup  # noqa: E402
 from streamlit_sidebar import get_llm_provider, render_sidebar  # noqa: E402
 from streamlit_state import (  # noqa: E402
@@ -162,9 +167,11 @@ def answer_current_question(question: str, options: dict) -> None:
 
     st.session_state["last_answer"] = answer
     st.session_state["last_results"] = results
+    retrieval_mode = get_retrieval_mode(results)
     st.session_state["last_metadata"] = {
         "question": question,
         "backend": backend_used,
+        "retrieval_mode": retrieval_mode,
         "top_k": options["top_k"],
         "use_llm": options["use_llm"],
         "corpus_path": corpus_path,
@@ -182,9 +189,13 @@ def render_last_answer(options: dict) -> None:
     metadata = st.session_state["last_metadata"]
 
     st.subheader("Answer")
+    backend_label = format_backend_label(
+        str(metadata.get("backend", "")),
+        metadata.get("retrieval_mode"),
+    )
 
     st.caption(
-        f"Backend: `{metadata.get('backend')}` | "
+        f"Backend: `{backend_label}` | "
         f"top_k: `{metadata.get('top_k')}` | "
         f"LLM: `{metadata.get('use_llm')}`"
     )
@@ -203,6 +214,7 @@ def render_last_answer(options: dict) -> None:
             corpus_path=metadata.get("corpus_path", ""),
             config_path=metadata.get("config_path", ""),
             backend=metadata.get("backend", ""),
+            retrieval_mode=metadata.get("retrieval_mode"),
             top_k=metadata.get("top_k", 0),
             use_llm=metadata.get("use_llm", False),
             config=options["config"],

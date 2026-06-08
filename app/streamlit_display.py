@@ -4,6 +4,29 @@ from typing import Any
 
 import streamlit as st
 
+from githelp.retrieval.mmore_result_mapping import (
+    MMORE_RETRIEVAL_MODE_METADATA_KEY,
+)
+
+
+def get_retrieval_mode(results: list[Any]) -> str | None:
+    """Return the retrieval mode attached to the first result, if available."""
+    for result in results:
+        metadata = getattr(result.document, "metadata", {})
+        mode = metadata.get(MMORE_RETRIEVAL_MODE_METADATA_KEY)
+        if mode:
+            return str(mode)
+
+    return None
+
+
+def format_backend_label(backend: str, retrieval_mode: str | None) -> str:
+    """Format the backend label shown in Streamlit."""
+    if backend != "mmore" or not retrieval_mode:
+        return backend
+
+    return f"{backend} ({retrieval_mode})"
+
 
 def display_sources(results: list[Any], show_full_sources: bool = False) -> None:
     """Display retrieved sources in expandable sections."""
@@ -24,12 +47,16 @@ def display_sources(results: list[Any], show_full_sources: bool = False) -> None
         )
         title = doc.title or doc.section_title or doc.symbol_name or "unknown"
         content = (doc.content or "").strip()
+        retrieval_mode = doc.metadata.get(MMORE_RETRIEVAL_MODE_METADATA_KEY)
 
         label = f"Source {index} - {source_type} - {relative_path}"
 
         with st.expander(label):
             st.markdown(f"**Title:** `{title}`")
             st.markdown(f"**Score:** `{result.score:.4f}`")
+
+            if retrieval_mode:
+                st.markdown(f"**Retrieval mode:** `{retrieval_mode}`")
 
             if doc.section_title:
                 st.markdown(f"**Section:** `{doc.section_title}`")
@@ -67,6 +94,7 @@ def display_debug_information(
     corpus_path: str,
     config_path: str,
     backend: str,
+    retrieval_mode: str | None,
     top_k: int,
     use_llm: bool,
     config: dict[str, Any] | None,
@@ -78,6 +106,7 @@ def display_debug_information(
     st.markdown(f"**Corpus path:** `{corpus_path}`")
     st.markdown(f"**Config path:** `{config_path}`")
     st.markdown(f"**Backend:** `{backend}`")
+    st.markdown(f"**Retrieval mode:** `{retrieval_mode or 'unknown'}`")
     st.markdown(f"**Top K:** `{top_k}`")
     st.markdown(f"**Use LLM:** `{use_llm}`")
 

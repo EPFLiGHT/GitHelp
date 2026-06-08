@@ -443,7 +443,7 @@ def extract_python_docs(
             )
         except SyntaxError:
             # Some files may use unsupported or invalid syntax.
-            # For the prototype, we skip them instead of stopping the pipeline.
+            # Skip unsupported files instead of stopping the whole pipeline.
             continue
 
     return documents

@@ -61,14 +61,27 @@ File:
 
 ```text
 src/githelp/retrieval/mmore_retriever.py
+src/githelp/retrieval/mmore_native.py
+src/githelp/retrieval/mmore_subprocess.py
+src/githelp/retrieval/mmore_corpus.py
+src/githelp/retrieval/mmore_result_mapping.py
 ```
 
 The MMORE retriever:
 
-- loads a MMORE retriever from config;
-- calls `retriever.retrieve(...)`;
+- runs native MMORE retrieval in an isolated subprocess;
+- loads a MMORE retriever from config inside that subprocess;
+- calls `retriever.retrieve(...)` when native retrieval is available;
 - parses GitHelp metadata from retrieved text;
 - converts raw MMORE results back into `RetrievalResult` objects.
+- falls back to `mmore_corpus.jsonl` if the native process fails locally.
+
+Retrieved sources are tagged with one of these metadata values:
+
+```text
+native_index
+corpus_fallback
+```
 
 Command example:
 
@@ -120,12 +133,19 @@ This keeps the core GitHelp retrieval pipeline generic while allowing MMORE-spec
 
 ## Backend choice
 
-For a project corpus built from the Streamlit interface, use:
+For a project corpus built from the Streamlit interface, `simple` is useful for
+quick deterministic checks:
 
 ```text
 backend simple
 ```
 
-unless the corresponding MMORE index has also been rebuilt.
+For the main MMORE workflow, use:
 
-The `mmore` backend retrieves from the configured MMORE index, not directly from the selected JSONL corpus.
+```text
+backend mmore
+```
+
+The `mmore` backend attempts native MMORE index retrieval first. If that native
+process fails, GitHelp falls back to the exported `mmore_corpus.jsonl` next to
+the selected project corpus so Streamlit can continue answering.

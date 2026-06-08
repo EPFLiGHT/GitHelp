@@ -97,15 +97,19 @@ simple
 mmore
 ```
 
-For a corpus built from the interface, the safest first option is:
+The `simple` backend reads the generated `corpus.jsonl` directly and is useful
+for deterministic debugging.
+
+The `mmore` backend is the main MMORE workflow. It attempts native MMORE index
+retrieval first and can fall back to the exported `mmore_corpus.jsonl` if the
+native process fails locally.
+
+The answer caption and source panels show the actual MMORE retrieval mode:
 
 ```text
-simple
+native_index
+corpus_fallback
 ```
-
-The `simple` backend reads the generated `corpus.jsonl` directly.
-
-The `mmore` backend should be used when the MMORE index has been built for the relevant corpus.
 
 ## LLM caching
 

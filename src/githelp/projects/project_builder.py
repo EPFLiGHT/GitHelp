@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import Literal, TypedDict
 
 import yaml
+
+from githelp.projects.project_commands import ProjectCommandError, run_project_command
 
 
 class GeneratedProjectConfig(TypedDict):
@@ -87,34 +87,6 @@ class MmoreIndexProjectResult(TypedDict):
     export_mmore_stderr: str
     build_index_stdout: str
     build_index_stderr: str
-
-
-class ProjectCommandError(RuntimeError):
-    """
-    Error raised when a GitHelp project preparation subprocess fails.
-
-    The command output is kept as structured attributes so UI code, tests, or
-    future logging can inspect it without parsing the formatted message.
-    """
-
-    def __init__(
-        self,
-        label: str,
-        command: list[str],
-        stdout: str,
-        stderr: str,
-    ) -> None:
-        self.label = label
-        self.command = command
-        self.stdout = stdout
-        self.stderr = stderr
-
-        super().__init__(
-            f"{label}.\n\n"
-            f"Command:\n{' '.join(command)}\n\n"
-            f"stdout:\n{stdout}\n\n"
-            f"stderr:\n{stderr}"
-        )
 
 
 def slugify_project_name(name: str) -> str:
@@ -357,8 +329,6 @@ def build_corpus_for_project(
         output_path=project_config_path,
     )
 
-    env_pythonpath = str(githelp_root / "src")
-
     command = [
         sys.executable,
         str(githelp_root / "scripts" / "build_corpus.py"),
@@ -368,24 +338,11 @@ def build_corpus_for_project(
         str(corpus_path),
     ]
 
-    environment = os.environ.copy()
-    environment["PYTHONPATH"] = env_pythonpath
-
-    completed_process = subprocess.run(
-        command,
-        cwd=str(githelp_root),
-        text=True,
-        capture_output=True,
-        env=environment,
+    completed_process = run_project_command(
+        label="Corpus build failed",
+        command=command,
+        cwd=githelp_root,
     )
-
-    if completed_process.returncode != 0:
-        raise ProjectCommandError(
-            label="Corpus build failed",
-            command=command,
-            stdout=completed_process.stdout,
-            stderr=completed_process.stderr,
-        )
 
     return {
         "project_name": str(prepared["project_name"]),
@@ -411,9 +368,6 @@ def export_mmore_corpus_for_project(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    environment = os.environ.copy()
-    environment["PYTHONPATH"] = str(githelp_root / "src")
-
     command = [
         sys.executable,
         str(githelp_root / "scripts" / "export_mmore_corpus.py"),
@@ -423,21 +377,11 @@ def export_mmore_corpus_for_project(
         str(output_path),
     ]
 
-    completed_process = subprocess.run(
-        command,
-        cwd=str(githelp_root),
-        text=True,
-        capture_output=True,
-        env=environment,
+    completed_process = run_project_command(
+        label="MMORE corpus export failed",
+        command=command,
+        cwd=githelp_root,
     )
-
-    if completed_process.returncode != 0:
-        raise ProjectCommandError(
-            label="MMORE corpus export failed",
-            command=command,
-            stdout=completed_process.stdout,
-            stderr=completed_process.stderr,
-        )
 
     return {
         "mmore_corpus_path": str(output_path),
@@ -457,9 +401,6 @@ def build_mmore_index_for_project(
     githelp_root = Path(githelp_root).resolve()
     documents_path = Path(documents_path).resolve()
 
-    environment = os.environ.copy()
-    environment["PYTHONPATH"] = str(githelp_root / "src")
-
     command = [
         sys.executable,
         str(githelp_root / "scripts" / "build_index.py"),
@@ -469,21 +410,11 @@ def build_mmore_index_for_project(
         collection_name,
     ]
 
-    completed_process = subprocess.run(
-        command,
-        cwd=str(githelp_root),
-        text=True,
-        capture_output=True,
-        env=environment,
+    completed_process = run_project_command(
+        label="MMORE index build failed",
+        command=command,
+        cwd=githelp_root,
     )
-
-    if completed_process.returncode != 0:
-        raise ProjectCommandError(
-            label="MMORE index build failed",
-            command=command,
-            stdout=completed_process.stdout,
-            stderr=completed_process.stderr,
-        )
 
     return {
         "collection_name": collection_name,
