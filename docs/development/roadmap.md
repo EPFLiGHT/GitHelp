@@ -1,6 +1,6 @@
 # Roadmap
 
-GitHelp is currently an early but functional prototype.
+GitHelp is currently a functional local RAG application with active areas for improvement.
 
 ## Implemented
 

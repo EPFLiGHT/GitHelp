@@ -11,7 +11,7 @@ from githelp.retrieval.simple_retriever import retrieve as simple_retrieve
 Factory for selecting a retrieval backend.
 
 GitHelp can currently retrieve documents with:
-- "simple": local token-overlap prototype retriever;
+- "simple": local deterministic token-overlap retriever;
 - "mmore": MMORE retrieval backend.
 
 This module gives the rest of the application a single retrieval entry point.

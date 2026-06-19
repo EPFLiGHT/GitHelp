@@ -198,4 +198,5 @@ build_corpus.py
 → ask with backend mmore
 ```
 
-For local development and newly built corpora, use the `simple` backend first.
+For local development, the `simple` backend is useful when you want to inspect
+the GitHelp corpus before exporting and indexing it with MMORE.

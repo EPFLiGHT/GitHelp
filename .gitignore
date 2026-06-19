@@ -35,6 +35,7 @@ data/processed/*
 data/extracted_code_docs/*
 data/app_state.json
 data/projects/
+data/repositories/
 
 # Keep folder structure
 !data/raw/.gitkeep

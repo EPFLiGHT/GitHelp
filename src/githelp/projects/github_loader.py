@@ -7,11 +7,11 @@ from typing import TypedDict
 from urllib.parse import urlparse
 
 from githelp.projects.project_builder import (
-    ProjectCommandError,
     SimpleIndexProjectResult,
     prepare_project_with_simple_index,
     slugify_project_name,
 )
+from githelp.projects.project_commands import ProjectCommandError
 
 
 GITHUB_HTTPS_RE = re.compile(

@@ -131,7 +131,7 @@ collection_name: mmore_docs
 mmore_index_config_path: configs/mmore_index_config.yaml
 ```
 
-Some fields, such as `chunk_size` and `chunk_overlap`, are kept for future chunking improvements. The current prototype mostly relies on Markdown sections and extracted code documentation records.
+Some fields, such as `chunk_size` and `chunk_overlap`, are kept for future chunking improvements. The current implementation mostly relies on Markdown sections and extracted code documentation records.
 
 ## `mmore_index_config.yaml`
 

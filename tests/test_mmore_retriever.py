@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from githelp.retrieval import mmore_retriever
+from githelp.retrieval import mmore_native, mmore_retriever
+from githelp.retrieval.mmore_errors import MMoreRetrievalError
 
 
 class FakeMmoreClient:
@@ -78,13 +79,13 @@ def test_retrieve_with_mmore_uses_githelp_configs_when_mmore_metadata_is_missing
     index_config_path = tmp_path / "mmore_index_config.yaml"
 
     monkeypatch.setattr(
-        mmore_retriever,
-        "_load_retriever_from_mmore_config",
+        mmore_native,
+        "load_retriever_from_mmore_config",
         raise_missing_model_name,
     )
     monkeypatch.setattr(
-        mmore_retriever,
-        "_create_retriever_from_githelp_configs",
+        mmore_native,
+        "create_retriever_from_githelp_configs",
         fake_create_retriever_from_githelp_configs,
     )
 
@@ -106,7 +107,7 @@ def test_retrieve_with_mmore_uses_githelp_configs_when_mmore_metadata_is_missing
             "index_config_path": index_config_path,
         }
     ]
-    assert retriever.calls[0]["k"] == mmore_retriever.MIN_MMORE_RAW_RESULTS
+    assert retriever.calls[0]["k"] == mmore_native.MIN_MMORE_RAW_RESULTS
     assert retriever.calls[0]["search_type"] == "hybrid"
     assert retriever.client.loaded_collections == ["mmore_docs"]
 
@@ -115,7 +116,7 @@ def test_load_collection_for_search_ignores_retrievers_without_milvus_client():
     class RetrieverWithoutClient:
         pass
 
-    mmore_retriever._load_collection_for_search(
+    mmore_native.load_collection_for_search(
         RetrieverWithoutClient(),
         "mmore_docs",
     )
@@ -129,13 +130,13 @@ def test_retrieve_with_mmore_reports_config_fallback_failure(monkeypatch, tmp_pa
         raise ValueError("bad config")
 
     monkeypatch.setattr(
-        mmore_retriever,
-        "_load_retriever_from_mmore_config",
+        mmore_native,
+        "load_retriever_from_mmore_config",
         raise_missing_model_name,
     )
     monkeypatch.setattr(
-        mmore_retriever,
-        "_create_retriever_from_githelp_configs",
+        mmore_native,
+        "create_retriever_from_githelp_configs",
         raise_fallback_error,
     )
 
@@ -169,7 +170,7 @@ def test_load_githelp_mmore_model_configs_reads_dense_and_sparse_models(
     )
 
     dense_model_config, sparse_model_config = (
-        mmore_retriever._load_githelp_mmore_model_configs(index_config_path)
+        mmore_native.load_githelp_mmore_model_configs(index_config_path)
     )
 
     assert dense_model_config["model_name"] == "dense-test"
@@ -205,7 +206,7 @@ def test_retrieve_with_mmore_falls_back_to_exported_mmore_corpus(
     )
 
     def fail_native_subprocess(*args, **kwargs):
-        raise RuntimeError("native MMORE crashed")
+        raise MMoreRetrievalError("native MMORE crashed")
 
     monkeypatch.setattr(
         mmore_retriever,

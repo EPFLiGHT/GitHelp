@@ -7,7 +7,7 @@ include_signatures: true
 include_code_snippets: false
 
 # Reserved for future chunking logic.
-# The current prototype mostly relies on Markdown sections and extracted
+# The current implementation mostly relies on Markdown sections and extracted
 # code documentation records rather than generic text chunking.
 chunk_size: 1200
 chunk_overlap: 150
@@ -16,7 +16,7 @@ chunk_overlap: 150
 top_k: 5
 
 # Retrieval backend.
-# "simple" is the local prototype retriever.
+# "simple" is the local deterministic retriever.
 # "mmore" uses the MMORE retrieval backend.
 retrieval_backend: simple
 # retrieval_backend: mmore

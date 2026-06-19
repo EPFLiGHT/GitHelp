@@ -32,8 +32,4 @@ def answer_from_sources(question: str, results: list[RetrievalResult]) -> str:
             f"Source: [Source 1]"
         )
 
-    return (
-        "Based on the most relevant source, here is the answer:\n\n"
-        f"{top_doc.content.strip()}\n\n"
-        "Source: [Source 1]"
-    )
+    return f"{top_doc.content.strip()}\n\nSource: [Source 1]"

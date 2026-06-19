@@ -4,10 +4,10 @@ import argparse
 import json
 from pathlib import Path
 
-from githelp.retrieval.mmore_retriever import (
+from githelp.retrieval.mmore_native import retrieve_with_mmore_native
+from githelp.retrieval.mmore_subprocess import (
     MMORE_WORKER_RESULT_PREFIX,
-    _retrieve_with_mmore_native,
-    _serialize_results,
+    serialize_results,
 )
 
 
@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     """Run native MMORE retrieval and print serialized results."""
     args = parse_args()
-    results = _retrieve_with_mmore_native(
+    results = retrieve_with_mmore_native(
         query=args.query,
         top_k=args.top_k,
         config_path=args.config_path,
@@ -36,7 +36,7 @@ def main() -> None:
         collection_name=args.collection_name,
         search_type=args.search_type,
     )
-    payload = json.dumps(_serialize_results(results), ensure_ascii=False)
+    payload = json.dumps(serialize_results(results), ensure_ascii=False)
     print(f"{MMORE_WORKER_RESULT_PREFIX}{payload}")
 
 
