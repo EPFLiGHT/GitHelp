@@ -13,6 +13,7 @@ def initialize_session_state(app_state_path: str | Path) -> None:
 
     defaults = {
         "question": "",
+        "messages": [],
         "last_answer": None,
         "last_results": [],
         "last_metadata": {},
@@ -82,3 +83,9 @@ def clear_results() -> None:
     st.session_state["last_answer"] = None
     st.session_state["last_results"] = []
     st.session_state["last_metadata"] = {}
+
+
+def clear_chat() -> None:
+    """Clear only chat messages and displayed answer state."""
+    st.session_state["messages"] = []
+    clear_results()

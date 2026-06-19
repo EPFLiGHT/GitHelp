@@ -16,6 +16,9 @@ if str(SRC_PATH) not in sys.path:
 from githelp.rag.answering import (  # noqa: E402
     answer_question,
     answer_question_with_provider,
+    answer_question_with_provider_from_results,
+    is_reformulation_followup,
+    rewrite_query_with_history,
 )
 from streamlit_display import (  # noqa: E402
     display_debug_information,
@@ -27,6 +30,7 @@ from streamlit_project_setup import render_project_setup  # noqa: E402
 from streamlit_sidebar import get_llm_provider, render_sidebar  # noqa: E402
 from streamlit_state import (  # noqa: E402
     apply_pending_state_updates,
+    clear_chat,
     clear_question,
     initialize_session_state,
     persist_current_state,
@@ -60,7 +64,7 @@ def render_answer_controls() -> tuple[str, bool]:
         height=100,
     )
 
-    col_ask, col_clear_question = st.columns([1, 1])
+    col_ask, col_clear_question, col_clear_chat = st.columns([1, 1, 1])
 
     with col_ask:
         ask_button = st.button("Ask", type="primary")
@@ -68,7 +72,37 @@ def render_answer_controls() -> tuple[str, bool]:
     with col_clear_question:
         st.button("Clear question", on_click=clear_question)
 
+    with col_clear_chat:
+        st.button("Clear chat", on_click=clear_chat)
+
     return question, ask_button
+
+
+def get_recent_chat_context(max_messages: int = 6) -> list[dict[str, str]]:
+    """Return only the latest messages used as lightweight LLM context."""
+    messages = st.session_state.get("messages", [])
+    return messages[-max_messages:]
+
+
+def render_chat_history() -> None:
+    """Display the in-memory conversation with a markdown fallback."""
+    messages = st.session_state.get("messages", [])
+
+    if not messages:
+        return
+
+    st.subheader("Chat")
+
+    for message in messages:
+        role = message.get("role", "assistant")
+        content = message.get("content", "")
+
+        if hasattr(st, "chat_message"):
+            with st.chat_message(role):
+                st.markdown(content)
+        else:
+            label = "User" if role == "user" else "Assistant"
+            st.markdown(f"**{label}:** {content}")
 
 
 def _is_incomplete_mmore_index_error(error: Exception) -> bool:
@@ -81,27 +115,49 @@ def _answer_with_backend(
     corpus: Path,
     options: dict,
     backend: str,
+    chat_history: list[dict[str, str]] | None = None,
 ):
     """Answer a question with a selected backend."""
     if options["use_llm"]:
         llm_provider = get_llm_provider(options["config_path"])
+        retrieval_query = rewrite_query_with_history(
+            question=question,
+            chat_history=chat_history,
+            llm_provider=llm_provider,
+        )
+        previous_results = st.session_state.get("last_results", [])
 
-        return answer_question_with_provider(
+        # Pure reformulations can reuse the previous sources safely.
+        if previous_results and is_reformulation_followup(question):
+            answer, results = answer_question_with_provider_from_results(
+                question=question,
+                llm_provider=llm_provider,
+                results=previous_results,
+                config_path=options["config_path"],
+                chat_history=chat_history,
+            )
+            return answer, results, retrieval_query, True
+
+        answer, results = answer_question_with_provider(
             question=question,
             llm_provider=llm_provider,
             corpus_path=corpus,
             top_k=options["top_k"],
             backend=backend,
             config_path=options["config_path"],
+            chat_history=chat_history,
+            retrieval_query=retrieval_query,
         )
+        return answer, results, retrieval_query, False
 
-    return answer_question(
+    answer, results = answer_question(
         question=question,
         corpus_path=corpus,
         top_k=options["top_k"],
         backend=backend,
         config_path=options["config_path"],
     )
+    return answer, results, question, False
 
 
 def answer_current_question(question: str, options: dict) -> None:
@@ -124,13 +180,21 @@ def answer_current_question(question: str, options: dict) -> None:
 
     with st.spinner("Retrieving sources and generating answer..."):
         backend_used = options["backend"]
+        # Retrieval uses the current question; only generation receives recent chat.
+        chat_history = get_recent_chat_context()
 
         try:
-            answer, results = _answer_with_backend(
+            (
+                answer,
+                results,
+                retrieval_query,
+                used_previous_sources,
+            ) = _answer_with_backend(
                 question=question,
                 corpus=corpus,
                 options=options,
                 backend=backend_used,
+                chat_history=chat_history,
             )
 
         except RuntimeError as error:
@@ -145,11 +209,17 @@ def answer_current_question(question: str, options: dict) -> None:
                 st.session_state["pending_backend"] = "simple"
 
                 try:
-                    answer, results = _answer_with_backend(
+                    (
+                        answer,
+                        results,
+                        retrieval_query,
+                        used_previous_sources,
+                    ) = _answer_with_backend(
                         question=question,
                         corpus=corpus,
                         options=options,
                         backend=backend_used,
+                        chat_history=chat_history,
                     )
                 except Exception as fallback_error:
                     st.error("An error occurred while answering with the fallback backend.")
@@ -167,6 +237,15 @@ def answer_current_question(question: str, options: dict) -> None:
 
     st.session_state["last_answer"] = answer
     st.session_state["last_results"] = results
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = []
+
+    st.session_state["messages"].extend(
+        [
+            {"role": "user", "content": question.strip()},
+            {"role": "assistant", "content": answer},
+        ]
+    )
     retrieval_mode = get_retrieval_mode(results)
     st.session_state["last_metadata"] = {
         "question": question,
@@ -176,19 +255,21 @@ def answer_current_question(question: str, options: dict) -> None:
         "use_llm": options["use_llm"],
         "corpus_path": corpus_path,
         "config_path": options["config_path"],
+        "retrieval_query": retrieval_query,
+        "used_previous_sources": used_previous_sources,
     }
 
     persist_app_state()
 
 
 def render_last_answer(options: dict) -> None:
-    """Render the latest answer, sources, and optional debug information."""
+    """Render latest answer metadata, sources, and optional debug information."""
     if st.session_state["last_answer"] is None:
         return
 
     metadata = st.session_state["last_metadata"]
 
-    st.subheader("Answer")
+    st.subheader("Latest answer details")
     backend_label = format_backend_label(
         str(metadata.get("backend", "")),
         metadata.get("retrieval_mode"),
@@ -199,8 +280,6 @@ def render_last_answer(options: dict) -> None:
         f"top_k: `{metadata.get('top_k')}` | "
         f"LLM: `{metadata.get('use_llm')}`"
     )
-
-    st.markdown(st.session_state["last_answer"])
 
     if options["show_sources"]:
         display_sources(
@@ -218,6 +297,8 @@ def render_last_answer(options: dict) -> None:
             top_k=metadata.get("top_k", 0),
             use_llm=metadata.get("use_llm", False),
             config=options["config"],
+            retrieval_query=metadata.get("retrieval_query"),
+            used_previous_sources=metadata.get("used_previous_sources", False),
         )
 
 
@@ -247,6 +328,7 @@ def main() -> None:
     if ask_button:
         answer_current_question(question, options)
 
+    render_chat_history()
     render_last_answer(options)
 
 

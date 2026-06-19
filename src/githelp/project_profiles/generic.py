@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from githelp.project_profiles.base import ProjectProfile
 from githelp.retrieval.base import RetrievalResult
 
@@ -127,7 +129,10 @@ class GenericProjectProfile(ProjectProfile):
                         bonus += 2.0
 
                 # Boost exact symbol mentions.
-                if symbol_name and symbol_name in normalized_question:
+                if symbol_name and self._contains_exact_identifier(
+                    normalized_question,
+                    symbol_name,
+                ):
                     bonus += 5.0
 
                 if doc.title and doc.title.lower() in normalized_question:
@@ -225,6 +230,14 @@ class GenericProjectProfile(ProjectProfile):
         ]
 
         return any(term in normalized_question for term in config_terms)
+
+    def _contains_exact_identifier(self, text: str, identifier: str) -> bool:
+        """Match identifiers without treating them as arbitrary substrings."""
+        if not identifier:
+            return False
+
+        pattern = rf"(?<![A-Za-z0-9_]){re.escape(identifier)}(?![A-Za-z0-9_])"
+        return re.search(pattern, text) is not None
 
     def _limit_config_results(
         self,

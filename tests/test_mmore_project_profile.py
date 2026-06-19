@@ -10,16 +10,18 @@ def make_result(
     source_type: str = "example_config",
     relative_path: str = "examples/colpali/config_index.yml",
     score: float = 1.0,
+    title: str = "Example config",
+    symbol_name: str | None = None,
 ) -> RetrievalResult:
     document = DocumentRecord(
         doc_id="doc::1",
         content=content,
         source_type=source_type,
-        title="Example config",
+        title=title,
         file_path=relative_path,
         section_title=None,
-        module_name=None,
-        symbol_name=None,
+        module_name="mmore.index.indexer" if symbol_name else None,
+        symbol_name=symbol_name,
         signature=None,
         language="en",
         tags=[],
@@ -116,3 +118,31 @@ def test_mmore_profile_filters_colpali_sources_when_question_does_not_mention_co
 
     assert general_result in filtered
     assert colpali_result not in filtered
+
+
+def test_mmore_profile_does_not_match_short_symbol_inside_longer_identifier():
+    profile = MMoreProjectProfile()
+
+    index_function = make_result(
+        content="Run the indexer with a config file and documents path.",
+        source_type="python_function",
+        relative_path="cli.py",
+        score=5.0,
+        title="mmore.cli.index",
+        symbol_name="index",
+    )
+    indexer_class = make_result(
+        content="The Indexer class builds and manages indexes.",
+        source_type="python_class",
+        relative_path="index/indexer.py",
+        score=2.0,
+        title="mmore.index.indexer.Indexer",
+        symbol_name="Indexer",
+    )
+
+    reranked = profile.rerank_results(
+        [index_function, indexer_class],
+        question="What does the Indexer class do?",
+    )
+
+    assert reranked[0] == indexer_class

@@ -8,7 +8,7 @@ from githelp.config import load_yaml
 from githelp.project_profiles.factory import create_project_profile
 from githelp.rag.extractive_answerer import answer_from_sources
 from githelp.rag.llm_factory import create_llm_provider
-from githelp.rag.prompting import build_user_prompt
+from githelp.rag.prompting import build_user_prompt, format_chat_history
 from githelp.retrieval.base import RetrievalResult
 from githelp.retrieval.retriever_factory import retrieve_documents
 
@@ -28,6 +28,44 @@ RETRIEVAL_CANDIDATE_MULTIPLIER = 8
 MIN_RETRIEVAL_CANDIDATES = 40
 LEXICAL_FALLBACK_CANDIDATE_MULTIPLIER = 4
 MIN_LEXICAL_FALLBACK_CANDIDATES = 20
+MAX_CHAT_HISTORY_MESSAGES = 6
+
+CONTEXT_DEPENDENT_FOLLOWUP_PATTERNS = [
+    "explain more simply",
+    "explain it more simply",
+    "explain more clearly",
+    "make it clearer",
+    "what does that mean",
+    "where is it used",
+    "how do i do that",
+    "what about this file",
+    "the second one",
+    "can you expand on that",
+    "give me an example",
+    "make it shorter",
+    "summarize",
+]
+
+CONTEXT_DEPENDENT_TERMS = [
+    " it",
+    " that",
+    " this",
+    " those",
+    " these",
+    " one",
+    " file",
+]
+
+PURE_REFORMULATION_PATTERNS = [
+    "explain more simply",
+    "explain it more simply",
+    "explain more clearly",
+    "make it clearer",
+    "make it shorter",
+    "summarize",
+    "give me an example",
+    "can you expand on that",
+]
 
 
 def _extract_filename_tokens(question: str) -> list[str]:
@@ -239,6 +277,92 @@ def _merge_results_by_doc_id(
     return [merged[doc_id] for doc_id in order]
 
 
+def is_context_dependent_question(question: str) -> bool:
+    """Detect follow-up questions that need recent chat context for retrieval."""
+    normalized_question = f" {question.strip().lower()} "
+
+    if not question.strip():
+        return False
+
+    if any(
+        pattern in normalized_question
+        for pattern in CONTEXT_DEPENDENT_FOLLOWUP_PATTERNS
+    ):
+        return True
+
+    question_tokens = re.findall(r"[a-zA-Z0-9_]+", question)
+
+    if len(question_tokens) <= 5 and any(
+        term in normalized_question
+        for term in CONTEXT_DEPENDENT_TERMS
+    ):
+        return True
+
+    return False
+
+
+def is_reformulation_followup(question: str) -> bool:
+    """Detect follow-ups that usually want the same sources re-explained."""
+    normalized_question = f" {question.strip().lower()} "
+    return any(
+        pattern in normalized_question
+        for pattern in PURE_REFORMULATION_PATTERNS
+    )
+
+
+def rewrite_query_with_history(
+    question: str,
+    chat_history: list[dict[str, Any]] | None,
+    llm_provider=None,
+) -> str:
+    """
+    Rewrite vague follow-up questions into standalone retrieval queries.
+
+    This never answers the user. If rewriting is unavailable or fails, it
+    safely returns the original question.
+    """
+    original_question = question.strip()
+
+    if (
+        not original_question
+        or not chat_history
+        or llm_provider is None
+        or not is_context_dependent_question(original_question)
+    ):
+        return question
+
+    recent_history = chat_history[-MAX_CHAT_HISTORY_MESSAGES:]
+    formatted_history = format_chat_history(recent_history)
+
+    if not formatted_history:
+        return question
+
+    prompt = (
+        "Rewrite the current user question into a standalone retrieval query "
+        "for searching a software repository corpus.\n"
+        "Use the recent conversation only to resolve references such as it, "
+        "that, this, the second one, or similar follow-up wording.\n"
+        "Do not answer the question. Do not add citations. Do not explain.\n"
+        "Output only one rewritten retrieval query as a single line.\n\n"
+        f"Recent conversation:\n{formatted_history}\n\n"
+        f"Current user question:\n{original_question}\n\n"
+        "Standalone retrieval query:"
+    )
+
+    try:
+        rewritten_query = str(llm_provider.generate(prompt)).strip()
+    except Exception:
+        return question
+
+    rewritten_query = rewritten_query.strip().strip('"').strip("'").strip()
+    rewritten_query = " ".join(rewritten_query.splitlines()).strip()
+
+    if not rewritten_query or len(rewritten_query) > 500:
+        return question
+
+    return rewritten_query
+
+
 def is_subjective_recommendation_question(question: str) -> bool:
     """
     Detect recommendation questions that cannot be answered from retrieved
@@ -349,11 +473,11 @@ def _retrieve_and_prepare_results(
     )
 
     should_add_lexical_results = (
+        _is_code_or_symbol_question(question)
+        or _contains_filename_like_token(question)
+    ) and (
         backend == "mmore"
-        and (
-            _is_code_or_symbol_question(question)
-            or _contains_filename_like_token(question)
-        )
+        or expanded_question != question
     )
 
     if should_add_lexical_results:
@@ -388,6 +512,8 @@ def prepare_answer_prompt(
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
+    chat_history: list[dict[str, Any]] | None = None,
+    retrieval_query: str | None = None,
 ) -> tuple[str, list[RetrievalResult]]:
     """
     Retrieve sources and build a prompt for LLM answer generation.
@@ -396,7 +522,7 @@ def prepare_answer_prompt(
     the retrieved sources for inspection.
     """
     results, config = _retrieve_and_prepare_results(
-        question=question,
+        question=retrieval_query or question,
         corpus_path=corpus_path,
         top_k=top_k,
         backend=backend,
@@ -409,6 +535,7 @@ def prepare_answer_prompt(
         question=question,
         results=results,
         project_name=project_name,
+        chat_history=chat_history,
     )
 
     return prompt, results
@@ -420,6 +547,7 @@ def answer_question(
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
+    retrieval_query: str | None = None,
 ) -> tuple[str, list[RetrievalResult]]:
     """
     Retrieve sources and produce a simple extractive answer.
@@ -427,20 +555,30 @@ def answer_question(
     This is a temporary non-LLM answering path. It is kept for testing retrieval
     before full LLM generation.
     """
-    config = load_yaml(config_path)
-    resolved_corpus_path = _resolve_corpus_path(corpus_path, config)
-
-    results = retrieve_documents(
-        query=question,
+    results, config = _retrieve_and_prepare_results(
+        question=retrieval_query or question,
+        corpus_path=corpus_path,
         top_k=top_k,
         backend=backend,
-        corpus_path=resolved_corpus_path,
+        config_path=config_path,
     )
 
-    results = results[:top_k]
+    project_profile = create_project_profile(config)
+    direct_answer = project_profile.answer_directly(question, results)
+
+    if direct_answer is not None:
+        return direct_answer, results
+
+    if is_subjective_recommendation_question(question):
+        return (
+            "The available sources do not provide enough information to determine "
+            "the best option for the user's private dataset. They show retrieved "
+            "documentation and configuration examples, but they do not establish "
+            "a general recommendation for an unseen dataset.",
+            results,
+        )
 
     answer = answer_from_sources(question, results)
-
     return answer, results
 
 
@@ -448,6 +586,7 @@ def _prepare_llm_answer_input(
     question: str,
     results: list[RetrievalResult],
     config: dict[str, Any],
+    chat_history: list[dict[str, Any]] | None = None,
 ) -> tuple[str, list[RetrievalResult], bool]:
     """Apply shared pre-generation checks and build the LLM prompt.
 
@@ -478,6 +617,7 @@ def _prepare_llm_answer_input(
         question=question,
         results=results,
         project_name=project_name,
+        chat_history=chat_history,
     )
     return prompt, results, True
 
@@ -488,13 +628,15 @@ def answer_question_with_llm(
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
+    chat_history: list[dict[str, Any]] | None = None,
+    retrieval_query: str | None = None,
 ) -> tuple[str, list[RetrievalResult]]:
     """Retrieve sources and generate a source-grounded LLM answer.
 
     The LLM provider and project profile are selected from the app configuration file.
     """
     results, config = _retrieve_and_prepare_results(
-        question=question,
+        question=retrieval_query or question,
         corpus_path=corpus_path,
         top_k=top_k,
         backend=backend,
@@ -505,6 +647,7 @@ def answer_question_with_llm(
         question=question,
         results=results,
         config=config,
+        chat_history=chat_history,
     )
 
     if not should_generate:
@@ -522,6 +665,8 @@ def answer_question_with_provider(
     top_k: int = 5,
     backend: str = "simple",
     config_path: str | Path = "configs/app_config.yaml",
+    chat_history: list[dict[str, Any]] | None = None,
+    retrieval_query: str | None = None,
 ) -> tuple[str, list[RetrievalResult]]:
     """Retrieve sources and generate an answer with a provided LLM provider.
 
@@ -529,7 +674,7 @@ def answer_question_with_provider(
     across questions.
     """
     results, config = _retrieve_and_prepare_results(
-        question=question,
+        question=retrieval_query or question,
         corpus_path=corpus_path,
         top_k=top_k,
         backend=backend,
@@ -540,6 +685,36 @@ def answer_question_with_provider(
         question=question,
         results=results,
         config=config,
+        chat_history=chat_history,
+    )
+
+    if not should_generate:
+        return prompt_or_answer, results
+
+    answer = llm_provider.generate(prompt_or_answer)
+    return answer, results
+
+
+def answer_question_with_provider_from_results(
+    question: str,
+    llm_provider,
+    results: list[RetrievalResult],
+    config_path: str | Path = "configs/app_config.yaml",
+    chat_history: list[dict[str, Any]] | None = None,
+) -> tuple[str, list[RetrievalResult]]:
+    """
+    Generate an answer from already retrieved sources.
+
+    This is used for lightweight reformulation follow-ups where the user asks
+    for the previous answer to be explained differently.
+    """
+    config = load_yaml(config_path)
+
+    prompt_or_answer, results, should_generate = _prepare_llm_answer_input(
+        question=question,
+        results=results,
+        config=config,
+        chat_history=chat_history,
     )
 
     if not should_generate:

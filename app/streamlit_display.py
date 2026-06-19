@@ -98,6 +98,8 @@ def display_debug_information(
     top_k: int,
     use_llm: bool,
     config: dict[str, Any] | None,
+    retrieval_query: str | None = None,
+    used_previous_sources: bool = False,
 ) -> None:
     """Display debug information for development."""
     st.subheader("Debug information")
@@ -109,6 +111,8 @@ def display_debug_information(
     st.markdown(f"**Retrieval mode:** `{retrieval_mode or 'unknown'}`")
     st.markdown(f"**Top K:** `{top_k}`")
     st.markdown(f"**Use LLM:** `{use_llm}`")
+    st.markdown(f"**Retrieval query:** `{retrieval_query or question}`")
+    st.markdown(f"**Used previous sources:** `{used_previous_sources}`")
 
     if config is not None:
         st.markdown("**Loaded app config:**")
