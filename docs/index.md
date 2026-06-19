@@ -1,3 +1,5 @@
+![GitHelp logo](_static/images/logo.png)
+
 # GitHelp Documentation
 
 GitHelp is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.

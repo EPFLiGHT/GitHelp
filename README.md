@@ -1,3 +1,5 @@
+![Githelp logo](docs/_static/images/logo.png)
+
 # GitHelp
 
 GitHelp is a conversational assistant for querying a software project's
@@ -30,6 +32,8 @@ Answers are source-grounded: GitHelp retrieves project documents first, builds a
 prompt from those sources, and then optionally calls a local LLM provider.
 
 ## Architecture
+
+![Githelp schema](docs/_static/images/schema.png)
 
 ```text
 target repository

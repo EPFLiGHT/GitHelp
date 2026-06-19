@@ -4,6 +4,8 @@ GitHelp is organized around a simple idea: all sources are converted into the sa
 
 The initial use case is MMORE, but the core pipeline is designed to remain project-agnostic. Project-specific behavior is isolated in optional project profiles.
 
+![GitHelp schema](../_static/images/schema.png)
+
 ## High-level flow
 
 ```text
