@@ -1,0 +1,22 @@
+services:
+  githelp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: githelp:latest
+    container_name: githelp-local
+    restart: unless-stopped
+
+    environment:
+      HF_HOME: /cache/huggingface
+
+    volumes:
+      - ./data:/app/data
+      - githelp_hf_cache:/cache/huggingface
+
+    ports:
+      - "8501:8501"
+
+volumes:
+  githelp_hf_cache:

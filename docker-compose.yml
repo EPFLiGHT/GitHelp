@@ -1,0 +1,34 @@
+services:
+  githelp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: githelp:latest
+    container_name: githelp
+    restart: unless-stopped
+
+    environment:
+      HF_HOME: /cache/huggingface
+
+    volumes:
+      - ./data:/app/data
+      - githelp_hf_cache:/cache/huggingface
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.githelp.entrypoints=web
+      - traefik.http.routers.githelp.rule=PathPrefix(`/githelp`)
+      - traefik.http.middlewares.strip-githelp.stripprefix.prefixes=/githelp
+      - traefik.http.routers.githelp.middlewares=strip-githelp
+      - traefik.http.services.githelp.loadbalancer.server.port=8501
+
+    networks:
+      - traefik
+
+volumes:
+  githelp_hf_cache:
+
+networks:
+  traefik:
+    external: true
