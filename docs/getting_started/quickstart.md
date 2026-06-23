@@ -12,17 +12,9 @@ From the root of the `GitHelp` repository:
 python -m pip install -e .
 ```
 
-If you use the local Qwen provider, make sure the LLM dependencies are installed:
-
-```bash
-python -m pip install transformers torch accelerate
-```
-
-If Streamlit is not already installed:
-
-```bash
-python -m pip install streamlit
-```
+This installs Streamlit, the local Qwen dependencies, and MMORE. The native
+MMORE backend is heavier than the simple backend and may download models during
+its first indexing or retrieval run.
 
 ## 2. Launch the Streamlit app
 
@@ -58,9 +50,9 @@ For GitHub URLs, GitHelp clones the repository into `data/repositories/` and
 then runs the same corpus, indexing, retrieval, and RAG pipeline on that local
 copy.
 
-## 4. Build the corpus
+## 4. Prepare the project
 
-Click one of the index build buttons:
+Click one of the project build buttons:
 
 ```text
 Build simple index
@@ -73,7 +65,7 @@ GitHelp generates a dedicated project folder:
 data/projects/<project_name>/
 ```
 
-For MMORE, this creates for example:
+For MMORE, both modes create for example:
 
 ```text
 data/projects/mmore/project_config.yaml
@@ -83,13 +75,16 @@ data/projects/mmore/corpus.jsonl
 The generated corpus can include:
 
 - Markdown and reStructuredText documentation;
-- Python docstrings and signatures extracted with `ast`;
+- Python module, class, function, and method docstrings, plus function and
+  method signatures extracted with `ast`;
 - YAML configuration files;
 - a synthetic repository structure document.
 
 ## 5. Ask questions
 
-After the corpus is built, use the **Ask questions** section.
+After the corpus is built, use the chat input at the bottom of the
+**Conversation** section. The input remains disabled until a valid project
+corpus is available.
 
 ### Choose an indexing mode
 
@@ -107,7 +102,9 @@ Use it when:
 
 #### MMORE index
 
-The MMORE index is the recommended mode for better retrieval quality.
+The MMORE index is the main semantic retrieval mode. Retrieval quality should
+still be checked against the displayed sources; the current evaluation is not
+large enough to claim that MMORE is better for every question.
 
 It builds the GitHelp corpus, exports it to MMORE format, and builds the MMORE index.
 
@@ -123,7 +120,8 @@ After building the MMORE index, select:
 Retrieval backend: mmore
 ```
 
-The simple backend remains available for debugging or quick corpus checks.
+The simple backend remains the recommended first run for debugging or quick
+corpus checks.
 
 Example questions:
 
@@ -144,6 +142,17 @@ The sidebar options let you:
 - show debug information;
 - switch between `simple` and `mmore` retrieval;
 - enable or disable LLM generation.
+
+When the `mmore` backend is selected, the diagnostics distinguish native index
+retrieval from the lexical corpus fallback:
+
+```text
+native_index
+corpus_fallback
+```
+
+The fallback searches the exported `mmore_corpus.jsonl` lexically. It does not
+use native MMORE/Milvus vector retrieval.
 
 ## 7. Persistent app state
 
@@ -200,3 +209,11 @@ build_corpus.py
 
 For local development, the `simple` backend is useful when you want to inspect
 the GitHelp corpus before exporting and indexing it with MMORE.
+
+```{note}
+Project corpora and MMORE export files are stored separately. The default app
+configuration nevertheless uses the MMORE-specific profile, and native MMORE
+indexing currently uses one shared `mmore_docs` collection. Use
+`project_profile: generic` for another project and rebuild the native index when
+switching its indexed corpus.
+```

@@ -91,9 +91,13 @@ data/projects/<project_name>/corpus.jsonl
 
 Each line is one serialized `DocumentRecord`.
 
-## Step 5: retrieval
+## Step 5: query preparation and retrieval
 
 There are two retrieval paths.
+
+Before retrieval, the selected project profile may expand the question with
+project-specific terms. The expanded text is used only for retrieval; the
+original question remains the question shown to the answer generator.
 
 ### Simple retrieval
 
@@ -120,22 +124,34 @@ or, in the default workflow:
 data/processed/mmore_corpus.jsonl
 ```
 
-Then MMORE indexes it and retrieves from the generated index.
+Then MMORE indexes it and retrieves from the generated index. If native
+retrieval fails, GitHelp can instead run lexical retrieval over the exported
+`mmore_corpus.jsonl` and reports the mode as `corpus_fallback`.
 
-The MMORE backend does not automatically read a newly built `corpus.jsonl`. The index must be rebuilt when the target corpus changes.
+The native MMORE backend does not automatically read a newly built
+`corpus.jsonl`. The export and index must be rebuilt when the target corpus
+changes.
+
+For code-, symbol-, and filename-oriented questions, the answering pipeline can
+also add candidates from the simple retriever before final filtering and
+reranking.
 
 ## Step 6: project profile
 
-After retrieval, GitHelp can apply a project profile.
+After retrieval, GitHelp applies the result-processing parts of the selected
+project profile.
 
 A project profile can:
 
-- expand queries with project-specific terms;
 - filter low-value or irrelevant results;
 - rerank results for known intents;
 - answer some structured questions directly without calling the LLM.
 
 The MMORE profile, for example, can answer some Milvus parameter questions deterministically to avoid unrelated configuration fields.
+
+The project profile comes from the application config. The generated project
+config does not select it automatically, so use `project_profile: generic` when
+querying another project unless a custom profile is required.
 
 ## Step 7: prompt and answer
 

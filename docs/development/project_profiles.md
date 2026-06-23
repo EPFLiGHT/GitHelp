@@ -85,13 +85,15 @@ Set the app config field:
 project_profile: example
 ```
 
-For a project-specific workflow, this can live in:
+The profile is selected from an app-level config such as:
 
 ```text
 configs/app_config.yaml
 ```
 
-or in app-level config that points to a generated project config.
+Generated `data/projects/<project_name>/project_config.yaml` files describe
+source paths but do not select a profile. The default app config remains set to
+`mmore`, so switch it to `generic` or a custom profile when changing projects.
 
 ## 4. Add tests
 

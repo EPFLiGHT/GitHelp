@@ -66,13 +66,15 @@ Example:
 ```yaml
 llm:
   provider: qwen
-  model_name: Qwen/Qwen3-1.7B
+  model_name: Qwen/Qwen3-4B
   max_new_tokens: 512
   temperature: 0.0
   enable_thinking: false
 ```
 
-The Qwen provider uses Hugging Face Transformers.
+The Qwen provider uses Hugging Face Transformers. A `dummy` provider is also
+implemented for tests and pipeline debugging. No external or hosted LLM
+provider is currently included.
 
 ## High-level answering helpers
 
@@ -115,7 +117,10 @@ user explicitly asks for a summary or rephrasing.
 
 Some structured questions are better answered deterministically than by an LLM.
 
-For example, the MMORE profile can answer Milvus parameter questions directly. This avoids returning unrelated fields such as `model_name`, `top_k`, or `max_workers` when the user asks specifically for Milvus parameters.
+For example, the MMORE profile can answer Milvus parameter questions directly.
+It scans the retrieved records for a fixed allowlist of known Milvus keys. This
+avoids returning unrelated fields such as `model_name`, `top_k`, or
+`max_workers`, but it is not a general YAML schema parser.
 
 ## Temporary extractive answerer
 

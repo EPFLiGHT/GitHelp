@@ -11,11 +11,7 @@ The initial use case is the
 project-oriented, so GitHelp can also build a corpus for another Python
 repository selected locally or cloned from a public GitHub URL.
 
-Full documentation:
-
-```text
-https://epflight.github.io/GitHelp/
-```
+Full documentation: [GitHelp documentation](https://epflight.github.io/GitHelp/)
 
 ## What GitHelp Answers
 
@@ -35,35 +31,10 @@ prompt from those sources, and then optionally calls a local LLM provider.
 
 ![Githelp schema](docs/_static/images/schema.png)
 
-```text
-target repository
-        |
-        v
-loaders and extractors
-        |
-        v
-DocumentRecord objects
-        |
-        v
-corpus.jsonl
-        |
-        +--> simple retriever
-        |
-        +--> MMORE export -> MMORE index -> MMORE retriever
-                         \-> mmore_corpus.jsonl fallback
-        |
-        v
-project profile
-        |
-        v
-source-grounded prompt
-        |
-        v
-extractive answer or local LLM answer
-        |
-        v
-Streamlit UI and CLI scripts
-```
+GitHelp turns a target repository into a structured `DocumentRecord` corpus.
+The simple backend searches this corpus directly, while the MMORE workflow
+exports and indexes it before retrieval. Retrieved records are then used either
+by the extractive answerer or as grounded context for the local LLM.
 
 Main package layout:
 
@@ -86,6 +57,31 @@ scripts/                    command-line workflows and debugging tools
 docs/                       Sphinx documentation
 tests/                      pytest suite
 ```
+
+## Quick Start
+
+From the repository root:
+
+```bash
+python -m pip install -e .
+streamlit run app/streamlit_app.py
+```
+
+Then open `http://localhost:8501` and:
+
+1. Select a local Python repository or enter a public GitHub repository URL.
+2. Build the **simple index** first. It creates the GitHelp corpus and is the
+   fastest way to validate extraction and retrieval.
+3. Ask a question and inspect the retrieved sources.
+4. Optionally build the **MMORE index** for native MMORE/Milvus retrieval.
+
+The two modes serve different purposes:
+
+- **Simple:** lightweight, deterministic lexical retrieval; recommended for a
+  first run and for debugging.
+- **MMORE:** dense and sparse retrieval through MMORE and Milvus; requires the
+  additional indexing step and is more sensitive to model dependencies and
+  local hardware.
 
 ## Installation
 
@@ -229,8 +225,9 @@ python scripts/build_index.py \
 
 The native MMORE retriever is run in an isolated subprocess. If that native
 process fails in a local environment, GitHelp keeps Streamlit alive and falls
-back to retrieval from the exported `mmore_corpus.jsonl`. Retrieved sources are
-tagged with the actual mode:
+back to lexical retrieval over the exported `mmore_corpus.jsonl`. This fallback
+keeps the application usable, but it does not use native MMORE/Milvus vector
+search. Retrieved sources are tagged with the actual mode:
 
 ```text
 native_index
@@ -243,7 +240,7 @@ Run retrieval evaluation on benchmark questions:
 
 ```bash
 python scripts/evaluate_retrieval.py \
-  --questions-path githelp_eval_questions.txt \
+  --questions-path tests/evaluation/githelp_eval_questions.txt \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
   --top-k 5
@@ -253,8 +250,8 @@ With expected-source checks:
 
 ```bash
 python scripts/evaluate_retrieval.py \
-  --questions-path githelp_eval_questions.txt \
-  --expected-sources-path githelp_eval_expected_sources.example.json \
+  --questions-path tests/evaluation/githelp_eval_questions.txt \
+  --expected-sources-path tests/evaluation/githelp_eval_expected_sources.example.json \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
   --top-k 5
@@ -318,17 +315,3 @@ Detailed deployment and troubleshooting instructions are available in:
 ```text
 docs/deployment/cluster.md
 ```
-
-
-## Current Limitations
-
-- GitHub loading currently targets public repositories.
-- Existing clones under `data/repositories/` are reused unless manually updated.
-- Building a corpus does not automatically rebuild the MMORE index.
-- The simple backend is useful and deterministic, but it is not semantic vector retrieval.
-- Native MMORE/Milvus retrieval can be sensitive to local Python, PyTorch, and
-  OpenMP environments; GitHelp isolates that path and provides an
-  `mmore_corpus.jsonl` fallback.
-- LLM quality and latency depend on the configured local model.
-
-See `docs/development/limitations.md` for more detail.

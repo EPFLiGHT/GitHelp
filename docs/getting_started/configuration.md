@@ -32,6 +32,9 @@ llm:
   max_new_tokens: 512
   temperature: 0.0
   enable_thinking: false
+
+project:
+  config_path: configs/project_config.yaml
 ```
 
 MMORE sparse indexing currently requires Transformers 4.x. GitHelp pins:
@@ -52,11 +55,12 @@ python -m pip install "transformers>=4.51.0,<5"
 
 | Field | Meaning |
 |---|---|
-| `app_title` | Title used by the app. |
-| `app_subtitle` | Subtitle used by the app. |
-| `show_sources` | Whether sources should be shown by default. |
-| `default_top_k` | Default number of retrieved sources. |
+| `app_title` | Parsed application title. The current Streamlit header still renders `GitHelp` directly. |
+| `app_subtitle` | Parsed application subtitle. The current Streamlit header still renders its caption directly. |
+| `show_sources` | Parsed display default; persisted Streamlit state takes precedence in the current UI. |
+| `default_top_k` | Parsed retrieval default; persisted Streamlit state currently initializes the sidebar value. |
 | `project_profile` | Project-specific behavior profile, for example `generic` or `mmore`. |
+| `project.config_path` | Project config used to identify the indexed project when preparing prompts. This is not changed automatically when Streamlit builds another project. |
 | `llm.provider` | LLM provider used by GitHelp. |
 | `llm.model_name` | Model name used by the provider. |
 | `llm.max_new_tokens` | Maximum number of generated tokens. |
@@ -95,7 +99,7 @@ yaml_config_paths:
   - /absolute/path/to/mmore/production-config
 
 include_repo_structure: true
-repo_structure_max_depth: 6
+repo_structure_max_depth: 4
 ```
 
 ### Main fields
@@ -112,9 +116,15 @@ repo_structure_max_depth: 6
 | `include_repo_structure` | Whether to add a synthetic repository tree document. |
 | `repo_structure_max_depth` | Maximum depth of the generated repository tree. |
 
+Generated project configs also contain `include_extensions` and
+`exclude_patterns`. These values are parsed and retained for future filtering,
+but the current corpus builder selects sources through the configured paths,
+source-specific extensions, and loader-level exclusions instead.
+
 ## `indexing_config.yaml`
 
-This file controls MMORE indexing defaults.
+This file contains prototype corpus/retrieval settings and the defaults used by
+`scripts/build_index.py`.
 
 ```yaml
 include_markdown: true
@@ -131,7 +141,11 @@ collection_name: mmore_docs
 mmore_index_config_path: configs/mmore_index_config.yaml
 ```
 
-Some fields, such as `chunk_size` and `chunk_overlap`, are kept for future chunking improvements. The current implementation mostly relies on Markdown sections and extracted code documentation records.
+The current index command reads `collection_name` and
+`mmore_index_config_path`. Fields describing source inclusion, chunking,
+`top_k`, and `retrieval_backend` are currently reserved configuration: the
+corpus builder and Streamlit sidebar do not consume them. Corpus construction
+instead relies on Markdown sections and extracted code documentation records.
 
 ## `mmore_index_config.yaml`
 
@@ -169,6 +183,11 @@ use_web: false
 reranker_model_name: null
 ```
 
+Both MMORE config files currently point to one local Milvus Lite database and
+the shared `mmore_docs` collection. Project-specific corpora and exports are
+isolated under `data/projects/`, but native MMORE indexes are not yet isolated
+per project.
+
 ## `data/app_state.json`
 
 The Streamlit app persists the latest local UI state in:
@@ -185,6 +204,9 @@ It can contain:
   "project_path": "/path/to/mmore",
   "corpus_path": "/path/to/githelp/data/projects/mmore/corpus.jsonl",
   "project_config_path": "/path/to/githelp/data/projects/mmore/project_config.yaml",
+  "mmore_corpus_path": "/path/to/githelp/data/projects/mmore/mmore_corpus.jsonl",
+  "collection_name": "mmore_docs",
+  "indexing_mode": "mmore",
   "backend": "simple",
   "top_k": 5,
   "use_llm": true,

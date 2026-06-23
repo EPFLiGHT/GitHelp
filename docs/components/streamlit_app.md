@@ -131,7 +131,8 @@ for deterministic debugging.
 
 The `mmore` backend is the main MMORE workflow. It attempts native MMORE index
 retrieval first and can fall back to the exported `mmore_corpus.jsonl` if the
-native process fails locally.
+native process fails locally. The fallback uses lexical ranking rather than
+native MMORE/Milvus vector search.
 
 The answer caption and source panels show the actual MMORE retrieval mode:
 
@@ -139,6 +140,12 @@ The answer caption and source panels show the actual MMORE retrieval mode:
 native_index
 corpus_fallback
 ```
+
+Project corpora and exports are stored in project-specific folders, but the
+default profile and native collection are global. The default config uses the
+MMORE profile, and **Build MMORE index** writes the shared `mmore_docs`
+collection. When switching projects, use the appropriate app config and rebuild
+the native index before relying on `native_index` results.
 
 ## LLM caching
 

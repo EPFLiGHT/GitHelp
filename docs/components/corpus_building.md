@@ -53,7 +53,10 @@ python scripts/build_corpus.py \
   --output-path data/projects/mmore/corpus.jsonl
 ```
 
-This is the mechanism used by the Streamlit app when a user selects a local project and clicks **Build corpus**.
+This is the mechanism used by the Streamlit app when a user selects a local
+project and clicks **Build simple index** or **Build MMORE index**. The simple
+button builds only this corpus; the MMORE button continues with export and
+native indexing.
 
 ## Output
 

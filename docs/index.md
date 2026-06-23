@@ -4,7 +4,10 @@
 
 GitHelp is a conversational assistant for querying a software project's documentation and code-related knowledge in natural language.
 
-The initial use case is the MMORE repository, but the architecture is designed to support other Python projects through project-specific configuration and optional project profiles.
+The initial use case is the MMORE repository, but the architecture can build
+corpora for other Python projects through project-specific source configuration
+and optional profiles. The current default app profile and native MMORE index
+remain global, as described in the limitations page.
 
 GitHelp can be used in two ways:
 
@@ -59,4 +62,6 @@ development/roadmap
 :caption: Deployment
 
 deployment/cluster
+deployment/maintainer
+deployment/troubleshooting
 ```

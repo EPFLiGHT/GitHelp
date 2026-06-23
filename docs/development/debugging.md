@@ -147,7 +147,7 @@ If results are poor, check:
 
 ```bash
 python scripts/evaluate_retrieval.py \
-  --questions-path githelp_eval_questions.txt \
+  --questions-path tests/evaluation/githelp_eval_questions.txt \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
   --top-k 5
@@ -160,8 +160,8 @@ To check expected sources as pass/fail criteria, provide a JSON file:
 
 ```bash
 python scripts/evaluate_retrieval.py \
-  --questions-path githelp_eval_questions.txt \
-  --expected-sources-path githelp_eval_expected_sources.example.json \
+  --questions-path tests/evaluation/githelp_eval_questions.txt \
+  --expected-sources-path tests/evaluation/githelp_eval_expected_sources.example.json \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
   --top-k 5
@@ -184,6 +184,10 @@ backend simple
 ```
 
 unless the MMORE export and index have also been rebuilt.
+
+Native MMORE indexing currently uses the shared `mmore_docs` collection. A
+successful build replaces the previous local Milvus Lite database, so verify
+that the index was built from the corpus selected in Streamlit.
 
 ## macOS OpenMP conflict while loading MMORE
 

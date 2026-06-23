@@ -126,7 +126,7 @@ python scripts/debug_retrieval.py \
 
 ```bash
 python scripts/evaluate_retrieval.py \
-  --questions-path githelp_eval_questions.txt \
+  --questions-path tests/evaluation/githelp_eval_questions.txt \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
   --top-k 5
@@ -140,8 +140,8 @@ To include expected-source checks:
 
 ```bash
 python scripts/evaluate_retrieval.py \
-  --questions-path githelp_eval_questions.txt \
-  --expected-sources-path githelp_eval_expected_sources.example.json \
+  --questions-path tests/evaluation/githelp_eval_questions.txt \
+  --expected-sources-path tests/evaluation/githelp_eval_expected_sources.example.json \
   --corpus-path data/projects/mmore/corpus.jsonl \
   --backend simple \
   --top-k 5
@@ -185,7 +185,10 @@ python scripts/prepare_answer.py \
   --config-path configs/app_config.yaml
 ```
 
-The MMORE backend requires an MMORE index to be built first.
+The MMORE backend attempts native index retrieval first. If the native process
+fails, it can fall back to lexical retrieval over the project-specific
+`mmore_corpus.jsonl`. Inspect the reported retrieval mode before comparing
+backends.
 
 ## Generate an answer
 
