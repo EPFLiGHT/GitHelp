@@ -1,6 +1,8 @@
 # Roadmap
 
-GitHelp is currently a functional local RAG application with active areas for improvement.
+GitHelp is a functional repository RAG application with local, Docker, and EPFL
+GPU-server workflows. This page distinguishes implemented behavior from the
+remaining multi-project and evaluation work.
 
 ## Implemented
 
@@ -29,37 +31,49 @@ GitHelp is currently a functional local RAG application with active areas for im
 - retrieval evaluation script for benchmark question sets;
 - expected-source checks for retrieval evaluation;
 - Streamlit interface for project setup, corpus building, question answering, and source inspection;
+- Streamlit actions for building the corpus, exporting it to MMORE format, and
+  building or rebuilding the native MMORE index;
+- conversational Streamlit layout with lightweight follow-up resolution;
 - tests for corpus building, retrieval, prompting, project state, project builder, and project profiles;
-- GitHub Actions workflow for running tests.
+- GitHub Actions workflow for running tests;
+- Sphinx documentation deployment through GitHub Pages;
+- CUDA-enabled Docker packaging and EPFL server deployment through Docker
+  Compose and Traefik.
 
 ## Current limitations
 
-- Public GitHub repository loading currently supports public repositories through local `git clone`.
+- GitHub repository loading supports public repositories through local `git clone`.
 - Existing GitHub clones are reused as-is and are not automatically updated.
-- Streamlit currently supports local project paths as the main project setup mode.
 - Building a corpus does not automatically rebuild the MMORE index.
 - The `simple` backend is useful for newly built corpora, but it is not a semantic retriever.
-- The MMORE backend depends on an existing MMORE index and configuration.
+- Native MMORE retrieval depends on an existing MMORE index and compatible
+  local dependencies; failures use a lexical corpus fallback.
+- Project corpora are isolated, but the active profile and native `mmore_docs`
+  collection are still global.
 - LLM quality depends on the selected local model.
 - Project profiles are currently lightweight heuristics, not a general evaluation-based reranking system.
+- Code extraction is Python-specific and indexes documented APIs rather than
+  complete implementation bodies or dependency graphs.
+- The evaluation set is preliminary and only partially annotated.
 
 ## Next steps
 
-1. Add an optional Streamlit action to export a project corpus to MMORE format.
-2. Add an optional Streamlit action to build or rebuild the MMORE index.
-3. Make backend selection clearer when the selected corpus and MMORE index may not match.
-4. Add richer support for code-aware questions.
-5. Add better source browsing in the Streamlit interface.
-6. Add deployment instructions for local lab machines or servers.
+1. Select the generic or project-specific profile automatically when a project
+   is activated.
+2. Isolate native MMORE collections and index metadata per project.
+3. Add a selector for previously prepared projects and validate that the active
+   corpus, profile, export, and native index match.
+4. Expand and fully annotate the retrieval evaluation set, then report ranking
+   and answer-grounding metrics.
+5. Add richer support for code-aware questions and implementation snippets.
+6. Add a dedicated source browser in the Streamlit interface.
 
 ## Future ideas
 
 - dependency graph between modules and symbols;
 - test and example extraction;
 - richer code-aware retrieval;
-- multiple saved projects in the UI;
-- project selector for previously built corpora;
-- evaluation set for retrieval quality;
-- better UI for browsing sources;
 - support for private GitHub repositories with authentication;
-- Sphinx documentation deployment through GitHub Pages.
+- optional external LLM providers;
+- automated index freshness checks;
+- evaluation-driven reranking.

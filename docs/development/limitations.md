@@ -12,6 +12,10 @@ credential-management decisions.
 Existing clones under `data/repositories/` are reused as local folders. GitHelp
 does not automatically pull updates from the remote repository.
 
+Repository ingestion is optimized for Python projects. Documentation, YAML, and
+the repository tree can still be collected from other repositories, but API
+extraction currently understands Python syntax only.
+
 ## Corpus and Index Freshness
 
 Building a GitHelp corpus writes:
@@ -26,6 +30,10 @@ project corpus must also be exported and indexed:
 ```text
 corpus.jsonl -> mmore_corpus.jsonl -> MMORE index
 ```
+
+The corpus and exported MMORE JSONL are project-specific. Native MMORE indexing
+currently uses one shared Milvus Lite database and the `mmore_docs` collection;
+rebuilding resets that database and replaces the previously indexed project.
 
 ## MMORE Native Retrieval
 
@@ -46,7 +54,13 @@ corpus_fallback
 ```
 
 The fallback still answers from the MMORE-formatted corpus, but it does not use
-the native Milvus vector search path.
+the native Milvus vector search path. It ranks records with the simple lexical
+retriever.
+
+For some code-, symbol-, and filename-oriented questions, the high-level
+answering pipeline also merges simple lexical candidates with MMORE candidates.
+Selecting the MMORE backend therefore does not guarantee that every final
+source originated from the native index.
 
 ## Local Environment Sensitivity
 
@@ -71,6 +85,15 @@ model and local hardware.
 The `dummy` provider remains available for tests and pipeline debugging without
 loading a model.
 
+The repository does not currently include an external or hosted LLM provider.
+
+## Project Profiles
+
+The active profile is selected globally from `configs/app_config.yaml`. The
+default is the MMORE-specific profile, and building a project-specific corpus
+does not update it automatically. Use `project_profile: generic` for another
+project unless it requires its own profile.
+
 ## Retrieval Quality
 
 GitHelp combines several retrieval improvements:
@@ -84,3 +107,7 @@ GitHelp combines several retrieval improvements:
 It is still not a complete code intelligence system. Future work could include
 dependency graphs, richer symbol indexing, tests/examples extraction, and
 evaluation-driven reranking.
+
+The current evaluation set contains ten MMORE questions, with expected-source
+annotations for only a small subset. It is useful as a regression check but is
+not a systematic benchmark of retrieval or answer quality.

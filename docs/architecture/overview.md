@@ -1,6 +1,7 @@
 # Architecture overview
 
-GitHelp is organized around a simple idea: all sources are converted into the same internal document format before retrieval.
+GitHelp is organized around a simple idea: all sources are converted into the
+same internal document format before retrieval.
 
 The initial use case is MMORE, but the core pipeline is designed to remain project-agnostic. Project-specific behavior is isolated in optional project profiles.
 
@@ -22,6 +23,8 @@ DocumentRecord objects
         v
 corpus.jsonl
         v
+question → optional project-profile query expansion
+        v
 retrieval backend
         |-------------------------------|
         |                               |
@@ -33,10 +36,9 @@ simple retriever                MMORE retriever
         v
 retrieved sources
         v
-project profile
+project-profile filtering and reranking
         |
         |  optional direct answer
-        |  optional query expansion / filtering / reranking
         v
 RAG prompt construction
         v
@@ -84,10 +86,15 @@ The `simple` backend reads a selected `corpus.jsonl` directly. It is useful for:
 
 The `mmore` backend is the main MMORE workflow. It retrieves from an MMORE index
 when native retrieval succeeds, and it can fall back to the exported
-`mmore_corpus.jsonl` if the local native process fails.
+`mmore_corpus.jsonl` if the local native process fails. That fallback is lexical
+and does not use native MMORE/Milvus vector search.
 
 The full MMORE workflow is:
 
 ```text
 Build corpus → export MMORE corpus → build MMORE index → use backend mmore
 ```
+
+For code-, symbol-, and filename-oriented questions, the high-level answering
+pipeline may merge lexical candidates from the simple retriever with MMORE
+candidates before applying the project profile.

@@ -74,7 +74,8 @@ The MMORE retriever:
 - calls `retriever.retrieve(...)` when native retrieval is available;
 - parses GitHelp metadata from retrieved text;
 - converts raw MMORE results back into `RetrievalResult` objects.
-- falls back to `mmore_corpus.jsonl` if the native process fails locally.
+- falls back to lexical ranking over `mmore_corpus.jsonl` if the native process
+  fails locally.
 
 Retrieved sources are tagged with one of these metadata values:
 
@@ -148,4 +149,15 @@ backend mmore
 
 The `mmore` backend attempts native MMORE index retrieval first. If that native
 process fails, GitHelp falls back to the exported `mmore_corpus.jsonl` next to
-the selected project corpus so Streamlit can continue answering.
+the selected project corpus so Streamlit can continue answering. Results tagged
+`corpus_fallback` did not come from MMORE/Milvus vector search.
+
+The high-level answering pipeline retrieves a wider candidate pool before
+profile filtering and reranking. For code-, symbol-, or filename-oriented
+questions, it may merge simple lexical candidates into the MMORE candidate
+pool. The final source list can therefore contain evidence rescued by the
+simple retriever even when `backend mmore` was selected.
+
+The default app config selects the `mmore` project profile globally. Generated
+project configs do not change this value automatically; select a generic or
+custom app config when querying another project.

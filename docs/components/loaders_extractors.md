@@ -37,7 +37,8 @@ Role:
 - extracts module docstrings;
 - extracts class docstrings;
 - extracts function and method docstrings;
-- reconstructs readable signatures.
+- reconstructs readable function and method signatures. Class records contain
+  class docstrings but no reconstructed class signature.
 
 Source types:
 
