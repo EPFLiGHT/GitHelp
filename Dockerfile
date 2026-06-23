@@ -22,6 +22,7 @@ COPY app ./app
 COPY configs ./configs
 COPY scripts ./scripts
 COPY docs ./docs
+COPY .streamlit ./.streamlit
 COPY data ./data
 COPY tests ./tests
 

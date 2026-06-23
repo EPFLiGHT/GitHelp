@@ -481,6 +481,13 @@ docker exec -it githelp python -c "import torch; print(torch.cuda.is_available()
 
 If this prints `False`, the container is not using CUDA.
 
+### Milvus networking
+
+If an external Milvus container is used, it should remain internal to the Docker network.
+
+Milvus should not expose public host ports.  
+GitHelp should reach Milvus through the Docker network, not through publicly bound host ports. In other words, Milvus can expose ports inside Docker, but it should not publish them on `0.0.0.0`.
+
 ## Current validated setup
 
 The current deployment has been validated with:

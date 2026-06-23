@@ -14,11 +14,10 @@ if str(SRC_PATH) not in sys.path:
 
 
 from githelp.rag.answering import (  # noqa: E402
+    AMBIGUOUS_FOLLOWUP_RESPONSE,
     answer_question,
     answer_question_with_provider,
-    answer_question_with_provider_from_results,
-    is_reformulation_followup,
-    rewrite_query_with_history,
+    resolve_retrieval_query,
 )
 from streamlit_display import (  # noqa: E402
     display_debug_information,
@@ -31,9 +30,13 @@ from streamlit_sidebar import get_llm_provider, render_sidebar  # noqa: E402
 from streamlit_state import (  # noqa: E402
     apply_pending_state_updates,
     clear_chat,
-    clear_question,
     initialize_session_state,
     persist_current_state,
+)
+from streamlit_theme import (  # noqa: E402
+    apply_githelp_theme,
+    render_githelp_header,
+    resolve_logo_path,
 )
 
 
@@ -43,7 +46,7 @@ DEFAULT_APP_STATE_PATH = PROJECT_ROOT / "data" / "app_state.json"
 
 st.set_page_config(
     page_title="GitHelp",
-    page_icon="📚",
+    page_icon=str(resolve_logo_path()),
     layout="wide",
 )
 
@@ -53,56 +56,45 @@ def persist_app_state() -> None:
     persist_current_state(DEFAULT_APP_STATE_PATH)
 
 
-def render_answer_controls() -> tuple[str, bool]:
-    """Render the question input and return the submitted question."""
-    st.header("Ask questions")
-
-    question = st.text_area(
-        "Question",
-        key="question",
-        placeholder="Example: Which Milvus parameters are used in the ColPali config?",
-        height=100,
-    )
-
-    col_ask, col_clear_question, col_clear_chat = st.columns([1, 1, 1])
-
-    with col_ask:
-        ask_button = st.button("Ask", type="primary")
-
-    with col_clear_question:
-        st.button("Clear question", on_click=clear_question)
-
-    with col_clear_chat:
-        st.button("Clear chat", on_click=clear_chat)
-
-    return question, ask_button
-
-
 def get_recent_chat_context(max_messages: int = 6) -> list[dict[str, str]]:
     """Return only the latest messages used as lightweight LLM context."""
     messages = st.session_state.get("messages", [])
     return messages[-max_messages:]
 
 
+def render_conversation_header() -> None:
+    """Render a compact conversation heading and chat action."""
+    heading_column, action_column = st.columns([6, 1])
+
+    with heading_column:
+        st.subheader("Conversation")
+
+    with action_column:
+        st.button(
+            "Clear chat",
+            on_click=clear_chat,
+            use_container_width=True,
+        )
+
+
 def render_chat_history() -> None:
-    """Display the in-memory conversation with a markdown fallback."""
+    """Display the in-memory conversation in chronological chat bubbles."""
     messages = st.session_state.get("messages", [])
 
     if not messages:
+        with st.chat_message("assistant"):
+            st.markdown(
+                "Ask me about the selected project's documentation, code, "
+                "configuration, or deployment."
+            )
         return
-
-    st.subheader("Chat")
 
     for message in messages:
         role = message.get("role", "assistant")
         content = message.get("content", "")
 
-        if hasattr(st, "chat_message"):
-            with st.chat_message(role):
-                st.markdown(content)
-        else:
-            label = "User" if role == "user" else "Assistant"
-            st.markdown(f"**{label}:** {content}")
+        with st.chat_message(role):
+            st.markdown(content)
 
 
 def _is_incomplete_mmore_index_error(error: Exception) -> bool:
@@ -120,23 +112,20 @@ def _answer_with_backend(
     """Answer a question with a selected backend."""
     if options["use_llm"]:
         llm_provider = get_llm_provider(options["config_path"])
-        retrieval_query = rewrite_query_with_history(
+        query_decision = resolve_retrieval_query(
             question=question,
             chat_history=chat_history,
             llm_provider=llm_provider,
         )
-        previous_results = st.session_state.get("last_results", [])
 
-        # Pure reformulations can reuse the previous sources safely.
-        if previous_results and is_reformulation_followup(question):
-            answer, results = answer_question_with_provider_from_results(
-                question=question,
-                llm_provider=llm_provider,
-                results=previous_results,
-                config_path=options["config_path"],
-                chat_history=chat_history,
+        if query_decision.is_ambiguous:
+            return (
+                AMBIGUOUS_FOLLOWUP_RESPONSE,
+                [],
+                query_decision.retrieval_query,
+                query_decision.is_followup,
+                True,
             )
-            return answer, results, retrieval_query, True
 
         answer, results = answer_question_with_provider(
             question=question,
@@ -146,9 +135,15 @@ def _answer_with_backend(
             backend=backend,
             config_path=options["config_path"],
             chat_history=chat_history,
-            retrieval_query=retrieval_query,
+            retrieval_query=query_decision.retrieval_query,
         )
-        return answer, results, retrieval_query, False
+        return (
+            answer,
+            results,
+            query_decision.retrieval_query,
+            query_decision.is_followup,
+            False,
+        )
 
     answer, results = answer_question(
         question=question,
@@ -157,30 +152,31 @@ def _answer_with_backend(
         backend=backend,
         config_path=options["config_path"],
     )
-    return answer, results, question, False
+    return answer, results, question, False, False
 
 
-def answer_current_question(question: str, options: dict) -> None:
-    """Answer the current question and persist the displayed result."""
+def answer_current_question(question: str, options: dict) -> str | None:
+    """Answer the current question, persist it, and return the answer text."""
     if not question.strip():
         st.warning("Please enter a question.")
-        return
+        return None
 
     corpus_path = st.session_state.get("corpus_path", "")
 
     if not corpus_path:
         st.error("No corpus selected. Build a corpus first in Project setup.")
-        return
+        return None
 
     corpus = Path(corpus_path)
 
     if not corpus.exists():
         st.error(f"Corpus file not found: {corpus}")
-        return
+        return None
 
     with st.spinner("Retrieving sources and generating answer..."):
         backend_used = options["backend"]
-        # Retrieval uses the current question; only generation receives recent chat.
+        # Recent chat may resolve a vague follow-up, but it is never appended
+        # wholesale to the retrieval query.
         chat_history = get_recent_chat_context()
 
         try:
@@ -188,7 +184,8 @@ def answer_current_question(question: str, options: dict) -> None:
                 answer,
                 results,
                 retrieval_query,
-                used_previous_sources,
+                is_followup,
+                followup_ambiguous,
             ) = _answer_with_backend(
                 question=question,
                 corpus=corpus,
@@ -213,7 +210,8 @@ def answer_current_question(question: str, options: dict) -> None:
                         answer,
                         results,
                         retrieval_query,
-                        used_previous_sources,
+                        is_followup,
+                        followup_ambiguous,
                     ) = _answer_with_backend(
                         question=question,
                         corpus=corpus,
@@ -224,16 +222,16 @@ def answer_current_question(question: str, options: dict) -> None:
                 except Exception as fallback_error:
                     st.error("An error occurred while answering with the fallback backend.")
                     st.exception(fallback_error)
-                    return
+                    return None
             else:
                 st.error("An error occurred while answering the question.")
                 st.exception(error)
-                return
+                return None
 
         except Exception as error:
             st.error("An error occurred while answering the question.")
             st.exception(error)
-            return
+            return None
 
     st.session_state["last_answer"] = answer
     st.session_state["last_results"] = results
@@ -256,60 +254,63 @@ def answer_current_question(question: str, options: dict) -> None:
         "corpus_path": corpus_path,
         "config_path": options["config_path"],
         "retrieval_query": retrieval_query,
-        "used_previous_sources": used_previous_sources,
+        "is_followup": is_followup,
+        "followup_ambiguous": followup_ambiguous,
     }
 
     persist_app_state()
+    return answer
 
 
 def render_last_answer(options: dict) -> None:
-    """Render latest answer metadata, sources, and optional debug information."""
+    """Render latest evidence and diagnostics as secondary content."""
     if st.session_state["last_answer"] is None:
         return
 
-    metadata = st.session_state["last_metadata"]
+    if not options["show_sources"] and not options["show_debug"]:
+        return
 
-    st.subheader("Latest answer details")
+    metadata = st.session_state["last_metadata"]
     backend_label = format_backend_label(
         str(metadata.get("backend", "")),
         metadata.get("retrieval_mode"),
     )
 
-    st.caption(
-        f"Backend: `{backend_label}` | "
-        f"top_k: `{metadata.get('top_k')}` | "
-        f"LLM: `{metadata.get('use_llm')}`"
-    )
-
-    if options["show_sources"]:
-        display_sources(
-            st.session_state["last_results"],
-            show_full_sources=options["show_full_sources"],
+    with st.expander("Latest answer sources and diagnostics", expanded=False):
+        st.caption(
+            f"Backend: `{backend_label}` | "
+            f"top_k: `{metadata.get('top_k')}` | "
+            f"LLM: `{metadata.get('use_llm')}`"
         )
 
-    if options["show_debug"]:
-        display_debug_information(
-            question=metadata.get("question", ""),
-            corpus_path=metadata.get("corpus_path", ""),
-            config_path=metadata.get("config_path", ""),
-            backend=metadata.get("backend", ""),
-            retrieval_mode=metadata.get("retrieval_mode"),
-            top_k=metadata.get("top_k", 0),
-            use_llm=metadata.get("use_llm", False),
-            config=options["config"],
-            retrieval_query=metadata.get("retrieval_query"),
-            used_previous_sources=metadata.get("used_previous_sources", False),
-        )
+        if options["show_sources"]:
+            display_sources(
+                st.session_state["last_results"],
+                show_full_sources=options["show_full_sources"],
+            )
+
+        if options["show_debug"]:
+            display_debug_information(
+                question=metadata.get("question", ""),
+                corpus_path=metadata.get("corpus_path", ""),
+                config_path=metadata.get("config_path", ""),
+                backend=metadata.get("backend", ""),
+                retrieval_mode=metadata.get("retrieval_mode"),
+                top_k=metadata.get("top_k", 0),
+                use_llm=metadata.get("use_llm", False),
+                config=options["config"],
+                retrieval_query=metadata.get("retrieval_query"),
+                is_followup=metadata.get("is_followup", False),
+                followup_ambiguous=metadata.get("followup_ambiguous", False),
+            )
 
 
 def main() -> None:
     initialize_session_state(DEFAULT_APP_STATE_PATH)
     apply_pending_state_updates()
+    apply_githelp_theme()
 
-    st.title("GitHelp")
-    st.caption(
-        "Ask questions about a software project's documentation and code documentation."
-    )
+    render_githelp_header()
 
     options = render_sidebar(
         default_config_path=DEFAULT_CONFIG_PATH,
@@ -321,14 +322,27 @@ def main() -> None:
         persist_current_state=persist_app_state,
     )
 
-    st.divider()
-
-    question, ask_button = render_answer_controls()
-
-    if ask_button:
-        answer_current_question(question, options)
-
+    render_conversation_header()
     render_chat_history()
+
+    corpus_path = st.session_state.get("corpus_path", "")
+    chat_ready = bool(corpus_path and Path(corpus_path).exists())
+    placeholder = (
+        "Ask a follow-up or start a new question..."
+        if chat_ready
+        else "Build a project index before asking a question"
+    )
+    question = st.chat_input(placeholder, disabled=not chat_ready)
+
+    if question:
+        with st.chat_message("user"):
+            st.markdown(question)
+
+        with st.chat_message("assistant"):
+            answer = answer_current_question(question, options)
+            if answer is not None:
+                st.markdown(answer)
+
     render_last_answer(options)
 
 

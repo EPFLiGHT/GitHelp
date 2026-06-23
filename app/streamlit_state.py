@@ -12,7 +12,6 @@ def initialize_session_state(app_state_path: str | Path) -> None:
     app_state = load_app_state(app_state_path)
 
     defaults = {
-        "question": "",
         "messages": [],
         "last_answer": None,
         "last_results": [],
@@ -71,11 +70,6 @@ def persist_current_state(app_state_path: str | Path) -> None:
     }
 
     save_app_state(app_state_path, state)
-
-
-def clear_question() -> None:
-    """Clear the current question input."""
-    st.session_state["question"] = ""
 
 
 def clear_results() -> None:

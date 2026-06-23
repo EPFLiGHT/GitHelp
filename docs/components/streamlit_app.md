@@ -32,6 +32,35 @@ The app usually opens at:
 http://localhost:8501/
 ```
 
+## Conversation layout
+
+The main page is organized as a chat assistant:
+
+- conversation messages render chronologically with `st.chat_message`;
+- the newest user and assistant messages appear at the bottom;
+- `st.chat_input` stays at the bottom of the page for the next question;
+- **Clear chat** sits beside the conversation heading;
+- the input remains disabled until a project corpus is available.
+
+Project and retrieval settings remain in compact controls so the conversation
+stays visually dominant. The same Streamlit layout is used locally and in the
+Docker deployment.
+
+## Visual identity
+
+The compact header uses the project logo from:
+
+```text
+docs/_static/images/logo.png
+```
+
+The path is resolved relative to the application source, not the shell's
+working directory, so it is the same locally and under Docker's `/app`
+working directory. The pastel-green primary color is defined in
+`.streamlit/config.toml`; a small complementary CSS layer in
+`app/streamlit_theme.py` styles buttons, chat accents, focus states, and
+neutral user/assistant avatars for light and dark displays.
+
 ## Project setup
 
 The app contains a **Project setup** section.
@@ -117,14 +146,19 @@ The app uses Streamlit resource caching to avoid reloading the local LLM provide
 
 The first LLM query may take longer because the model is loaded. Later queries reuse the cached provider unless the config cache is cleared.
 
-## Sources
+## Sources and diagnostics
 
-Retrieved sources are displayed by default.
+Retrieved sources are enabled by default but appear in a collapsed **Latest
+answer sources and diagnostics** section below the conversation.
 
 The sidebar can:
 
 - hide retrieved sources;
 - show full source content;
 - show debug information.
+
+The debug panel shows the original question, the standalone query used for
+retrieval, and whether the question was detected as a follow-up. It also marks
+ambiguous follow-ups that were stopped for clarification before retrieval.
 
 This makes the interface useful both for users and for development debugging.
