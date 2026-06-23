@@ -46,20 +46,6 @@ Project and retrieval settings remain in compact controls so the conversation
 stays visually dominant. The same Streamlit layout is used locally and in the
 Docker deployment.
 
-## Visual identity
-
-The compact header uses the project logo from:
-
-```text
-docs/_static/images/logo.png
-```
-
-The path is resolved relative to the application source, not the shell's
-working directory, so it is the same locally and under Docker's `/app`
-working directory. The pastel-green primary color is defined in
-`.streamlit/config.toml`; a small complementary CSS layer in
-`app/streamlit_theme.py` styles buttons, chat accents, focus states, and
-neutral user/assistant avatars for light and dark displays.
 
 ## Project setup
 

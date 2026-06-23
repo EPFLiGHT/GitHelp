@@ -56,18 +56,6 @@ remaining multi-project and evaluation work.
   complete implementation bodies or dependency graphs.
 - The evaluation set is preliminary and only partially annotated.
 
-## Next steps
-
-1. Select the generic or project-specific profile automatically when a project
-   is activated.
-2. Isolate native MMORE collections and index metadata per project.
-3. Add a selector for previously prepared projects and validate that the active
-   corpus, profile, export, and native index match.
-4. Expand and fully annotate the retrieval evaluation set, then report ranking
-   and answer-grounding metrics.
-5. Add richer support for code-aware questions and implementation snippets.
-6. Add a dedicated source browser in the Streamlit interface.
-
 ## Future ideas
 
 - dependency graph between modules and symbols;

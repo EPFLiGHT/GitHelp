@@ -5,47 +5,10 @@ same internal document format before retrieval.
 
 The initial use case is MMORE, but the core pipeline is designed to remain project-agnostic. Project-specific behavior is isolated in optional project profiles.
 
-![GitHelp schema](../_static/images/schema.png)
-
 ## High-level flow
 
-```text
-Target project repository
-        |
-        |  Markdown / RST docs
-        |  Python source files
-        |  YAML config files
-        |  repository tree
-        v
-GitHelp loaders and extractors
-        v
-DocumentRecord objects
-        v
-corpus.jsonl
-        v
-question → optional project-profile query expansion
-        v
-retrieval backend
-        |-------------------------------|
-        |                               |
-        v                               v
-simple retriever                MMORE retriever
-(local / dynamic corpus)        (MMORE index)
-        |                               |
-        |-------------------------------|
-        v
-retrieved sources
-        v
-project-profile filtering and reranking
-        |
-        |  optional direct answer
-        v
-RAG prompt construction
-        v
-LLM or extractive answer
-        v
-answer with cited sources
-```
+![GitHelp schema](../_static/images/schema.png)
+
 
 ## Main design choices
 

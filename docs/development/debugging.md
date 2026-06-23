@@ -189,21 +189,3 @@ Native MMORE indexing currently uses the shared `mmore_docs` collection. A
 successful build replaces the previous local Milvus Lite database, so verify
 that the index was built from the corpus selected in Streamlit.
 
-## macOS OpenMP conflict while loading MMORE
-
-On some macOS environments, MMORE model loading can fail before retrieval with:
-
-```text
-OMP: Error #15: Initializing libomp.dylib, but found libomp.dylib already initialized.
-```
-
-This is an environment conflict between native numerical libraries. For a local
-debugging run, you can try:
-
-```bash
-KMP_DUPLICATE_LIB_OK=TRUE streamlit run app/streamlit_app.py
-```
-
-Use this only as a local workaround. The cleaner fix is to reinstall the
-environment so PyTorch, transformers, and MMORE share a compatible OpenMP
-runtime.

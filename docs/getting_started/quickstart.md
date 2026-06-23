@@ -34,7 +34,7 @@ http://localhost:8501/
 
 In the Streamlit interface, use the **Project setup** section.
 
-For the MMORE use case, either enter the local path to the MMORE repository:
+Enter the local path to the repository. For example, to query questions on MMORE:
 
 ```text
 /Users/<user>/path/to/mmore
@@ -102,11 +102,7 @@ Use it when:
 
 #### MMORE index
 
-The MMORE index is the main semantic retrieval mode. Retrieval quality should
-still be checked against the displayed sources; the current evaluation is not
-large enough to claim that MMORE is better for every question.
-
-It builds the GitHelp corpus, exports it to MMORE format, and builds the MMORE index.
+The MMORE index is the main semantic retrieval mode. It builds the GitHelp corpus, exports it to MMORE format, and builds the MMORE index.
 
 Use it when:
 

@@ -3,11 +3,14 @@
 GitHelp uses a `src/` layout.
 
 ```text
-githelp/
+GitHelp/
 ├── README.md
 ├── pyproject.toml
 ├── .env.example
 ├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── docker-compose.local.yml
 ├── configs/
 ├── data/
 ├── docs/
@@ -29,6 +32,15 @@ githelp/
 | `scripts/` | Command-line utilities for building, debugging, indexing, and running GitHelp. |
 | `src/githelp/` | Main Python package. |
 | `tests/` | Automated tests. |
+
+## Docker and deployment files
+
+GitHelp also includes Docker files to make local execution and server deployment easier.
+
+| File | Role |
+| Dockerfile | Defines the container environment used to install and run GitHelp. |
+| docker-compose.local.yml | Local Docker Compose configuration, mainly useful for testing the app in a container. |
+| docker-compose.yml | Docker Compose configuration intended for deployment, for example on a server. |
 
 ## Generated data layout
 
