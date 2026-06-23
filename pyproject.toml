@@ -15,6 +15,7 @@ dependencies = [
     "torch",
     "langchain-community",
     "mmore[index,rag]==1.2.2",
+    "docker-7.1.0",
 ]
 
 [project.optional-dependencies]
