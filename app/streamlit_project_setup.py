@@ -335,12 +335,12 @@ def render_project_setup(
     backend = st.session_state.get("backend", "mmore")
 
     if corpus_exists:
-        st.success(
-            f"Project `{project_name or 'unknown'}` is ready "
-            f"with `{indexing_mode}` indexing and `{backend}` retrieval."
+        st.caption(
+            f"Connected project: `{project_name or 'unknown'}` · "
+            f"index: `{indexing_mode}` · retrieval: `{backend}`"
         )
 
-        with st.expander("Project settings / rebuild index", expanded=False):
+        with st.expander("Project settings and index management", expanded=False):
             _render_project_setup_form(
                 project_root=project_root,
                 persist_current_state=persist_current_state,

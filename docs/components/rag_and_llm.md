@@ -31,7 +31,11 @@ The prompt instructs the LLM to:
 - cite sources inline with `[Source 1]`, `[Source 2]`, etc.;
 - avoid inventing commands, paths, APIs, modules, or configuration keys;
 - avoid interpreting configuration values unless the sources explain them;
-- say when the sources are insufficient.
+- begin with a brief, direct context sentence;
+- use practical numbered steps for how-to questions;
+- group parameters by role instead of repeating one description pattern;
+- clearly separate supported facts, safe inferences, and missing evidence;
+- say when the sources are incomplete or insufficient.
 
 Debug command:
 
@@ -90,14 +94,22 @@ answer_question_with_provider(...)
 Current flow:
 
 ```text
-question
+current question + recent chat
+→ keep standalone questions unchanged, or rewrite a clear follow-up
+→ ask for clarification when a follow-up has no single clear referent
 → project profile query expansion
 → retrieval
 → project profile filtering/reranking
 → optional project profile direct answer
-→ prompt construction
+→ prompt construction with the original question and lightweight recent context
 → LLM generation
 ```
+
+The rewritten query is used only for retrieval. Recent chat is not appended to
+the retrieval query, and standalone questions are not forced into the previous
+topic. The final answer prompt receives at most six recent messages to resolve
+references, but instructs the model not to repeat earlier answers unless the
+user explicitly asks for a summary or rephrasing.
 
 ## Direct answers from project profiles
 

@@ -4,6 +4,7 @@ import pytest
 
 from githelp.data_models import DocumentRecord
 from githelp.rag.answering import (
+    AMBIGUOUS_FOLLOWUP_RESPONSE,
     _boost_filename_matches,
     _extract_filename_tokens,
     _get_project_name,
@@ -13,6 +14,7 @@ from githelp.rag.answering import (
     answer_question_with_provider,
     is_context_dependent_question,
     is_reformulation_followup,
+    resolve_retrieval_query,
     rewrite_query_with_history,
 )
 from githelp.retrieval.base import RetrievalResult
@@ -75,6 +77,16 @@ class DummyProvider:
 class FailingProvider:
     def generate(self, prompt: str) -> str:
         raise RuntimeError("rewrite failed")
+
+
+class SequencedProvider:
+    def __init__(self, responses: list[str]):
+        self.responses = iter(responses)
+        self.prompts: list[str] = []
+
+    def generate(self, prompt: str) -> str:
+        self.prompts.append(prompt)
+        return next(self.responses)
 
 
 def test_extract_filename_tokens_finds_common_extensions():
@@ -193,7 +205,17 @@ def test_context_dependent_question_detection():
     assert is_context_dependent_question("explain it more simply") is True
     assert is_context_dependent_question("make it clearer") is True
     assert is_context_dependent_question("Where is it used?") is True
+    assert is_context_dependent_question("Can you explain step 2?") is True
+    assert is_context_dependent_question("tell me briefly the steps to apply") is True
+    assert is_context_dependent_question("What about Docker?") is True
+    assert is_context_dependent_question("Why did that fail?") is True
     assert is_context_dependent_question("How to use indexing in mmore?") is False
+    assert is_context_dependent_question("Which file defines the app config?") is False
+    assert is_context_dependent_question("Summarize how MMORE indexing works") is False
+    assert (
+        is_context_dependent_question("Which setting ensures that Docker uses GPU?")
+        is False
+    )
 
 
 def test_reformulation_followup_detection():
@@ -240,6 +262,87 @@ def test_rewrite_query_with_history_falls_back_safely():
         llm_provider=FailingProvider(),
     ) == "Where is it used?"
 
+
+def test_resolve_retrieval_query_does_not_consult_history_for_standalone_question():
+    provider = DummyProvider("wrong rewritten query")
+
+    decision = resolve_retrieval_query(
+        "How does Docker deployment work?",
+        chat_history=[
+            {"role": "user", "content": "How does MMORE indexing work?"},
+            {"role": "assistant", "content": "It builds a vector index."},
+        ],
+        llm_provider=provider,
+    )
+
+    assert decision.retrieval_query == "How does Docker deployment work?"
+    assert decision.is_followup is False
+    assert decision.is_ambiguous is False
+    assert provider.prompts == []
+
+
+def test_standalone_unrelated_question_is_used_as_is_for_retrieval(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    result = make_custom_result(
+        doc_id="markdown::docker",
+        content="Docker deployment uses the documented compose configuration.",
+        source_type="markdown_section",
+        score=1.0,
+        title="Docker deployment",
+        relative_path="docs/deployment/docker.md",
+    )
+    queries: list[str] = []
+    provider = DummyProvider("Docker answer")
+    monkeypatch.setattr(
+        "githelp.rag.answering.load_yaml",
+        lambda _path: {"project_profile": "generic", "project_name": "githelp"},
+    )
+
+    def fake_retrieve_documents(**kwargs):
+        queries.append(kwargs["query"])
+        return [result]
+
+    monkeypatch.setattr(
+        "githelp.rag.answering.retrieve_documents",
+        fake_retrieve_documents,
+    )
+
+    answer, results = answer_question_with_provider(
+        question="How does Docker deployment work?",
+        llm_provider=provider,
+        corpus_path=tmp_path / "corpus.jsonl",
+        backend="simple",
+        config_path="unused.yaml",
+        chat_history=[
+            {"role": "user", "content": "How does MMORE indexing work?"},
+            {"role": "assistant", "content": "It builds a vector index."},
+        ],
+    )
+
+    assert answer == "Docker answer"
+    assert results == [result]
+    assert queries == ["How does Docker deployment work?"]
+    assert len(provider.prompts) == 1
+
+
+def test_resolve_retrieval_query_can_report_ambiguous_followup():
+    provider = DummyProvider("AMBIGUOUS")
+
+    decision = resolve_retrieval_query(
+        "Where is it used?",
+        chat_history=[
+            {"role": "user", "content": "Compare the indexer and retriever."},
+        ],
+        llm_provider=provider,
+    )
+
+    assert decision.retrieval_query == "Where is it used?"
+    assert decision.is_followup is True
+    assert decision.is_ambiguous is True
+    assert "Prefer the most recent relevant user question" in provider.prompts[0]
+    assert "output exactly AMBIGUOUS" in provider.prompts[0]
 
 def test_answer_question_without_llm_uses_shared_prepared_retrieval(
     monkeypatch: pytest.MonkeyPatch,
@@ -401,3 +504,80 @@ def test_answer_question_with_provider_uses_retrieval_query_only_for_retrieval(
     assert "Question:" in provider.prompts[0]
     assert "explain it more simply" in provider.prompts[0]
     assert "Recent conversation context:" in provider.prompts[0]
+
+
+def test_answer_question_with_provider_rewrites_followup_before_retrieval(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    result = make_custom_result(
+        doc_id="markdown::indexing",
+        content="Indexing uses a configuration file that defines the index settings.",
+        source_type="markdown_section",
+        score=1.0,
+    )
+    queries: list[str] = []
+    provider = SequencedProvider(
+        ["How is MMORE indexing configured?", "focused answer"]
+    )
+
+    monkeypatch.setattr(
+        "githelp.rag.answering.load_yaml",
+        lambda _path: {"project_profile": "generic", "project_name": "mmore"},
+    )
+
+    def fake_retrieve_documents(**kwargs):
+        queries.append(kwargs["query"])
+        return [result]
+
+    monkeypatch.setattr(
+        "githelp.rag.answering.retrieve_documents",
+        fake_retrieve_documents,
+    )
+
+    answer, results = answer_question_with_provider(
+        question="How do I configure it?",
+        llm_provider=provider,
+        corpus_path=tmp_path / "corpus.jsonl",
+        backend="simple",
+        config_path="unused.yaml",
+        chat_history=[
+            {"role": "user", "content": "How does MMORE indexing work?"},
+            {"role": "assistant", "content": "It uses a configuration file."},
+        ],
+    )
+
+    assert answer == "focused answer"
+    assert results == [result]
+    assert queries == ["How is MMORE indexing configured?"]
+    assert "Standalone retrieval query:" in provider.prompts[0]
+    assert "Question:\nHow do I configure it?" in provider.prompts[1]
+
+
+def test_answer_question_with_provider_asks_for_clarification_when_ambiguous(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    provider = DummyProvider("AMBIGUOUS")
+
+    def fail_if_retrieval_runs(**_kwargs):
+        raise AssertionError("ambiguous follow-up should not run retrieval")
+
+    monkeypatch.setattr(
+        "githelp.rag.answering.retrieve_documents",
+        fail_if_retrieval_runs,
+    )
+
+    answer, results = answer_question_with_provider(
+        question="Where is it used?",
+        llm_provider=provider,
+        corpus_path=tmp_path / "corpus.jsonl",
+        config_path="unused.yaml",
+        chat_history=[
+            {"role": "user", "content": "Compare the indexer and retriever."},
+        ],
+    )
+
+    assert answer == AMBIGUOUS_FOLLOWUP_RESPONSE
+    assert results == []
+    assert len(provider.prompts) == 1

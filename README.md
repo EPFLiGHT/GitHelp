@@ -294,6 +294,32 @@ python -m pip install -r docs/requirements.txt
 sphinx-build -b html docs docs/_build/html
 ```
 
+## Docker and EPFL Cluster Deployment
+
+GitHelp can also be run with Docker.
+
+For local testing:
+
+```bash
+docker compose -f docker-compose.local.yml up --build
+```
+
+Then open:
+```text
+http://localhost:8501
+```
+For the EPFL GPU server deployment, GitHelp is packaged as a CUDA-enabled Docker image and served through Traefik under:
+```text
+http://gpu217.rcp.epfl.ch:1312/githelp/
+```
+The deployment uses a persistent `data/` volume for cloned repositories, generated corpora and MMORE indexes, and a persistent Hugging Face cache for local model files.
+
+Detailed deployment and troubleshooting instructions are available in:
+```text
+docs/deployment/cluster.md
+```
+
+
 ## Current Limitations
 
 - GitHub loading currently targets public repositories.
