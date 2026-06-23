@@ -53,3 +53,10 @@ development/project_profiles
 development/retrieval_evaluation
 development/roadmap
 ```
+
+```{toctree}
+:maxdepth: 1
+:caption: Deployment
+
+deployment/cluster
+```

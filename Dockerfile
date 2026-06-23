@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -26,7 +26,19 @@ COPY data ./data
 COPY tests ./tests
 
 RUN python -m pip install --upgrade pip setuptools wheel \
-    && python -m pip install -e .
+    && python -m pip install -e . --no-deps \
+    && python -m pip install \
+        pyyaml \
+        pydantic \
+        pytest \
+        streamlit \
+        python-dotenv \
+        "transformers>=4.51.0,<5" \
+        accelerate \
+        langchain-community \
+        "mmore[index,rag]==1.2.2" \
+        "docker==7.1.0" \
+        faiss-cpu
 
 EXPOSE 8501
 
