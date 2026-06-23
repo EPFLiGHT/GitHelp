@@ -8,8 +8,11 @@ services:
     container_name: githelp
     restart: unless-stopped
 
+    gpus: all
+
     environment:
       HF_HOME: /cache/huggingface
+      NVIDIA_VISIBLE_DEVICES: "1"
 
     volumes:
       - ./data:/app/data
