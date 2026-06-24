@@ -1,15 +1,6 @@
 from __future__ import annotations
 
 from contextlib import nullcontext
-from pathlib import Path
-import sys
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-APP_PATH = PROJECT_ROOT / "app"
-
-if str(APP_PATH) not in sys.path:
-    sys.path.insert(0, str(APP_PATH))
 
 import streamlit_app
 from streamlit_app import (
@@ -22,7 +13,6 @@ from streamlit_display import (
     format_backend_label,
     get_retrieval_mode,
 )
-
 from githelp.data_models import DocumentRecord
 from githelp.retrieval.base import RetrievalResult
 from githelp.retrieval.mmore_result_mapping import (

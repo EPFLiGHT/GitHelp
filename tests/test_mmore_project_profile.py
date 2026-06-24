@@ -44,6 +44,16 @@ def test_mmore_profile_expands_colpali_milvus_query():
     assert "collection_name" in expanded
 
 
+def test_mmore_profile_expands_code_oriented_indexing_query():
+    profile = MMoreProjectProfile()
+
+    expanded = profile.expand_query("Which function implements indexing?")
+
+    assert "cli.py" in expanded
+    assert "mmore.cli" in expanded
+    assert "signature" in expanded
+
+
 def test_mmore_profile_directly_answers_milvus_parameter_question():
     profile = MMoreProjectProfile()
 
@@ -92,6 +102,18 @@ def test_mmore_profile_returns_none_for_non_milvus_question():
     assert answer is None
 
 
+def test_mmore_profile_reports_when_milvus_parameters_are_not_retrieved():
+    profile = MMoreProjectProfile()
+    result = make_result(
+        "Milvus is the vector database used by this indexing example."
+    )
+
+    answer = profile.answer_directly("Which Milvus parameters are used?", [result])
+
+    assert answer is not None
+    assert "do not provide enough information" in answer
+
+
 def test_mmore_profile_filters_colpali_sources_when_question_does_not_mention_colpali():
     profile = MMoreProjectProfile()
 
@@ -118,6 +140,63 @@ def test_mmore_profile_filters_colpali_sources_when_question_does_not_mention_co
 
     assert general_result in filtered
     assert colpali_result not in filtered
+
+
+def test_mmore_profile_filters_websearch_sources_unless_requested():
+    profile = MMoreProjectProfile()
+    websearch_result = make_result(
+        content=(
+            "Websearch documentation describing online result retrieval "
+            "and its configuration in enough detail."
+        ),
+        relative_path="core_features/websearch.md",
+    )
+    general_result = make_result(
+        content=(
+            "General retrieval documentation describing the local pipeline "
+            "and its configuration in enough detail."
+        ),
+        relative_path="core_features/retrieval.md",
+    )
+
+    filtered = profile.filter_results(
+        [websearch_result, general_result],
+        question="How does local retrieval work?",
+    )
+    requested = profile.filter_results(
+        [websearch_result, general_result],
+        question="How does web search retrieval work?",
+    )
+
+    assert filtered == [general_result]
+    assert websearch_result in requested
+
+
+def test_mmore_profile_reranks_milvus_config_above_generic_config():
+    profile = MMoreProjectProfile()
+    generic_config = make_result(
+        content=(
+            "General indexing configuration with model and batching settings "
+            "for the complete pipeline."
+        ),
+        relative_path="configs/index.yml",
+        score=10.0,
+    )
+    milvus_config = make_result(
+        content=(
+            "milvus:\n  db_path: ./data.db\n  collection_name: pages\n"
+            "  create_collection: true\n  dim: 128\n  metric_type: IP"
+        ),
+        relative_path="examples/colpali/config_index.yml",
+        score=1.0,
+    )
+
+    reranked = profile.rerank_results(
+        [generic_config, milvus_config],
+        question="Which Milvus parameters are in the ColPali config?",
+    )
+
+    assert reranked[0] == milvus_config
 
 
 def test_mmore_profile_does_not_match_short_symbol_inside_longer_identifier():
