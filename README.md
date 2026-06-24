@@ -13,6 +13,8 @@ repository selected locally or cloned from a public GitHub URL.
 
 Full documentation: [GitHelp documentation](https://epflight.github.io/GitHelp/)
 
+Direct access to the interface (from EPFL or VPN-connected): [Interface](http://gpu217.rcp.epfl.ch:1312/githelp/)
+
 ## What GitHelp Answers
 
 GitHelp is designed for questions such as:
