@@ -9,6 +9,7 @@ Its job is to turn retrieved sources into a grounded answer.
 ```text
 src/githelp/rag/prompting.py
 src/githelp/rag/extractive_answerer.py
+src/githelp/rag/retrieval_query.py
 src/githelp/rag/answering.py
 src/githelp/rag/llm_provider.py
 src/githelp/rag/llm_factory.py
@@ -77,6 +78,15 @@ implemented for tests and pipeline debugging. No external or hosted LLM
 provider is currently included.
 
 ## High-level answering helpers
+
+Conversation-aware retrieval query detection and rewriting live in:
+
+```text
+src/githelp/rag/retrieval_query.py
+```
+
+This module keeps follow-up detection, ambiguity handling, and LLM-assisted
+query rewriting separate from retrieval and answer generation.
 
 File:
 

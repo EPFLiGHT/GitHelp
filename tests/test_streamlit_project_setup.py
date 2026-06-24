@@ -1,16 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
-import sys
-
 import pytest
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-APP_PATH = PROJECT_ROOT / "app"
-
-if str(APP_PATH) not in sys.path:
-    sys.path.insert(0, str(APP_PATH))
 
 from streamlit_project_setup import _resolve_project_path
 

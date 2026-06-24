@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Literal, TypedDict
 
 import yaml
 
-from githelp.projects.project_commands import ProjectCommandError, run_project_command
+from githelp.projects.project_commands import (
+    ProjectCommandError as ProjectCommandError,
+    run_project_command,
+)
 
 
 class GeneratedProjectConfig(TypedDict):
@@ -87,6 +91,27 @@ class MmoreIndexProjectResult(TypedDict):
     export_mmore_stderr: str
     build_index_stdout: str
     build_index_stderr: str
+
+
+def _run_script(
+    *,
+    githelp_root: Path,
+    script_name: str,
+    arguments: list[str],
+    error_label: str,
+) -> subprocess.CompletedProcess[str]:
+    """Run one GitHelp script with consistent command and error handling."""
+    command = [
+        sys.executable,
+        str(githelp_root / "scripts" / script_name),
+        *arguments,
+    ]
+
+    return run_project_command(
+        label=error_label,
+        command=command,
+        cwd=githelp_root,
+    )
 
 
 def slugify_project_name(name: str) -> str:
@@ -329,19 +354,16 @@ def build_corpus_for_project(
         output_path=project_config_path,
     )
 
-    command = [
-        sys.executable,
-        str(githelp_root / "scripts" / "build_corpus.py"),
-        "--config",
-        str(project_config_path),
-        "--output-path",
-        str(corpus_path),
-    ]
-
-    completed_process = run_project_command(
-        label="Corpus build failed",
-        command=command,
-        cwd=githelp_root,
+    completed_process = _run_script(
+        githelp_root=githelp_root,
+        script_name="build_corpus.py",
+        error_label="Corpus build failed",
+        arguments=[
+            "--config",
+            str(project_config_path),
+            "--output-path",
+            str(corpus_path),
+        ],
     )
 
     return {
@@ -368,19 +390,16 @@ def export_mmore_corpus_for_project(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    command = [
-        sys.executable,
-        str(githelp_root / "scripts" / "export_mmore_corpus.py"),
-        "--corpus-path",
-        str(corpus_path),
-        "--output-path",
-        str(output_path),
-    ]
-
-    completed_process = run_project_command(
-        label="MMORE corpus export failed",
-        command=command,
-        cwd=githelp_root,
+    completed_process = _run_script(
+        githelp_root=githelp_root,
+        script_name="export_mmore_corpus.py",
+        error_label="MMORE corpus export failed",
+        arguments=[
+            "--corpus-path",
+            str(corpus_path),
+            "--output-path",
+            str(output_path),
+        ],
     )
 
     return {
@@ -401,19 +420,16 @@ def build_mmore_index_for_project(
     githelp_root = Path(githelp_root).resolve()
     documents_path = Path(documents_path).resolve()
 
-    command = [
-        sys.executable,
-        str(githelp_root / "scripts" / "build_index.py"),
-        "--documents-path",
-        str(documents_path),
-        "--collection-name",
-        collection_name,
-    ]
-
-    completed_process = run_project_command(
-        label="MMORE index build failed",
-        command=command,
-        cwd=githelp_root,
+    completed_process = _run_script(
+        githelp_root=githelp_root,
+        script_name="build_index.py",
+        error_label="MMORE index build failed",
+        arguments=[
+            "--documents-path",
+            str(documents_path),
+            "--collection-name",
+            collection_name,
+        ],
     )
 
     return {

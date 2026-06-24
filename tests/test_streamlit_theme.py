@@ -2,16 +2,8 @@ from __future__ import annotations
 
 from contextlib import nullcontext
 from pathlib import Path
-import sys
 
 import pytest
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-APP_PATH = PROJECT_ROOT / "app"
-
-if str(APP_PATH) not in sys.path:
-    sys.path.insert(0, str(APP_PATH))
 
 from streamlit_theme import (
     GITHELP_CSS,
@@ -19,6 +11,9 @@ from streamlit_theme import (
     render_githelp_header,
     resolve_logo_path,
 )
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_resolve_logo_path_uses_repository_relative_asset():

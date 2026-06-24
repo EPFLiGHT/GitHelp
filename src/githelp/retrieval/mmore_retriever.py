@@ -35,6 +35,29 @@ from githelp.retrieval.mmore_subprocess import (
 )
 
 
+__all__ = [
+    "DEFAULT_MMORE_CORPUS_PATH",
+    "DEFAULT_MMORE_INDEX_CONFIG_PATH",
+    "MIN_MMORE_RAW_RESULTS",
+    "MMORE_CORPUS_FALLBACK_MODE",
+    "MMORE_NATIVE_MODE",
+    "MMORE_RETRIEVAL_MODE_METADATA_KEY",
+    "MMORE_WORKER_RESULT_PREFIX",
+    "_create_retriever_from_githelp_configs",
+    "_get_result_field",
+    "_load_collection_for_search",
+    "_load_githelp_mmore_model_configs",
+    "_load_mmore_corpus_documents",
+    "_load_retriever_from_mmore_config",
+    "_mmore_result_to_retrieval_result",
+    "_parse_githelp_header",
+    "_resolve_mmore_corpus_path",
+    "_serialize_results",
+    "deserialize_results",
+    "retrieve_with_mmore",
+]
+
+
 """
 MMORE retrieval backend adapter.
 
