@@ -14,7 +14,7 @@ dependencies = [
     "accelerate",
     "torch",
     "langchain-community",
-    "mmore[index,rag]==1.2.2",
+    "mmore[index,rag]==1.2.4",
     "docker==7.1.0",
 ]
 
