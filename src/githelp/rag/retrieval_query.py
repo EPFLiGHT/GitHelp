@@ -32,6 +32,8 @@ CONTEXT_DEPENDENT_FOLLOWUP_PATTERNS = (
 
 
 PURE_REFORMULATION_PATTERNS = (
+    r"(?:please\s+)?explain more simply[?.!]*",
+    r"(?:please\s+)?explain more clearly[?.!]*",
     r"(?:please\s+)?explain (?:it|this|that|the answer) more simply[?.!]*",
     r"(?:please\s+)?explain (?:it|this|that|the answer) more clearly[?.!]*",
     r"(?:please\s+)?make (?:it|this|that|the answer) clearer[?.!]*",

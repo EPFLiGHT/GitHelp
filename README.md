@@ -102,7 +102,7 @@ python -m pytest -q
 GitHelp depends on MMORE for the native `mmore` backend:
 
 ```text
-mmore[index,rag]==1.2.2
+mmore[index,rag]==1.2.4
 transformers>=4.51.0,<5
 ```
 
