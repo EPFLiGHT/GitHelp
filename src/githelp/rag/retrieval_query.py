@@ -144,10 +144,9 @@ def resolve_retrieval_query(
     """
     original_question = question.strip()
 
-    is_followup = (
-        is_context_dependent_question(original_question)
-        or is_reformulation_followup(original_question)
-    )
+    is_followup = is_context_dependent_question(
+        original_question
+    ) or is_reformulation_followup(original_question)
 
     if not original_question or not is_followup:
         return RetrievalQueryDecision(

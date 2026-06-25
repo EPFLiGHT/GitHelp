@@ -115,8 +115,7 @@ def test_format_chat_history_keeps_only_user_and_assistant_messages():
 def test_build_user_prompt_includes_recent_chat_history_only():
     result = make_result()
     history = [
-        {"role": "user", "content": f"old question {index}"}
-        for index in range(8)
+        {"role": "user", "content": f"old question {index}"} for index in range(8)
     ]
 
     prompt = build_user_prompt(
@@ -145,6 +144,9 @@ def test_build_user_prompt_treats_history_as_light_context_only():
 
     assert "Treat the current question as the primary request" in prompt
     assert "Do not assume it continues the previous topic" in prompt
-    assert "If the current question is standalone, ignore unrelated earlier topics" in prompt
+    assert (
+        "If the current question is standalone, ignore unrelated earlier topics"
+        in prompt
+    )
     assert "Do not repeat the previous answer unless the user explicitly asks" in prompt
     assert "follow-up is ambiguous and ask the user" in prompt

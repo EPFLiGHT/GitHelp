@@ -17,9 +17,7 @@ it to the configured LLM provider.
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Answer a question using GitHelp."
-    )
+    parser = argparse.ArgumentParser(description="Answer a question using GitHelp.")
 
     parser.add_argument(
         "question",

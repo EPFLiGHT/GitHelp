@@ -157,12 +157,9 @@ def rerank_for_githelp_intent(
     """
     query_lower = query.lower()
 
-    wants_config_example = (
-        "config" in query_lower
-        and any(
-            word in query_lower
-            for word in ["look like", "example", "yaml", "write", "structure"]
-        )
+    wants_config_example = "config" in query_lower and any(
+        word in query_lower
+        for word in ["look like", "example", "yaml", "write", "structure"]
     )
 
     if not wants_config_example:
@@ -248,10 +245,7 @@ def retrieve_with_mmore_native(
         search_type=search_type,
     )
 
-    results = [
-        mmore_result_to_retrieval_result(result)
-        for result in raw_results
-    ]
+    results = [mmore_result_to_retrieval_result(result) for result in raw_results]
 
     reranked_results = rerank_for_githelp_intent(query, results)
     return tag_results_with_mmore_mode(reranked_results, MMORE_NATIVE_MODE)

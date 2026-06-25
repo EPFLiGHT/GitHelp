@@ -71,10 +71,7 @@ def calculate_answer(value: int) -> int:
 
     app_config_path = tmp_path / "app_config.yaml"
     app_config_path.write_text(
-        "project_name: tiny_repo\n"
-        "project_profile: generic\n"
-        "llm:\n"
-        "  provider: dummy\n",
+        "project_name: tiny_repo\nproject_profile: generic\nllm:\n  provider: dummy\n",
         encoding="utf-8",
     )
 

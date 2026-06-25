@@ -250,17 +250,23 @@ def test_rewrite_query_with_history_uses_llm_for_vague_followup():
 def test_rewrite_query_with_history_falls_back_safely():
     history = [{"role": "user", "content": "What does MmoreRetriever do?"}]
 
-    assert rewrite_query_with_history(
-        "Where is it used?",
-        chat_history=history,
-        llm_provider=None,
-    ) == "Where is it used?"
+    assert (
+        rewrite_query_with_history(
+            "Where is it used?",
+            chat_history=history,
+            llm_provider=None,
+        )
+        == "Where is it used?"
+    )
 
-    assert rewrite_query_with_history(
-        "Where is it used?",
-        chat_history=history,
-        llm_provider=FailingProvider(),
-    ) == "Where is it used?"
+    assert (
+        rewrite_query_with_history(
+            "Where is it used?",
+            chat_history=history,
+            llm_provider=FailingProvider(),
+        )
+        == "Where is it used?"
+    )
 
 
 def test_resolve_retrieval_query_does_not_consult_history_for_standalone_question():
@@ -343,6 +349,7 @@ def test_resolve_retrieval_query_can_report_ambiguous_followup():
     assert decision.is_ambiguous is True
     assert "Prefer the most recent relevant user question" in provider.prompts[0]
     assert "output exactly AMBIGUOUS" in provider.prompts[0]
+
 
 def test_answer_question_without_llm_uses_shared_prepared_retrieval(
     monkeypatch: pytest.MonkeyPatch,

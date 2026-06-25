@@ -33,7 +33,9 @@ def _resolve_project_path(
         if github_result["cloned"]:
             st.write(f"Cloned `{github_result['repository_url']}`.")
         else:
-            st.write(f"Using existing local clone of `{github_result['repository_url']}`.")
+            st.write(
+                f"Using existing local clone of `{github_result['repository_url']}`."
+            )
 
         return github_result["repository_path"], github_result["project_name"]
 
@@ -80,9 +82,7 @@ def _build_mmore_index(
                 "project_config_path"
             ]
             st.session_state["corpus_path"] = build_result["corpus_path"]
-            st.session_state["mmore_corpus_path"] = build_result[
-                "mmore_corpus_path"
-            ]
+            st.session_state["mmore_corpus_path"] = build_result["mmore_corpus_path"]
             st.session_state["collection_name"] = build_result["collection_name"]
             st.session_state["indexing_mode"] = "mmore"
             st.session_state["pending_backend"] = "mmore"

@@ -5,6 +5,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from githelp.rag.llm_provider import LLMProvider
 
+
 def remove_thinking_trace(text: str) -> str:
     """Remove Qwen thinking traces from generated text."""
     cleaned = re.sub(
@@ -77,7 +78,7 @@ class QwenLLMProvider(LLMProvider):
             **generation_kwargs,
         )
 
-        generated_ids = outputs[0][inputs["input_ids"].shape[-1]:]
+        generated_ids = outputs[0][inputs["input_ids"].shape[-1] :]
 
         answer = self.tokenizer.decode(
             generated_ids,

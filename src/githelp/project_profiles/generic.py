@@ -78,9 +78,7 @@ class GenericProjectProfile(ProjectProfile):
 
             source_type = doc.source_type or ""
             relative_path = (
-                doc.metadata.get("relative_path")
-                or doc.file_path
-                or ""
+                doc.metadata.get("relative_path") or doc.file_path or ""
             ).lower()
 
             title = (doc.title or "").lower()
@@ -163,7 +161,13 @@ class GenericProjectProfile(ProjectProfile):
                     bonus += 1.5
 
             # Small generic semantic boost.
-            for term in ["implementation", "implemented", "function", "class", "method"]:
+            for term in [
+                "implementation",
+                "implemented",
+                "function",
+                "class",
+                "method",
+            ]:
                 if term in normalized_question and term in searchable_text:
                     bonus += 0.5
 

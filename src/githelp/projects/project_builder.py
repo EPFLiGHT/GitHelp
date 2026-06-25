@@ -209,11 +209,7 @@ def infer_yaml_config_paths(project_path: str | Path) -> list[str]:
         project_path / "production-config",
     ]
 
-    return [
-        str(path)
-        for path in candidates
-        if path.exists() and path.is_dir()
-    ]
+    return [str(path) for path in candidates if path.exists() and path.is_dir()]
 
 
 def build_project_config(

@@ -77,11 +77,7 @@ def mmore_result_to_retrieval_result(result: dict[str, Any]) -> RetrievalResult:
         "raw_mmore_id": result.get("id"),
     }
 
-    metadata = {
-        key: value
-        for key, value in metadata.items()
-        if value is not None
-    }
+    metadata = {key: value for key, value in metadata.items() if value is not None}
 
     doc = DocumentRecord(
         doc_id=doc_id,

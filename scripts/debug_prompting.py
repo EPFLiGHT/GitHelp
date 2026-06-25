@@ -15,9 +15,7 @@ LLM prompt, and prints it without calling an LLM.
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Debug GitHelp prompt construction."
-    )
+    parser = argparse.ArgumentParser(description="Debug GitHelp prompt construction.")
 
     parser.add_argument(
         "question",

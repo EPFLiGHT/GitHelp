@@ -96,9 +96,7 @@ def retrieve(
     query_token_set = set(query_tokens)
 
     query_identifiers = {
-        token
-        for token in query_tokens
-        if "_" in token or "." in token
+        token for token in query_tokens if "_" in token or "." in token
     }
 
     results: list[RetrievalResult] = []
@@ -146,7 +144,9 @@ def retrieve(
 
             # Also match queries written with spaces instead of underscores.
             symbol_parts = symbol_lower.split("_")
-            if len(symbol_parts) > 1 and all(part in query_token_set for part in symbol_parts):
+            if len(symbol_parts) > 1 and all(
+                part in query_token_set for part in symbol_parts
+            ):
                 exact_symbol_match = True
                 score += SYMBOL_PARTS_BOOST
 
@@ -179,7 +179,10 @@ def retrieve(
             score -= UNRELATED_SIGNATURE_PENALTY
 
         # For user-facing questions, prefer human-written documentation.
-        if doc.source_type.startswith("markdown") and query_token_set & USER_DOC_QUERY_WORDS:
+        if (
+            doc.source_type.startswith("markdown")
+            and query_token_set & USER_DOC_QUERY_WORDS
+        ):
             score += USER_DOC_MARKDOWN_BOOST
         results.append(RetrievalResult(document=doc, score=score))
 

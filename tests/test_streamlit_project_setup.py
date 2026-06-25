@@ -25,7 +25,9 @@ def test_resolve_project_path_loads_github_repository(monkeypatch, tmp_path):
             "owner": "swiss-ai",
             "repo": "mmore",
             "project_name": "mmore",
-            "repository_path": str(tmp_path / "data" / "repositories" / "swiss-ai-mmore"),
+            "repository_path": str(
+                tmp_path / "data" / "repositories" / "swiss-ai-mmore"
+            ),
             "cloned": True,
         }
 

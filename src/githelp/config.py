@@ -108,9 +108,7 @@ class ProjectConfig:
             include_yaml_configs=bool(
                 data.get("include_yaml_configs", cls.include_yaml_configs)
             ),
-            yaml_config_paths=[
-                str(path) for path in data.get("yaml_config_paths", [])
-            ],
+            yaml_config_paths=[str(path) for path in data.get("yaml_config_paths", [])],
             include_repo_structure=bool(
                 data.get("include_repo_structure", cls.include_repo_structure)
             ),
@@ -139,9 +137,7 @@ class IndexingConfig:
     def from_mapping(cls, data: dict[str, Any]) -> IndexingConfig:
         return cls(
             top_k=int(data.get("top_k", cls.top_k)),
-            retrieval_backend=str(
-                data.get("retrieval_backend", cls.retrieval_backend)
-            ),
+            retrieval_backend=str(data.get("retrieval_backend", cls.retrieval_backend)),
             collection_name=str(data.get("collection_name", cls.collection_name)),
             mmore_index_config_path=str(
                 data.get("mmore_index_config_path", cls.mmore_index_config_path)
@@ -212,7 +208,9 @@ def load_app_config(path: str | Path = "configs/app_config.yaml") -> AppConfig:
     return AppConfig.from_mapping(load_yaml(path))
 
 
-def load_project_config(path: str | Path = "configs/project_config.yaml") -> ProjectConfig:
+def load_project_config(
+    path: str | Path = "configs/project_config.yaml",
+) -> ProjectConfig:
     """Load the typed target project configuration."""
     return ProjectConfig.from_mapping(load_yaml(path))
 

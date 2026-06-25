@@ -40,11 +40,7 @@ def display_sources(results: list[Any], show_full_sources: bool = False) -> None
         doc = result.document
 
         source_type = doc.source_type or "unknown"
-        relative_path = (
-            doc.metadata.get("relative_path")
-            or doc.file_path
-            or "unknown"
-        )
+        relative_path = doc.metadata.get("relative_path") or doc.file_path or "unknown"
         title = doc.title or doc.section_title or doc.symbol_name or "unknown"
         content = (doc.content or "").strip()
         retrieval_mode = doc.metadata.get(MMORE_RETRIEVAL_MODE_METADATA_KEY)

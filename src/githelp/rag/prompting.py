@@ -165,9 +165,7 @@ def build_user_prompt(
     sections = [system_prompt]
 
     if conversation_context:
-        sections.append(
-            f"Recent conversation context:\n{conversation_context}"
-        )
+        sections.append(f"Recent conversation context:\n{conversation_context}")
 
     sections.extend(
         [

@@ -100,9 +100,7 @@ def build_repo_tree(
             return
 
         children = [
-            child
-            for child in directory.iterdir()
-            if not _should_skip(child, repo_root)
+            child for child in directory.iterdir() if not _should_skip(child, repo_root)
         ]
 
         visible_children = [

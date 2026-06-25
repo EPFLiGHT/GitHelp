@@ -15,10 +15,7 @@ from githelp.evaluation.retrieval_eval import (
 def test_load_eval_questions_ignores_blank_lines_and_shell_artifacts(tmp_path: Path):
     questions_path = tmp_path / "questions.txt"
     questions_path.write_text(
-        "cat > githelp_eval_questions.txt << 'EOF'\n"
-        "\n"
-        "How do I install it?\n"
-        "EOF\n",
+        "cat > githelp_eval_questions.txt << 'EOF'\n\nHow do I install it?\nEOF\n",
         encoding="utf-8",
     )
 

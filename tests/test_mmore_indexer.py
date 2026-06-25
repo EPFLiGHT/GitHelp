@@ -16,10 +16,7 @@ def test_build_mmore_index_creates_local_milvus_parent_dir(
 
     config_path.parent.mkdir()
     config_path.write_text(
-        "indexer:\n"
-        "  db:\n"
-        "    uri: ./data/indexes/mmore/githelp.db\n"
-        "    name: my_db\n",
+        "indexer:\n  db:\n    uri: ./data/indexes/mmore/githelp.db\n    name: my_db\n",
         encoding="utf-8",
     )
     documents_path.write_text('{"text": "example"}\n', encoding="utf-8")
@@ -68,16 +65,21 @@ def test_build_mmore_index_removes_stale_local_milvus_db_before_rebuild(
 ):
     config_path = tmp_path / "configs" / "mmore_index_config.yaml"
     documents_path = tmp_path / "corpus.jsonl"
-    stale_collection = tmp_path / "data" / "indexes" / "mmore" / "githelp.db" / "collections" / "mmore_docs"
+    stale_collection = (
+        tmp_path
+        / "data"
+        / "indexes"
+        / "mmore"
+        / "githelp.db"
+        / "collections"
+        / "mmore_docs"
+    )
 
     config_path.parent.mkdir()
     stale_collection.mkdir(parents=True)
     (stale_collection / "partial").write_text("stale", encoding="utf-8")
     config_path.write_text(
-        "indexer:\n"
-        "  db:\n"
-        "    uri: ./data/indexes/mmore/githelp.db\n"
-        "    name: my_db\n",
+        "indexer:\n  db:\n    uri: ./data/indexes/mmore/githelp.db\n    name: my_db\n",
         encoding="utf-8",
     )
     documents_path.write_text('{"text": "example"}\n', encoding="utf-8")

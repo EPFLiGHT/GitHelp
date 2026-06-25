@@ -220,7 +220,9 @@ def answer_current_question(question: str, options: dict) -> str | None:
                         chat_history=chat_history,
                     )
                 except Exception as fallback_error:
-                    st.error("An error occurred while answering with the fallback backend.")
+                    st.error(
+                        "An error occurred while answering with the fallback backend."
+                    )
                     st.exception(fallback_error)
                     return None
             else:
