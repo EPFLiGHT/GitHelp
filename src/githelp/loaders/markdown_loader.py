@@ -200,7 +200,9 @@ def load_markdown_documents(
             if not section_content:
                 continue
 
-            doc_id_suffix = _slugify(section_title) if section_title else f"section-{idx}"
+            doc_id_suffix = (
+                _slugify(section_title) if section_title else f"section-{idx}"
+            )
 
             full_title = page_title
             if section_title and section_title != page_title:

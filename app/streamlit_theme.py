@@ -140,6 +140,4 @@ def render_githelp_header() -> None:
 
     with title_column:
         st.title("GitHelp")
-        st.caption(
-            "Ask questions about a software project's documentation and code."
-        )
+        st.caption("Ask questions about a software project's documentation and code.")

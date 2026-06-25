@@ -39,11 +39,7 @@ def document_to_mmore_sample(doc: DocumentRecord) -> dict[str, Any]:
         "tags": doc.tags,
     }
 
-    metadata = {
-        key: value
-        for key, value in metadata.items()
-        if value is not None
-    }
+    metadata = {key: value for key, value in metadata.items() if value is not None}
 
     source_header = "\n".join(
         part

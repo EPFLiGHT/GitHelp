@@ -104,9 +104,7 @@ def test_mmore_profile_returns_none_for_non_milvus_question():
 
 def test_mmore_profile_reports_when_milvus_parameters_are_not_retrieved():
     profile = MMoreProjectProfile()
-    result = make_result(
-        "Milvus is the vector database used by this indexing example."
-    )
+    result = make_result("Milvus is the vector database used by this indexing example.")
 
     answer = profile.answer_directly("Which Milvus parameters are used?", [result])
 

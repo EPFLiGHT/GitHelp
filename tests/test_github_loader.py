@@ -147,11 +147,15 @@ def test_prepare_github_project_with_simple_index_reuses_project_builder(
             "owner": "swiss-ai",
             "repo": "mmore",
             "project_name": "mmore",
-            "repository_path": str(tmp_path / "data" / "repositories" / "swiss-ai-mmore"),
+            "repository_path": str(
+                tmp_path / "data" / "repositories" / "swiss-ai-mmore"
+            ),
             "cloned": True,
         }
 
-    def fake_prepare_project_with_simple_index(githelp_root, project_path, project_name):
+    def fake_prepare_project_with_simple_index(
+        githelp_root, project_path, project_name
+    ):
         calls.append(
             {
                 "githelp_root": githelp_root,

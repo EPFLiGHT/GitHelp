@@ -6,6 +6,7 @@ ENV PIP_NO_CACHE_DIR=1
 ENV HF_HOME=/cache/huggingface
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 ENV STREAMLIT_SERVER_PORT=8501
+ENV STREAMLIT_THEME_BASE=light
 
 WORKDIR /app
 
@@ -37,7 +38,7 @@ RUN python -m pip install --upgrade pip setuptools wheel \
         "transformers>=4.51.0,<5" \
         accelerate \
         langchain-community \
-        "mmore[index,rag]==1.2.2" \
+        "mmore[index,rag]==1.2.4" \
         "docker==7.1.0" \
         faiss-cpu
 

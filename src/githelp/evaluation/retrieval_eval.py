@@ -104,9 +104,7 @@ def load_expected_sources(path: str | Path) -> dict[str, list[ExpectedSource]]:
 
         for raw_expectation in raw_expectations:
             if not isinstance(raw_expectation, dict):
-                raise ValueError(
-                    f"Expected source entries must be objects: {question}"
-                )
+                raise ValueError(f"Expected source entries must be objects: {question}")
 
             expectation: ExpectedSource = {}
 

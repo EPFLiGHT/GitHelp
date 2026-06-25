@@ -372,12 +372,8 @@ def _retrieve_and_prepare_results(
     )
 
     should_add_lexical_results = (
-        _is_code_or_symbol_question(question)
-        or _contains_filename_like_token(question)
-    ) and (
-        backend == "mmore"
-        or expanded_question != question
-    )
+        _is_code_or_symbol_question(question) or _contains_filename_like_token(question)
+    ) and (backend == "mmore" or expanded_question != question)
 
     if should_add_lexical_results:
         simple_results = retrieve_documents(

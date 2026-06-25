@@ -118,7 +118,9 @@ def test_prepare_project_paths(tmp_path: Path):
     )
 
     assert prepared["project_name"] == "target-project"
-    assert prepared["project_dir"] == githelp_root / "data" / "projects" / "target-project"
+    assert (
+        prepared["project_dir"] == githelp_root / "data" / "projects" / "target-project"
+    )
     assert prepared["project_config_path"] == (
         githelp_root / "data" / "projects" / "target-project" / "project_config.yaml"
     )
@@ -141,7 +143,9 @@ def test_prepare_project_with_simple_index_uses_corpus_builder(monkeypatch, tmp_
     ):
         return {
             "project_name": "target-project",
-            "project_dir": str(tmp_path / "githelp" / "data" / "projects" / "target-project"),
+            "project_dir": str(
+                tmp_path / "githelp" / "data" / "projects" / "target-project"
+            ),
             "project_config_path": str(tmp_path / "project_config.yaml"),
             "corpus_path": str(tmp_path / "corpus.jsonl"),
             "stdout": "built",
@@ -163,7 +167,9 @@ def test_prepare_project_with_simple_index_uses_corpus_builder(monkeypatch, tmp_
     assert result["project_name"] == "target-project"
 
 
-def test_build_corpus_for_project_raises_structured_command_error(monkeypatch, tmp_path):
+def test_build_corpus_for_project_raises_structured_command_error(
+    monkeypatch, tmp_path
+):
     githelp_root = tmp_path / "githelp"
     project_path = tmp_path / "target_project"
 

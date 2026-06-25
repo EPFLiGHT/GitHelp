@@ -79,8 +79,7 @@ def test_debug_information_shows_query_rewrite_decision(monkeypatch):
 
     assert "**Original user question:** `How do I configure it?`" in rendered
     assert (
-        "**Rewritten retrieval query:** `How is MMORE indexing configured?`"
-        in rendered
+        "**Rewritten retrieval query:** `How is MMORE indexing configured?`" in rendered
     )
     assert "**Detected as follow-up:** `True`" in rendered
 

@@ -87,7 +87,7 @@ def retrieve_with_mmore_subprocess(
 
     for line in reversed(completed.stdout.splitlines()):
         if line.startswith(MMORE_WORKER_RESULT_PREFIX):
-            payload = json.loads(line[len(MMORE_WORKER_RESULT_PREFIX):])
+            payload = json.loads(line[len(MMORE_WORKER_RESULT_PREFIX) :])
             return deserialize_results(payload)
 
     raise MMoreRetrievalError("Native MMORE worker did not return retrieval results.")

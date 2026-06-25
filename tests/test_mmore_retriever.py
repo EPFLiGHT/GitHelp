@@ -122,7 +122,9 @@ def test_load_collection_for_search_ignores_retrievers_without_milvus_client():
     )
 
 
-def test_retrieve_with_mmore_reports_config_fallback_failure(monkeypatch, tmp_path: Path):
+def test_retrieve_with_mmore_reports_config_fallback_failure(
+    monkeypatch, tmp_path: Path
+):
     def raise_missing_model_name(config_path):
         raise KeyError("model_name")
 

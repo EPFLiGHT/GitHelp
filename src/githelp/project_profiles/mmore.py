@@ -54,8 +54,7 @@ class MMoreProjectProfile(GenericProjectProfile):
 
         question_mentions_colpali = "colpali" in normalized_question
         question_mentions_websearch = (
-            "websearch" in normalized_question
-            or "web search" in normalized_question
+            "websearch" in normalized_question or "web search" in normalized_question
         )
 
         for result in results:
@@ -64,9 +63,7 @@ class MMoreProjectProfile(GenericProjectProfile):
             title = (doc.title or "").lower()
             section_title = (doc.section_title or "").lower()
             relative_path = (
-                doc.metadata.get("relative_path")
-                or doc.file_path
-                or ""
+                doc.metadata.get("relative_path") or doc.file_path or ""
             ).lower()
 
             is_colpali_source = (
@@ -124,9 +121,7 @@ class MMoreProjectProfile(GenericProjectProfile):
             title = (doc.title or "").lower()
             content = (doc.content or "").lower()
             relative_path = (
-                doc.metadata.get("relative_path")
-                or doc.file_path
-                or ""
+                doc.metadata.get("relative_path") or doc.file_path or ""
             ).lower()
             source_type = (doc.source_type or "").lower()
 

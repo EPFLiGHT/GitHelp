@@ -121,10 +121,13 @@ def test_generic_profile_limits_config_dominance_for_code_question():
     )
 
     assert reranked.index(code) < reranked.index(second_config)
-    assert sum(
-        result.document.source_type in profile.CONFIG_SOURCE_TYPES
-        for result in reranked[:2]
-    ) == 1
+    assert (
+        sum(
+            result.document.source_type in profile.CONFIG_SOURCE_TYPES
+            for result in reranked[:2]
+        )
+        == 1
+    )
 
 
 def test_generic_profile_boosts_yaml_for_configuration_question():
