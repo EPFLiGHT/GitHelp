@@ -20,6 +20,7 @@ services:
 
     labels:
       - traefik.enable=true
+      - traefik.docker.network=traefik
       - traefik.http.routers.githelp.entrypoints=web
       - traefik.http.routers.githelp.rule=PathPrefix(`/githelp`)
       - traefik.http.middlewares.strip-githelp.stripprefix.prefixes=/githelp
@@ -27,7 +28,9 @@ services:
       - traefik.http.services.githelp.loadbalancer.server.port=8501
 
     networks:
-      - traefik
+      traefik:
+        aliases:
+          - githelp
 
 volumes:
   githelp_hf_cache:

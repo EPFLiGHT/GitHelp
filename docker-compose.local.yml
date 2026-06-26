@@ -1,3 +1,7 @@
+# Local development only.
+# Do not use this file on the GPU server.
+# It publishes Streamlit on host port 8501.
+
 services:
   githelp:
     build:
@@ -16,7 +20,7 @@ services:
       - githelp_hf_cache:/cache/huggingface
 
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
 
 volumes:
   githelp_hf_cache:
