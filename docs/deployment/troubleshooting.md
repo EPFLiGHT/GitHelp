@@ -34,7 +34,7 @@ published on the host. Traefik reaches it through the Docker network.
 Test inside the container instead:
 
 ```bash
-docker exec -it githelp curl http://localhost:8501/_stcore/health
+docker exec -it githelp curl http://localhost:8501/githelp/_stcore/health
 ```
 
 ## GitHelp is healthy but Traefik does not route it
@@ -48,7 +48,8 @@ docker inspect root-traefik-1 --format '{{json .NetworkSettings.Networks}}'
 ```
 
 Both services must share the external `traefik` network. The configured router
-matches `/githelp` and strips the prefix before forwarding to Streamlit.
+matches `/githelp` and forwards that path to Streamlit, which is configured with
+`server.baseUrlPath=githelp`.
 
 ## A local project path does not exist
 

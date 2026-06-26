@@ -46,7 +46,7 @@ docker compose logs -f githelp
 Check the Streamlit health endpoint inside the container:
 
 ```bash
-docker exec -it githelp curl http://localhost:8501/_stcore/health
+docker exec -it githelp curl http://localhost:8501/githelp/_stcore/health
 ```
 
 The expected response is `ok`.
@@ -120,7 +120,8 @@ The Compose service:
 - runs Streamlit on internal port `8501`;
 - joins the external `traefik` network;
 - exposes no Streamlit host port in the server Compose file;
-- uses Traefik's `/githelp` route and strips that prefix before forwarding;
+- uses Traefik's `/githelp` route and configures Streamlit with
+  `server.baseUrlPath=githelp`;
 - mounts `./data` at `/app/data`;
 - keeps Hugging Face models in the `githelp_hf_cache` volume.
 

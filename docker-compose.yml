@@ -14,6 +14,24 @@ services:
       HF_HOME: /cache/huggingface
       NVIDIA_VISIBLE_DEVICES: "1"
 
+    command:
+      - streamlit
+      - run
+      - app/streamlit_app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+      - --server.enableCORS=false
+      - --server.enableXsrfProtection=false
+      - --server.baseUrlPath=githelp
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/githelp/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
     volumes:
       - ./data:/app/data
       - githelp_hf_cache:/cache/huggingface
@@ -22,8 +40,6 @@ services:
       - traefik.enable=true
       - traefik.http.routers.githelp.entrypoints=web
       - traefik.http.routers.githelp.rule=PathPrefix(`/githelp`)
-      - traefik.http.middlewares.strip-githelp.stripprefix.prefixes=/githelp
-      - traefik.http.routers.githelp.middlewares=strip-githelp
       - traefik.http.services.githelp.loadbalancer.server.port=8501
 
     networks:
