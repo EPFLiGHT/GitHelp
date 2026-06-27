@@ -13,7 +13,7 @@ repository selected locally or cloned from a public GitHub URL.
 
 Full documentation: [GitHelp documentation](https://epflight.github.io/GitHelp/)
 
-Direct access to the interface (from EPFL or VPN-connected): [Interface](http://gpu217.rcp.epfl.ch:1312/githelp/)
+Direct access to the deployed interface (from EPFL or VPN-connected): [Interface](http://gpu217.rcp.epfl.ch:1312/githelp/)
 
 ## What GitHelp Answers
 
@@ -64,7 +64,12 @@ tests/                      pytest suite
 
 GitHelp requires Python 3.10 or higher.
 
-Clone the repository and create a fresh environment:
+There are two ways to use GitHelp:
+
+- use the deployed EPFL interface, available from the EPFL network or VPN: [Interface](http://gpu217.rcp.epfl.ch:1312/githelp/)
+- run the Streamlit interface locally by cloning the repository.
+
+To run GitHelp locally, clone the repository and create a fresh environment:
 
 ```bash
 git clone https://github.com/EPFLiGHT/GitHelp.git
@@ -129,10 +134,23 @@ transformers>=4.51.0,<5
 The Transformers upper bound is intentional: MMORE sparse indexing currently
 uses APIs that are not compatible with Transformers 5.
 
-## Run the Streamlit App
+## Run the Streamlit App Locally
+
+To run GitHelp on your own machine, use:
 
 ```bash
 streamlit run app/streamlit_app.py
+```
+
+Then open: 
+```text
+http://localhost:8501
+```
+
+This local run is separate from the EPFL cluster deployment. The deployed
+interface is available from the EPFL network or VPN at:
+```text
+http://gpu217.rcp.epfl.ch:1312/githelp/
 ```
 
 The interface lets a user:

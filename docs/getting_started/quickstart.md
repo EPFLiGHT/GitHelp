@@ -2,10 +2,16 @@
 
 This page explains the shortest path to run GitHelp locally.
 
-GitHelp requires Python 3.10 or higher. Python 3.9 is not supported.
+GitHelp requires Python 3.10 or higher.  
 
-The recommended way to use GitHelp is the Streamlit interface. The command-line
-scripts remain available for debugging and development.
+GitHelp can be used in two ways:
+
+- through the deployed EPFL interface, available from the EPFL network or VPN;
+- locally, by cloning the repository and running the Streamlit app.
+
+The local Streamlit interface is the recommended way to test GitHelp during
+development. The command-line scripts remain available for debugging and
+development.
 
 ## 1. Clone the repository
 
@@ -41,6 +47,12 @@ The interface opens locally, usually at:
 
 ```text
 http://localhost:8501/
+```
+
+The deployed EPFL interface is separate from this local run and is available
+from the EPFL network or VPN at:
+```text
+http://gpu217.rcp.epfl.ch:1312/githelp/
 ```
 
 ## 5. Select a project
