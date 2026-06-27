@@ -62,8 +62,6 @@ tests/                      pytest suite
 
 ## Quick Start
 
-## Quick Start
-
 GitHelp requires Python 3.10 or higher.
 
 Clone the repository and create a fresh environment:
