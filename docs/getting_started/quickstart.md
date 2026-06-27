@@ -2,12 +2,27 @@
 
 This page explains the shortest path to run GitHelp locally.
 
-The recommended way to use GitHelp is the Streamlit interface. The command-line scripts remain available for debugging and development.
+GitHelp requires Python 3.10 or higher. Python 3.9 is not supported.
 
-## 1. Install the project
+The recommended way to use GitHelp is the Streamlit interface. The command-line
+scripts remain available for debugging and development.
 
-From the root of the `GitHelp` repository:
+## 1. Clone the repository
 
+```bash
+git clone https://github.com/EPFLiGHT/GitHelp.git
+cd GitHelp
+```
+
+All commands below must be run from the root of the GitHelp repository.
+
+## 2. Create an environment
+```bash
+conda create -n githelp python=3.10 -y
+conda activate githelp
+```
+
+## 3. Install the project
 ```bash
 python -m pip install -e .
 ```
@@ -16,9 +31,7 @@ This installs Streamlit, the local Qwen dependencies, and MMORE. The native
 MMORE backend is heavier than the simple backend and may download models during
 its first indexing or retrieval run.
 
-## 2. Launch the Streamlit app
-
-From the root of the `githelp` repository:
+## 4. Launch the Streamlit app
 
 ```bash
 streamlit run app/streamlit_app.py
@@ -30,7 +43,7 @@ The interface opens locally, usually at:
 http://localhost:8501/
 ```
 
-## 3. Select a project
+## 5. Select a project
 
 In the Streamlit interface, use the **Project setup** section.
 
@@ -50,7 +63,7 @@ For GitHub URLs, GitHelp clones the repository into `data/repositories/` and
 then runs the same corpus, indexing, retrieval, and RAG pipeline on that local
 copy.
 
-## 4. Prepare the project
+## 6. Prepare the project
 
 Click one of the project build buttons:
 
@@ -80,7 +93,7 @@ The generated corpus can include:
 - YAML configuration files;
 - a synthetic repository structure document.
 
-## 5. Ask questions
+## 7. Ask questions
 
 After the corpus is built, use the chat input at the bottom of the
 **Conversation** section. The input remains disabled until a valid project
@@ -127,7 +140,7 @@ Which Milvus parameters are used in the ColPali config?
 Where are the example configs located?
 ```
 
-## 6. Inspect sources
+## 8. Inspect sources
 
 By default, GitHelp displays retrieved sources under the answer.
 
@@ -150,7 +163,7 @@ corpus_fallback
 The fallback searches the exported `mmore_corpus.jsonl` lexically. It does not
 use native MMORE/Milvus vector retrieval.
 
-## 7. Persistent app state
+## 9. Persistent app state
 
 GitHelp stores the last selected project and UI settings in:
 
@@ -162,7 +175,7 @@ This allows the interface to restore the previous project, corpus path, backend,
 
 This file is local state and should normally not be committed.
 
-## 8. Optional: command-line corpus build
+## 10. Optional: command-line corpus build
 
 The default command still works:
 
@@ -190,7 +203,7 @@ python scripts/build_corpus.py \
   --output-path data/projects/mmore/corpus.jsonl
 ```
 
-## 9. Optional: MMORE indexing
+## 11. Optional: MMORE indexing
 
 The `mmore` backend retrieves from an MMORE index. Building a corpus alone is not enough to update that index.
 

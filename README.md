@@ -62,10 +62,29 @@ tests/                      pytest suite
 
 ## Quick Start
 
-From the repository root:
+## Quick Start
+
+GitHelp requires Python 3.10 or higher.
+
+Clone the repository and create a fresh environment:
+
+```bash
+git clone https://github.com/EPFLiGHT/GitHelp.git
+cd GitHelp
+
+conda create -n githelp python=3.10 -y
+conda activate githelp
+```
+
+Install GitHelp from the repository root:
 
 ```bash
 python -m pip install -e .
+```
+
+Run the Streamlit interface:
+
+```bash
 streamlit run app/streamlit_app.py
 ```
 
@@ -87,9 +106,12 @@ The two modes serve different purposes:
 
 ## Installation
 
+GitHelp requires Python 3.10 or higher.
+
 From the repository root:
 
 ```bash
+
 python -m pip install -e .
 ```
 
